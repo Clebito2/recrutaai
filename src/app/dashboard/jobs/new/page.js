@@ -14,6 +14,7 @@ export default function NewJob() {
   const [formData, setFormData] = useState({
     title: "",
     type: "a",
+    profileLevel: "tecnico", // 'tecnico' or 'lideranca'
     motivator: "a",
     mustHaves: "",
     niceToHaves: "",
@@ -114,15 +115,32 @@ export default function NewJob() {
                 <div className="selection-grid">
                   <label className={`selection-card ${formData.type === 'a' ? 'selected' : ''}`}>
                     <input type="radio" value="a" checked={formData.type === 'a'} onChange={e => setFormData({ ...formData, type: e.target.value })} />
-                    <div className="card-icon"><Crosshair size={24} /></div>
-                    <strong>(a) Hunter</strong>
+                    <span className="card-number">A</span>
+                    <strong>Hunter</strong>
                     <span>Agressividade comercial, foco em abertura e prospecção.</span>
                   </label>
                   <label className={`selection-card ${formData.type === 'b' ? 'selected' : ''}`}>
                     <input type="radio" value="b" checked={formData.type === 'b'} onChange={e => setFormData({ ...formData, type: e.target.value })} />
-                    <div className="card-icon"><Shield size={24} /></div>
-                    <strong>(b) Farmer</strong>
+                    <span className="card-number">B</span>
+                    <strong>Farmer</strong>
                     <span>Relacionamento, gestão de carteira e resiliência.</span>
+                  </label>
+                </div>
+
+                <h3 className="narrative-text" style={{ marginTop: '40px' }}>Nível de Atuação</h3>
+                <p className="step-desc">Para esta vaga, o foco é execução técnica ou gestão de pessoas?</p>
+                <div className="selection-grid">
+                  <label className={`selection-card ${formData.profileLevel === 'tecnico' ? 'selected' : ''}`}>
+                    <input type="radio" value="tecnico" checked={formData.profileLevel === 'tecnico'} onChange={e => setFormData({ ...formData, profileLevel: e.target.value })} />
+                    <span className="card-number">T</span>
+                    <strong>Perfil Técnico/Especialista</strong>
+                    <span>Profundidade técnica, execução de processos complexos e entrega individual.</span>
+                  </label>
+                  <label className={`selection-card ${formData.profileLevel === 'lideranca' ? 'selected' : ''}`}>
+                    <input type="radio" value="lideranca" checked={formData.profileLevel === 'lideranca'} onChange={e => setFormData({ ...formData, profileLevel: e.target.value })} />
+                    <span className="card-number">L</span>
+                    <strong>Perfil Liderança/Gestão</strong>
+                    <span>Gestão de KPIs, desenvolvimento de pessoas e visão estratégica.</span>
                   </label>
                 </div>
               </div>
@@ -374,9 +392,23 @@ export default function NewJob() {
 
           .selection-card input { display: none; }
 
-          .card-icon {
+          .card-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--action-primary);
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+            border-radius: 8px;
             margin-bottom: 16px;
-            color: var(--action-secondary);
+          }
+
+          .selection-card.selected .card-number {
+            background: white;
+            color: var(--action-primary);
           }
 
           .selection-card strong {

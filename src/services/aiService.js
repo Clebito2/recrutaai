@@ -1,13 +1,14 @@
 /**
- * AI Service - Recruit-AI
+ * AI Service - Recruit-AI (Protocolo Elite V6.0)
  * Handles all LLM interactions for job generation and candidate analysis
+ * With differentiated competencies for Technical vs Leadership profiles
  */
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 // System prompts for different modes
 const SYSTEM_PROMPTS = {
-    mode1_architect: `Você é um Consultor Sênior de Recrutamento e Seleção especializado em criar anúncios de vagas estratégicos.
+    mode1_architect: `Você é um Consultor Sênior de Recrutamento e Seleção do Protocolo Elite V6.0.
 
 REGRAS ABSOLUTAS:
 1. PROIBIDO usar emojis em qualquer circunstância
@@ -19,35 +20,91 @@ ESTRUTURA OBRIGATÓRIA DO ANÚNCIO:
 1. TÍTULO DA VAGA (claro e objetivo)
 2. SOBRE A EMPRESA (2-3 frases sobre cultura e missão)
 3. O DESAFIO (o que a pessoa vai fazer no dia a dia)
-4. REQUISITOS OBRIGATÓRIOS (bullets claros)
-5. DIFERENCIAIS (nice to have)
-6. O QUE OFERECEMOS (benefícios e cultura)
-7. DIVERSIDADE (declaração de inclusão)
+4. RESPONSABILIDADES PRINCIPAIS (adaptadas ao nível de atuação)
+5. REQUISITOS OBRIGATÓRIOS (bullets claros)
+6. DIFERENCIAIS (nice to have)
+7. O QUE OFERECEMOS (benefícios e cultura)
+8. DIVERSIDADE (declaração de inclusão)
 
-Use linguagem que ressoe com o perfil identificado (Hunter vs Farmer, motivadores).`,
+ADAPTAÇÃO POR NÍVEL DE ATUAÇÃO:
+- LIDERANÇA: Responsabilidades devem usar verbos como: Disseminar, Treinar, Auditar, Planejar, Reportar, Gerir, Desenvolver equipe
+- TÉCNICO: Responsabilidades devem usar verbos como: Executar, Analisar, Solucionar, Operar, Implementar, Documentar
 
-    mode2_analyst: `Você é um Analista de Perfil especializado em avaliação comportamental e técnica de candidatos.
+Use linguagem que ressoe com o perfil identificado (Hunter vs Farmer, Técnico vs Liderança).`,
 
-METODOLOGIA:
-1. Análise STAR (Situação, Tarefa, Ação, Resultado) para cada experiência relevante
-2. Matriz SWOT do candidato (Forças, Fraquezas, Oportunidades, Ameaças)
-3. Identificação de Temperamento (Analítico, Expressivo, Condutor, Amigável)
+    mode2_analyst_tecnico: `Você é um Analista de Perfil Senior do Protocolo Elite V6.0 - MODO PERFIL TÉCNICO.
 
-OUTPUT ESTRUTURADO (JSON):
+METODOLOGIA STAR para TÉCNICOS:
+- Na análise do "R" (Resultado), busque:
+  * Qual foi o ganho de eficiência técnica (ex: redução de tempo de execução em X%)?
+  * Houve economia de recursos ou mitigação de erros graves?
+  * Métricas quantificáveis de entrega individual
+
+COMPETÊNCIAS ESPECÍFICAS PARA PERFIL TÉCNICO (Peso 30%):
+1. Domínio de Hard Skills: Proficiência nas ferramentas e métodos específicos
+2. Resolução de Problemas: Velocidade e precisão técnica no diagnóstico
+3. Qualidade de Entrega: Atenção aos detalhes e conformidade técnica
+4. Profundidade Técnica: Domínio especializado na área
+
+TEMPERAMENTOS TÉCNICOS:
+- Melancólico: O "Ouro" da execução técnica; precisão absoluta
+- Fleumático: Excelente para suporte e manutenção de sistemas estáveis
+
+OUTPUT OBRIGATÓRIO (JSON):
 {
   "nome": "Nome do Candidato",
   "resumo": "Síntese de 2-3 linhas",
+  "perfilNivel": "Técnico",
   "scorecard": {
-    "comportamental": 1-5,
-    "tecnico": 1-5,
-    "comunicacao": 1-5,
-    "alinhamento": 1-5
+    "dominio_hardskills": 1-5,
+    "resolucao_problemas": 1-5,
+    "qualidade_entrega": 1-5,
+    "profundidade_tecnica": 1-5
   },
-  "temperamento": "Tipo predominante",
-  "star_analysis": [...],
-  "swot": {...},
-  "recomendacao": "Aprovado/Reprovado/Mais análise",
-  "justificativa": "Razão da recomendação"
+  "nota_geral": 1-5,
+  "temperamento": "Tipo predominante e análise",
+  "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
+  "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
+  "recomendacao": "Aprovado/Reprovado/Aprofundar",
+  "justificativa": "Razão detalhada da recomendação"
+}`,
+
+    mode2_analyst_lideranca: `Você é um Analista de Perfil Senior do Protocolo Elite V6.0 - MODO PERFIL LIDERANÇA.
+
+METODOLOGIA STAR para LÍDERES:
+- Na análise do "R" (Resultado), busque RESULTADOS DE EQUIPE:
+  * O resultado foi uma melhoria no processo ou no faturamento do setor?
+  * Houve diminuição de Turnover ou aumento de produtividade do time?
+  * RED FLAG: Se o líder fala apenas "Eu fiz" sem mencionar equipe = centralização
+
+COMPETÊNCIAS ESPECÍFICAS PARA PERFIL LIDERANÇA (Peso 30%):
+1. Tomada de Decisão: Capacidade de decidir sob pressão e assumir riscos
+2. Gestão de Conflitos: Habilidade em mediar crises e manter o clima organizacional
+3. Mentoria/Delegar: Capacidade de desenvolver o time e não centralizar tarefas
+4. Visão Estratégica: Alinhamento com objetivos macro da organização
+
+TEMPERAMENTOS DE LIDERANÇA:
+- Colérico: Excelente para turnarounds (empresas em crise), mas risco de clima pesado
+- Sanguíneo: Excelente para engajamento e cultura, mas risco de falta de processos
+
+OUTPUT OBRIGATÓRIO (JSON):
+{
+  "nome": "Nome do Candidato",
+  "resumo": "Síntese de 2-3 linhas",
+  "perfilNivel": "Liderança",
+  "scorecard": {
+    "tomada_decisao": 1-5,
+    "gestao_conflitos": 1-5,
+    "mentoria_delegacao": 1-5,
+    "visao_estrategica": 1-5
+  },
+  "nota_geral": 1-5,
+  "temperamento": "Tipo predominante e análise",
+  "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
+  "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
+  "red_flags": ["Lista de alertas se houver centralização ou problemas"],
+  "recomendacao": "Aprovado/Reprovado/Aprofundar",
+  "justificativa": "Razão detalhada da recomendação"
 }`
 };
 
@@ -107,22 +164,31 @@ export async function generateJobAd(companyName, diagnosticData) {
 
 /**
  * Analyze candidate profile using Mode 2 (Analyst)
+ * Now with differentiated analysis for Técnico vs Liderança
  */
-export async function analyzeCandidate(companyName, cvContent, jobContext) {
+export async function analyzeCandidate(companyName, cvContent, jobContext, profileLevel = 'tecnico') {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
         throw new Error("GEMINI_API_KEY não configurada");
     }
 
+    // Select appropriate prompt based on profile level
+    const systemPrompt = profileLevel === 'lideranca'
+        ? SYSTEM_PROMPTS.mode2_analyst_lideranca
+        : SYSTEM_PROMPTS.mode2_analyst_tecnico;
+
+    const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
+
     const userPrompt = `
 Empresa: ${companyName}
 Contexto da Vaga: ${jobContext || "Não especificado"}
+Perfil Buscado: ${profileName}
 
 CURRÍCULO/TRANSCRIÇÃO DO CANDIDATO:
 ${cvContent}
 
-Analise este candidato seguindo a metodologia STAR e SWOT. Retorne APENAS o JSON estruturado.`;
+Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileName} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`;
 
     const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: "POST",
@@ -133,7 +199,7 @@ Analise este candidato seguindo a metodologia STAR e SWOT. Retorne APENAS o JSON
             contents: [
                 {
                     parts: [
-                        { text: SYSTEM_PROMPTS.mode2_analyst },
+                        { text: systemPrompt },
                         { text: userPrompt }
                     ]
                 }
@@ -174,9 +240,14 @@ Analise este candidato seguindo a metodologia STAR e SWOT. Retorne APENAS o JSON
 
 /**
  * Build the prompt for job generation based on diagnostic data
+ * Now with profile level differentiation
  */
 function buildJobPrompt(companyName, data) {
     const profileType = data.type === 'a' ? 'Hunter (agressivo, prospector, abre mercado)' : 'Farmer (relacionamento, manutenção, LTV)';
+
+    const profileLevel = data.profileLevel === 'lideranca'
+        ? 'Liderança/Gestão (foco em gestão de KPIs, desenvolvimento de pessoas, visão estratégica)'
+        : 'Técnico/Especialista (foco em profundidade técnica, execução de processos, entrega individual)';
 
     const motivators = {
         'a': 'Ambição Financeira (comissões, bônus, ganho variável)',
@@ -190,6 +261,7 @@ EMPRESA CLIENTE: ${companyName}
 DIAGNÓSTICO DA VAGA:
 - Título: ${data.title}
 - Perfil Psicológico: ${profileType}
+- Nível de Atuação: ${profileLevel}
 - Motivador Principal: ${motivators[data.motivator] || 'Não especificado'}
 - Modelo de Trabalho: ${data.workModel}
 - Faixa Salarial: ${data.salary || 'A combinar'}
@@ -203,5 +275,8 @@ ${data.niceToHaves || 'Não especificados'}
 BENEFÍCIOS:
 ${data.benefits || 'Não especificados'}
 
-Gere o anúncio completo seguindo a estrutura obrigatória. Adapte o tom para atrair o perfil ${data.type === 'a' ? 'Hunter' : 'Farmer'} com foco no motivador ${motivators[data.motivator]?.split(' ')[0] || 'identificado'}.`;
+Gere o anúncio completo seguindo a estrutura obrigatória. 
+- Adapte o tom para atrair o perfil ${data.type === 'a' ? 'Hunter' : 'Farmer'}.
+- As RESPONSABILIDADES devem ser adaptadas para nível ${data.profileLevel === 'lideranca' ? 'LIDERANÇA' : 'TÉCNICO'}.
+- Foque no motivador ${motivators[data.motivator]?.split(' ')[0] || 'identificado'}.`;
 }
