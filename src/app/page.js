@@ -127,7 +127,7 @@ export default function Home() {
           <Link href="/privacy">Privacidade</Link>
           <Link href="/contact">Contato</Link>
         </div>
-        <p className="footer-copy">© 2026 Live Consultoria. Todos os direitos reservados.</p>
+        <p className="footer-copy">© 2026 RecruitAI. Todos os direitos reservados.</p>
       </footer>
 
       <style jsx>{`
