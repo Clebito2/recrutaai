@@ -116,11 +116,11 @@ p {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* Primary Button */
+/* Primary Button (Outlined variant by default now for "Entrar/Começar") */
 .btn-indigo {
-    background: var(--action-primary);
+    background: transparent;
     color: white;
-    border: none;
+    border: 1px solid var(--action-primary);
     padding: 14px 28px;
     border-radius: 8px;
     font-weight: 600;
@@ -132,12 +132,13 @@ p {
     justify-content: center;
     gap: 10px;
     text-decoration: none;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.1);
 }
 
 .btn-indigo:hover {
-    background: #4338CA;
+    background: var(--action-primary);
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
 }
 
 .btn-indigo:disabled {
@@ -150,7 +151,7 @@ p {
 /* Secondary Button */
 .btn-secondary {
     background: transparent;
-    color: rgba(255, 255, 255, 0.8);
+    color: white;
     border: 1px solid var(--border-glass);
     padding: 14px 28px;
     border-radius: 8px;

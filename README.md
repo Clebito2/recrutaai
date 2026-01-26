@@ -44,6 +44,8 @@ GEMINI_API_KEY=sua_chave_gemini
 2. Crie uma API Key
 3. Adicione ao `.env.local` como `GEMINI_API_KEY`
 
+> **Nota**: O sistema possui tratamento de erro automático para chaves inválidas (Erro 400), exibindo mensagens amigáveis na interface.
+
 ## Instalação e Execução
 
 ```bash
@@ -83,11 +85,10 @@ src/
 ## Funcionalidades
 
 ### Modo 1: Arquiteto de Vagas
-- Wizard de 4 etapas para criar anúncios otimizados
-- Seleção de perfil psicológico (Hunter/Farmer)
-- Seleção de nível de atuação (Técnico/Liderança)
+- **Arquétipo Mental Unificado**: Seleção integrada de perfil (Hunter/Farmer/Técnico/Liderança)
 - Driver motivacional (Financeiro/Competição/Propósito)
-- Geração automática de texto persuasivo
+- Geração automática de texto persuasivo sem emojis
+- UI Polida: Botões Outlined e alto contraste (Humanidade Sintética V2)
 
 ### Modo 2: Analista de Perfil (Protocolo Elite V6.0)
 - Upload de CV (.txt, .pdf, .doc, .docx)

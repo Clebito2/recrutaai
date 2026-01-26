@@ -9,122 +9,103 @@ import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 
 export default function JobsPage() {
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    const { user } = useAuth();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuth();
 
-    useEffect(() => {
-        const fetchJobs = async () => {
-            if (!user) return;
+  useEffect(() => {
+    const fetchJobs = async () => {
+      if (!user) return;
 
-            try {
-                // For now, we'll show placeholder data
-                // In production, this would fetch from Firestore
-                setJobs([
-                    {
-                        id: "1",
-                        title: "Senior Account Executive",
-                        type: "Hunter",
-                        workModel: "Híbrido",
-                        createdAt: new Date(),
-                        status: "active",
-                        applicants: 12
-                    },
-                    {
-                        id: "2",
-                        title: "Customer Success Manager",
-                        type: "Farmer",
-                        workModel: "Remoto",
-                        createdAt: new Date(Date.now() - 86400000 * 2),
-                        status: "active",
-                        applicants: 8
-                    }
-                ]);
-            } catch (error) {
-                console.error("Error fetching jobs:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+      try {
+        // For now, we'll show placeholder data
+        // In production, this would fetch from Firestore
+        setJobs([]);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchJobs();
-    }, [user]);
+    fetchJobs();
+  }, [user]);
 
-    const filteredJobs = jobs.filter(job =>
-        job.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const filteredJobs = jobs.filter(job =>
+    job.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    return (
-        <div className="jobs-page animate-fade">
-            <header className="page-header">
-                <div className="header-info">
-                    <h1>Pipeline de Vagas</h1>
-                    <p>Gerencie suas posições abertas e acompanhe candidatos.</p>
+  return (
+    <div className="jobs-page animate-fade">
+      <header className="page-header">
+        <div className="header-info">
+          <h1>Pipeline de Vagas</h1>
+          <p>Gerencie suas posições abertas e acompanhe candidatos.</p>
+        </div>
+        <Link href="/dashboard/jobs/new" className="btn-indigo">
+          <Plus size={20} /> Nova Vaga
+        </Link>
+      </header>
+
+      <div className="jobs-toolbar">
+        <div className="search-box">
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Buscar vagas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <button className="btn-filter">
+          <Filter size={18} /> Filtros
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="loading-state">Carregando vagas...</div>
+      ) : filteredJobs.length === 0 ? (
+        <GlassCard className="empty-state">
+          <Briefcase size={48} color="var(--action-primary)" />
+          <h3>Nenhuma vaga encontrada</h3>
+          <p>Crie sua primeira vaga usando o Arquiteto de Vagas com IA.</p>
+          <Link href="/dashboard/jobs/new" className="btn-indigo">
+            <Plus size={20} /> Criar Primeira Vaga
+          </Link>
+        </GlassCard>
+      ) : (
+        <div className="jobs-grid">
+          {filteredJobs.map((job) => (
+            <GlassCard key={job.id} className="job-card">
+              <div className="job-header">
+                <div className="job-badge">{job.type}</div>
+                <span className={`status-dot ${job.status}`} />
+              </div>
+
+              <h3 className="job-title">{job.title}</h3>
+
+              <div className="job-meta">
+                <span><MapPin size={14} /> {job.workModel}</span>
+                <span><Calendar size={14} /> {formatDate(job.createdAt)}</span>
+              </div>
+
+              <div className="job-stats">
+                <div className="stat">
+                  <span className="stat-value">{job.applicants}</span>
+                  <span className="stat-label">Candidatos</span>
                 </div>
-                <Link href="/dashboard/jobs/new" className="btn-indigo">
-                    <Plus size={20} /> Nova Vaga
-                </Link>
-            </header>
+              </div>
 
-            <div className="jobs-toolbar">
-                <div className="search-box">
-                    <Search size={18} className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="Buscar vagas..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <button className="btn-filter">
-                    <Filter size={18} /> Filtros
-                </button>
-            </div>
+              <Link href={`/dashboard/jobs/${job.id}`} className="job-action">
+                Ver Detalhes <ChevronRight size={16} />
+              </Link>
+            </GlassCard>
+          ))}
+        </div>
+      )}
 
-            {loading ? (
-                <div className="loading-state">Carregando vagas...</div>
-            ) : filteredJobs.length === 0 ? (
-                <GlassCard className="empty-state">
-                    <Briefcase size={48} color="var(--action-primary)" />
-                    <h3>Nenhuma vaga encontrada</h3>
-                    <p>Crie sua primeira vaga usando o Arquiteto de Vagas com IA.</p>
-                    <Link href="/dashboard/jobs/new" className="btn-indigo">
-                        <Plus size={20} /> Criar Primeira Vaga
-                    </Link>
-                </GlassCard>
-            ) : (
-                <div className="jobs-grid">
-                    {filteredJobs.map((job) => (
-                        <GlassCard key={job.id} className="job-card">
-                            <div className="job-header">
-                                <div className="job-badge">{job.type}</div>
-                                <span className={`status-dot ${job.status}`} />
-                            </div>
-
-                            <h3 className="job-title">{job.title}</h3>
-
-                            <div className="job-meta">
-                                <span><MapPin size={14} /> {job.workModel}</span>
-                                <span><Calendar size={14} /> {formatDate(job.createdAt)}</span>
-                            </div>
-
-                            <div className="job-stats">
-                                <div className="stat">
-                                    <span className="stat-value">{job.applicants}</span>
-                                    <span className="stat-label">Candidatos</span>
-                                </div>
-                            </div>
-
-                            <Link href={`/dashboard/jobs/${job.id}`} className="job-action">
-                                Ver Detalhes <ChevronRight size={16} />
-                            </Link>
-                        </GlassCard>
-                    ))}
-                </div>
-            )}
-
-            <style jsx>{`
+      <style jsx>{`
         .jobs-page {
           max-width: 1200px;
         }
@@ -331,17 +312,17 @@ export default function JobsPage() {
           to { opacity: 1; }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
 
 function formatDate(date) {
-    const now = new Date();
-    const diff = now - date;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const diff = now - date;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (days === 0) return "Hoje";
-    if (days === 1) return "Ontem";
-    if (days < 7) return `${days} dias atrás`;
-    return date.toLocaleDateString("pt-BR");
+  if (days === 0) return "Hoje";
+  if (days === 1) return "Ontem";
+  if (days < 7) return `${days} dias atrás`;
+  return date.toLocaleDateString("pt-BR");
 }

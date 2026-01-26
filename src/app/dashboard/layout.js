@@ -205,7 +205,7 @@ export default function DashboardLayout({ children }) {
           font-weight: 600;
           font-size: 0.95rem;
           transition: all 0.2s ease;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
           background: rgba(255, 255, 255, 0.02);
           margin-bottom: 8px;
         }

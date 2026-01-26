@@ -281,17 +281,23 @@ export default function Login() {
         }
 
         .toggle-mode button {
-          background: none;
-          border: none;
+          background: transparent;
+          border: 1px solid var(--action-primary);
+          padding: 8px 16px;
+          border-radius: 6px;
           color: var(--action-primary);
           font-weight: 600;
           cursor: pointer;
           font-size: 0.9rem;
+          transition: all 0.2s;
         }
 
         .toggle-mode button:hover {
-          text-decoration: underline;
+          background: rgba(79, 70, 229, 0.1);
+          transform: translateY(-1px);
         }
+
+
 
         .spin {
           animation: spin 1s linear infinite;

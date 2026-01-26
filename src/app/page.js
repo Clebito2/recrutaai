@@ -13,7 +13,7 @@ export default function Home() {
           <span className="brand-text">Recruit<span className="text-accent">AI</span></span>
         </div>
         <div className="nav-links">
-          <Link href="/login" className="nav-link">Entrar</Link>
+          <Link href="/login" className="btn-secondary">Entrar</Link>
           <Link href="/login" className="btn-indigo">
             Começar Grátis
           </Link>
@@ -227,18 +227,20 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          background: var(--action-primary);
+          background: transparent;
           color: white;
+          border: 2px solid var(--action-primary);
           padding: 18px 40px;
           border-radius: 10px;
           font-weight: 700;
           font-size: 1.05rem;
           text-decoration: none;
           transition: all 0.2s;
+          box-shadow: 0 0 15px rgba(79, 70, 229, 0.15);
         }
 
         .btn-primary-large:hover {
-          background: #4338CA;
+          background: var(--action-primary);
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
         }
@@ -263,6 +265,9 @@ export default function Home() {
 
         .contrast-card {
           padding: 40px;
+          background: linear-gradient(180deg, rgba(30, 32, 45, 0.9) 0%, rgba(20, 22, 35, 0.8) 100%);
+          border: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .contrast-card.old {
@@ -321,6 +326,9 @@ export default function Home() {
 
         .pillar-card {
           padding: 48px 36px;
+          background: linear-gradient(180deg, rgba(30, 32, 45, 0.9) 0%, rgba(20, 22, 35, 0.8) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .pillar-number {

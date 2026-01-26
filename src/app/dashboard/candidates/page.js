@@ -154,25 +154,7 @@ export default function CandidatesPage() {
               </div>
             )}
 
-            <div className="profile-selector">
-              <span className="selector-label">Perfil Buscado:</span>
-              <div className="selector-buttons">
-                <button
-                  type="button"
-                  className={`selector-btn ${profileLevel === 'tecnico' ? 'active' : ''}`}
-                  onClick={() => setProfileLevel('tecnico')}
-                >
-                  Técnico/Especialista
-                </button>
-                <button
-                  type="button"
-                  className={`selector-btn ${profileLevel === 'lideranca' ? 'active' : ''}`}
-                  onClick={() => setProfileLevel('lideranca')}
-                >
-                  Liderança/Gestão
-                </button>
-              </div>
-            </div>
+
 
             {activeTab === "upload" && (
               <div className="upload-section">
