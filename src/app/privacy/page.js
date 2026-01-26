@@ -1,44 +1,46 @@
+"use client";
+
 import GlassCard from "../../components/common/GlassCard";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default function Privacy() {
-    return (
-        <div className="legal-page">
-            <div className="container">
-                <Link href="/" className="back-link">
-                    <ArrowLeft size={20} /> Voltar para Home
-                </Link>
+  return (
+    <div className="legal-page">
+      <div className="container">
+        <Link href="/" className="back-link">
+          <ArrowLeft size={20} /> Voltar para Home
+        </Link>
 
-                <GlassCard className="legal-card">
-                    <h1>Política de Privacidade</h1>
-                    <p className="last-updated">Última atualização: 26 de Janeiro de 2026</p>
+        <GlassCard className="legal-card">
+          <h1>Política de Privacidade</h1>
+          <p className="last-updated">Última atualização: 26 de Janeiro de 2026</p>
 
-                    <div className="content">
-                        <section>
-                            <h2>1. Coleta de Dados</h2>
-                            <p>Coletamos informações que você nos fornece diretamente, como dados de registro, currículos enviados para análise e transcrições.</p>
-                        </section>
+          <div className="content">
+            <section>
+              <h2>1. Coleta de Dados</h2>
+              <p>Coletamos informações que você nos fornece diretamente, como dados de registro, currículos enviados para análise e transcrições.</p>
+            </section>
 
-                        <section>
-                            <h2>2. Uso das Informações</h2>
-                            <p>Utilizamos os dados para fornecer, manter e melhorar nossos serviços de análise via IA. Não vendemos seus dados pessoais a terceiros.</p>
-                        </section>
+            <section>
+              <h2>2. Uso das Informações</h2>
+              <p>Utilizamos os dados para fornecer, manter e melhorar nossos serviços de análise via IA. Não vendemos seus dados pessoais a terceiros.</p>
+            </section>
 
-                        <section>
-                            <h2>3. Segurança</h2>
-                            <p>Implementamos medidas de segurança técnicas e organizacionais para proteger seus dados. Utilizamos criptografia e protocolos seguros.</p>
-                        </section>
+            <section>
+              <h2>3. Segurança</h2>
+              <p>Implementamos medidas de segurança técnicas e organizacionais para proteger seus dados. Utilizamos criptografia e protocolos seguros.</p>
+            </section>
 
-                        <section>
-                            <h2>4. Seus Direitos (LGPD)</h2>
-                            <p>Você tem o direito de acessar, corrigir ou excluir seus dados pessoais a qualquer momento. Entre em contato conosco para exercer esses direitos.</p>
-                        </section>
-                    </div>
-                </GlassCard>
-            </div>
+            <section>
+              <h2>4. Seus Direitos (LGPD)</h2>
+              <p>Você tem o direito de acessar, corrigir ou excluir seus dados pessoais a qualquer momento. Entre em contato conosco para exercer esses direitos.</p>
+            </section>
+          </div>
+        </GlassCard>
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .legal-page {
           min-height: 100vh;
           padding: 40px 24px;
@@ -97,6 +99,6 @@ export default function Privacy() {
           margin-bottom: 16px;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

@@ -1,72 +1,74 @@
+"use client";
+
 import GlassCard from "../../components/common/GlassCard";
 import Link from "next/link";
 import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Contact() {
-    return (
-        <div className="contact-page">
-            <div className="container">
-                <Link href="/" className="back-link">
-                    <ArrowLeft size={20} /> Voltar para Home
-                </Link>
+  return (
+    <div className="contact-page">
+      <div className="container">
+        <Link href="/" className="back-link">
+          <ArrowLeft size={20} /> Voltar para Home
+        </Link>
 
-                <div className="content-grid">
-                    <div className="info-column">
-                        <h1>Fale Conosco</h1>
-                        <p className="subtitle">Estamos aqui para ajudar você a transformar seu processo de recrutamento.</p>
+        <div className="content-grid">
+          <div className="info-column">
+            <h1>Fale Conosco</h1>
+            <p className="subtitle">Estamos aqui para ajudar você a transformar seu processo de recrutamento.</p>
 
-                        <div className="contact-details">
-                            <div className="detail-item">
-                                <div className="icon-box"><Mail size={20} /></div>
-                                <div>
-                                    <h3>Email</h3>
-                                    <p>suporte@recruitai.com</p>
-                                </div>
-                            </div>
-
-                            <div className="detail-item">
-                                <div className="icon-box"><Phone size={20} /></div>
-                                <div>
-                                    <h3>Telefone</h3>
-                                    <p>+55 (11) 99999-9999</p>
-                                </div>
-                            </div>
-
-                            <div className="detail-item">
-                                <div className="icon-box"><MapPin size={20} /></div>
-                                <div>
-                                    <h3>Localização</h3>
-                                    <p>São Paulo, SP - Brasil</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <GlassCard className="form-card">
-                        <h2>Envie uma mensagem</h2>
-                        <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
-                            <div className="input-group">
-                                <label>Nome</label>
-                                <input type="text" placeholder="Seu nome" />
-                            </div>
-
-                            <div className="input-group">
-                                <label>Email</label>
-                                <input type="email" placeholder="seu@email.com" />
-                            </div>
-
-                            <div className="input-group">
-                                <label>Mensagem</label>
-                                <textarea rows={4} placeholder="Como podemos ajudar?" />
-                            </div>
-
-                            <button className="btn-indigo full-width">Enviar Mensagem</button>
-                        </form>
-                    </GlassCard>
+            <div className="contact-details">
+              <div className="detail-item">
+                <div className="icon-box"><Mail size={20} /></div>
+                <div>
+                  <h3>Email</h3>
+                  <p>suporte@recruitai.com</p>
                 </div>
-            </div>
+              </div>
 
-            <style jsx>{`
+              <div className="detail-item">
+                <div className="icon-box"><Phone size={20} /></div>
+                <div>
+                  <h3>Telefone</h3>
+                  <p>+55 (11) 99999-9999</p>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="icon-box"><MapPin size={20} /></div>
+                <div>
+                  <h3>Localização</h3>
+                  <p>São Paulo, SP - Brasil</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <GlassCard className="form-card">
+            <h2>Envie uma mensagem</h2>
+            <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="input-group">
+                <label>Nome</label>
+                <input type="text" placeholder="Seu nome" />
+              </div>
+
+              <div className="input-group">
+                <label>Email</label>
+                <input type="email" placeholder="seu@email.com" />
+              </div>
+
+              <div className="input-group">
+                <label>Mensagem</label>
+                <textarea rows={4} placeholder="Como podemos ajudar?" />
+              </div>
+
+              <button className="btn-indigo full-width">Enviar Mensagem</button>
+            </form>
+          </GlassCard>
+        </div>
+      </div>
+
+      <style jsx>{`
         .contact-page {
           min-height: 100vh;
           padding: 40px 24px;
@@ -202,6 +204,6 @@ export default function Contact() {
           }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
