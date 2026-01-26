@@ -5,7 +5,7 @@ import GlassCard from "../../../components/common/GlassCard";
 import { Plus, Briefcase, Calendar, MapPin, ChevronRight, Search, Filter } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 
 export default function JobsPage() {
@@ -20,10 +20,11 @@ export default function JobsPage() {
 
       try {
         const jobsRef = collection(db, "jobs");
+
+        // Removed orderBy to avoid missing index error
         const q = query(
           jobsRef,
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc")
+          where("userId", "==", user.uid)
         );
 
         const querySnapshot = await getDocs(q);
@@ -35,7 +36,7 @@ export default function JobsPage() {
             // Convert Firestore Timestamp to JS Date
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date()
           };
-        });
+        }).sort((a, b) => b.createdAt - a.createdAt); // Client-side sort
 
         setJobs(jobsData);
       } catch (error) {
@@ -108,7 +109,7 @@ export default function JobsPage() {
 
               <div className="job-stats">
                 <div className="stat">
-                  <span className="stat-value">{job.applicants}</span>
+                  <span className="stat-value">{job.applicants || 0}</span>
                   <span className="stat-label">Candidatos</span>
                 </div>
               </div>

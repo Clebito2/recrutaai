@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
 import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
-import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User } from "lucide-react";
+import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
 import { db } from "../../../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 
 export default function CandidatesPage() {
   const [activeTab, setActiveTab] = useState("upload");
@@ -19,10 +19,40 @@ export default function CandidatesPage() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState("");
+  const [history, setHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const fileInputRef = useRef(null);
   const { user, userProfile } = useAuth();
   const { incrementUsage } = useSubscription();
+
+  // Loading history logic when tab is active
+  useEffect(() => {
+    if (activeTab === 'history' && user) {
+      fetchHistory();
+    }
+  }, [activeTab, user]);
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const q = query(
+        collection(db, "candidates"),
+        where("userId", "==", user.uid)
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date()
+      })).sort((a, b) => b.createdAt - a.createdAt); // Client side sort
+      setHistory(data);
+    } catch (err) {
+      console.error("Error loading history:", err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const saveAnalysisToHistory = async (analysisData) => {
     try {
@@ -168,6 +198,12 @@ export default function CandidatesPage() {
               >
                 <Mic size={18} /> Transcrição
               </button>
+              <button
+                className={`tab ${activeTab === 'history' ? 'active' : ''}`}
+                onClick={() => setActiveTab('history')}
+              >
+                <History size={18} /> Histórico
+              </button>
             </div>
 
             {error && (
@@ -176,10 +212,28 @@ export default function CandidatesPage() {
               </div>
             )}
 
-
-
             {activeTab === "upload" && (
-              <div className="upload-section">
+              <div className="upload-section animate-fade">
+                <div className="profile-selector">
+                  <span className="selector-label">Nível de Análise:</span>
+                  <div className="selector-buttons">
+                    <button
+                      type="button"
+                      className={`selector-btn ${profileLevel === 'tecnico' ? 'active' : ''}`}
+                      onClick={() => setProfileLevel('tecnico')}
+                    >
+                      Técnico / Operacional
+                    </button>
+                    <button
+                      type="button"
+                      className={`selector-btn ${profileLevel === 'lideranca' ? 'active' : ''}`}
+                      onClick={() => setProfileLevel('lideranca')}
+                    >
+                      Liderança / Gestão
+                    </button>
+                  </div>
+                </div>
+
                 <div
                   className={`drop-zone ${file ? 'has-file' : ''}`}
                   onClick={() => fileInputRef.current?.click()}
@@ -205,34 +259,76 @@ export default function CandidatesPage() {
                     </>
                   )}
                 </div>
+
+                <button
+                  className="btn-indigo full-width"
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !file}
+                >
+                  {isAnalyzing ? (
+                    <><Loader2 className="spin" size={20} /> Analisando com IA...</>
+                  ) : (
+                    <>Iniciar Análise DO CV <ChevronRight size={20} /></>
+                  )}
+                </button>
               </div>
             )}
 
             {activeTab === "transcript" && (
-              <div className="transcript-section">
+              <div className="transcript-section animate-fade">
                 <textarea
                   placeholder="Cole aqui a transcrição da entrevista ou anotações sobre o candidato..."
                   value={transcript}
                   onChange={(e) => setTranscript(e.target.value)}
                   rows={12}
                 />
+                <button
+                  className="btn-indigo full-width"
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !transcript.trim()}
+                >
+                  {isAnalyzing ? (
+                    <><Loader2 className="spin" size={20} /> Analisando com IA...</>
+                  ) : (
+                    <>Iniciar Análise da Transcrição <ChevronRight size={20} /></>
+                  )}
+                </button>
               </div>
             )}
 
-            <button
-              className="btn-indigo full-width"
-              onClick={handleAnalyze}
-              disabled={isAnalyzing || (activeTab === 'upload' && !file) || (activeTab === 'transcript' && !transcript.trim())}
-            >
-              {isAnalyzing ? (
-                <><Loader2 className="spin" size={20} /> Analisando com IA...</>
-              ) : (
-                <>Iniciar Análise STAR/SWOT <ChevronRight size={20} /></>
-              )}
-            </button>
+            {activeTab === "history" && (
+              <div className="history-section animate-fade">
+                {loadingHistory ? (
+                  <div className="loading-state"><Loader2 className="spin" /> Carregando histórico...</div>
+                ) : history.length === 0 ? (
+                  <div className="empty-history">
+                    <History size={48} opacity={0.2} />
+                    <p>Nenhuma análise salva ainda.</p>
+                  </div>
+                ) : (
+                  <div className="history-list">
+                    {history.map(item => (
+                      <div key={item.id} className="history-item" onClick={() => setAnalysisResult(item.analysis)}>
+                        <div className="history-avatar"><User size={20} /></div>
+                        <div className="history-info">
+                          <strong>{item.name}</strong>
+                          <span>{item.role}</span>
+                        </div>
+                        <div className="history-date">
+                          <Calendar size={14} />
+                          {item.createdAt.toLocaleDateString('pt-BR')}
+                        </div>
+                        <ChevronRight size={16} opacity={0.5} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
           </GlassCard>
         ) : (
-          <div className="result-section">
+          <div className="result-section animate-fade-right">
             <GlassCard className="result-header-card">
               <div className="candidate-info">
                 <div className="avatar">
@@ -276,7 +372,7 @@ export default function CandidatesPage() {
 
             <div className="result-actions">
               <button onClick={() => setAnalysisResult(null)} className="btn-secondary">
-                Nova Análise
+                <ArrowLeft size={16} /> Voltar
               </button>
               <button
                 className="btn-indigo"
@@ -472,6 +568,76 @@ export default function CandidatesPage() {
             padding: 16px;
           }
 
+          /* History Section */
+          .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          }
+
+          .history-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .history-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--action-primary);
+          }
+
+          .history-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+          }
+
+          .history-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .history-info strong {
+            font-size: 1rem;
+            color: white;
+          }
+
+          .history-info span {
+             font-size: 0.85rem;
+             opacity: 0.6;
+          }
+
+          .history-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin-right: 12px;
+          }
+
+          .loading-state, .empty-history {
+             padding: 40px;
+             text-align: center;
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             gap: 16px;
+             opacity: 0.6;
+          }
+
           /* Result Section */
           .result-section {
             display: flex;
@@ -601,6 +767,9 @@ export default function CandidatesPage() {
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
           }
 
           .btn-secondary:hover {
@@ -621,9 +790,18 @@ export default function CandidatesPage() {
             animation: fadeIn 0.4s ease-out forwards;
           }
 
+          .animate-fade-right {
+             animation: fadeInRight 0.4s ease-out forwards;
+          }
+
           @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+          }
+          
+          @keyframes fadeInRight {
+             from { opacity: 0; transform: translateX(20px); }
+             to { opacity: 1; transform: translateX(0); }
           }
 
           @media (max-width: 768px) {
@@ -642,7 +820,15 @@ function formatScoreLabel(key) {
     comportamental: "Comportamental",
     tecnico: "Técnico",
     comunicacao: "Comunicação",
-    alinhamento: "Alinhamento"
+    alinhamento: "Alinhamento",
+    dominio_hardskills: "Hard Skills",
+    resolucao_problemas: "Resolução",
+    qualidade_entrega: "Qualidade",
+    profundidade_tecnica: "Técnica",
+    tomada_decisao: "Decisão",
+    gestao_conflitos: "Conflitos",
+    mentoria_delegacao: "Mentoria",
+    visao_estrategica: "Estratégia"
   };
   return labels[key] || key;
 }
