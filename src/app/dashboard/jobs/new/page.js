@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSubscription } from "../../../../hooks/useSubscription";
 import { useAuth } from "../../../../context/AuthContext";
+import { db } from "../../../../config/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function NewJob() {
   const [step, setStep] = useState(1);
@@ -34,8 +36,35 @@ export default function NewJob() {
   const handleNext = () => setStep(s => s + 1);
   const handlePrev = () => setStep(s => s - 1);
 
+  const saveJobToHistory = async (text, data) => {
+    try {
+      if (!user) return;
+
+      await addDoc(collection(db, "jobs"), {
+        userId: user.uid,
+        companyName: userProfile?.companyName || "Empresa",
+        title: data.title,
+        jobDescription: text,
+        status: "active",
+        createdAt: serverTimestamp(),
+        type: data.profileType,
+        jobData: data // Persist original parameters
+      });
+      console.log("Job saved automatically");
+    } catch (e) {
+      console.error("Auto-save failed:", e);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
+    if (!formData.salary || !formData.workModel) {
+      setError("Por favor, preencha o Budget Salarial e o Modelo Operacional antes de gerar.");
+      return;
+    }
+
     setIsGenerating(true);
     setError("");
 
@@ -58,6 +87,10 @@ export default function NewJob() {
       }
 
       setGeneratedText(data.jobText);
+
+      // Auto-save
+      await saveJobToHistory(data.jobText, formData);
+
       await incrementUsage("job");
       setStep(5); // Go to result step
 
@@ -526,7 +559,7 @@ export default function NewJob() {
             border: 1px solid var(--border-glass);
             border-radius: 12px;
             padding: 24px;
-            max-height: 500px;
+            max-height: 70vh;
             overflow-y: auto;
             margin-bottom: 32px;
           }
