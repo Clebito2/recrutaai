@@ -295,3 +295,4 @@ Gere o anúncio completo seguindo a estrutura obrigatória e as regras do Protoc
 2. As RESPONSABILIDADES devem ser específicas para nível ${isLeadership ? 'LIDERANÇA (verbos: gerir, liderar, desenvolver)' : 'EXECUÇÃO (verbos: executar, operar, criar)'}.
 3. Foque no motivador ${motivators[data.motivator]?.split(' ')[0] || 'identificado'}.`;
 }
+// Force Deploy Fix: 2026-01-26_0105
