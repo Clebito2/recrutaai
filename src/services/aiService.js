@@ -114,8 +114,12 @@ OUTPUT OBRIGATÓRIO (JSON):
 export async function generateJobAd(companyName, diagnosticData) {
     const apiKey = process.env.GEMINI_API_KEY;
 
+    console.log("--- DEBUG AI SERVICE ---");
+    console.log("API Key configurada?", apiKey ? "SIM (Começa com " + apiKey.substring(0, 5) + "...)" : "NÃO (Undefined/Empty)");
+
     if (!apiKey) {
-        throw new Error("GEMINI_API_KEY não configurada");
+        console.error("CRITICAL: GEMINI_API_KEY is missing in process.env");
+        throw new Error("GEMINI_API_KEY não configurada no servidor (Verifique .env.local ou Variáveis de Ambiente do Deploy)");
     }
 
     const userPrompt = buildJobPrompt(companyName, diagnosticData);
@@ -145,8 +149,12 @@ export async function generateJobAd(companyName, diagnosticData) {
 
     if (!response.ok) {
         const error = await response.json();
+        console.error("--- GEMINI API ERROR ---");
+        console.error("Status:", response.status);
+        console.error("Error Detail:", JSON.stringify(error, null, 2));
+
         if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
-            throw new Error("Erro de configuração: Chave de API inválida.");
+            throw new Error("Chave de API inválida ou rejeitada pelo Google. (Verifique se a chave está ativa)");
         }
         throw new Error(error.error?.message || "Erro na API Gemini");
     }
