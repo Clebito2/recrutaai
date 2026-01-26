@@ -227,16 +227,11 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          background: rgba(79, 70, 229, 0.1) !important;
-          color: white !important;
-          border: 2px solid var(--action-primary) !important;
           padding: 18px 40px;
           border-radius: 10px;
           font-weight: 700;
           font-size: 1.05rem;
-          text-decoration: none;
           transition: all 0.2s;
-          box-shadow: 0 0 15px rgba(79, 70, 229, 0.25);
         }
 
         .btn-primary-large:hover {

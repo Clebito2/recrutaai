@@ -200,13 +200,11 @@ export default function DashboardLayout({ children }) {
         .nav-item {
           padding: 12px 18px;
           border-radius: 8px;
-          color: white !important;
+          color: white;
           text-decoration: none;
           font-weight: 600;
           font-size: 0.95rem;
           transition: all 0.2s ease;
-          border: 1px solid rgba(255, 255, 255, 0.3) !important;
-          background: rgba(255, 255, 255, 0.05);
           margin-bottom: 8px;
         }
 

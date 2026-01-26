@@ -289,3 +289,41 @@ label {
         font-size: 0.9rem;
     }
 }
+
+/* --- EMERGENCY OVERRIDES (FORCE VISIBILITY) --- */
+/* Landing Page Button */
+.btn-primary-large {
+    background: rgba(79, 70, 229, 0.15) !important;
+    border: 2px solid #4F46E5 !important;
+    color: white !important;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3) !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Sidebar Items */
+.dashboard-layout .sidebar .nav-item {
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.dashboard-layout .sidebar .nav-item.active {
+    border: 1px solid var(--action-primary) !important;
+    background: var(--action-primary) !important;
+    color: white !important;
+    opacity: 1 !important;
+}
+
+/* Login Toggle Button */
+.toggle-mode button {
+    border: 1px solid var(--action-primary) !important;
+    background: rgba(79, 70, 229, 0.1) !important;
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    color: var(--action-primary) !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+}

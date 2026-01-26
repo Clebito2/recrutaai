@@ -281,16 +281,10 @@ export default function Login() {
         }
 
         .toggle-mode button {
-          background: rgba(79, 70, 229, 0.05) !important;
-          border: 1px solid var(--action-primary) !important;
-          padding: 10px 20px;
-          border-radius: 8px;
-          color: var(--action-primary) !important;
           font-weight: 700;
           cursor: pointer;
           font-size: 0.95rem;
           transition: all 0.2s;
-          text-decoration: none !important;
         }
 
         .toggle-mode button:hover {
