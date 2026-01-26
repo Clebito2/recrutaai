@@ -1,0 +1,30 @@
+import { analyzeCandidate } from "../../../services/aiService";
+import { NextResponse } from "next/server";
+
+export async function POST(request) {
+    try {
+        const body = await request.json();
+        const { companyName, cvContent, jobContext } = body;
+
+        if (!cvContent) {
+            return NextResponse.json(
+                { error: "Conteúdo do CV não fornecido" },
+                { status: 400 }
+            );
+        }
+
+        const analysis = await analyzeCandidate(companyName, cvContent, jobContext);
+
+        return NextResponse.json({
+            success: true,
+            analysis
+        });
+
+    } catch (error) {
+        console.error("API Error:", error);
+        return NextResponse.json(
+            { error: error.message || "Erro interno" },
+            { status: 500 }
+        );
+    }
+}

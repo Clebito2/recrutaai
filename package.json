@@ -1,0 +1,22 @@
+{
+    "name": "recruit-ai",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "next": "15.1.4",
+        "lucide-react": "^0.473.0",
+        "firebase": "^11.2.0"
+    },
+    "devDependencies": {
+        "eslint": "^9.0.0",
+        "eslint-config-next": "15.1.4"
+    }
+}

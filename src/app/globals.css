@@ -1,0 +1,138 @@
+:root {
+    /* --- Canvas (Humanidade Sintética) --- */
+    --canvas-bg: #05050A;
+    /* Deeper Obsidian */
+    --canvas-card: rgba(20, 20, 25, 0.6);
+    --canvas-card-hover: rgba(30, 30, 40, 0.8);
+
+    /* --- Ação & Energia --- */
+    --action-primary: #4F46E5;
+    /* Electric Indigo */
+    --action-secondary: #00F0FF;
+    /* Neon Teal */
+    --action-accent: #8B5CF6;
+    /* Violet */
+
+    /* --- Semântica Sofisticada --- */
+    --status-analysis: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+    --status-danger: #EF4444;
+
+    /* --- Bordas & Vidro --- */
+    --border-glass: rgba(255, 255, 255, 0.05);
+    --border-active: rgba(79, 70, 229, 0.4);
+    --glass-blur: blur(24px) saturate(160%);
+
+    /* --- Fontes --- */
+    --font-ui: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-narrative: 'Merriweather', serif;
+
+    /* --- Física --- */
+    --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-fluid: cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--canvas-bg);
+    /* Neo-Clean Grid Pattern - Subtle & Technical */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+
+    color: #F5F5F7;
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--canvas-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-glass);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--action-primary);
+}
+
+.glass-card {
+    background: var(--canvas-card);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    transition: all 0.3s var(--ease-fluid);
+}
+
+.glass-card:hover {
+    border-color: var(--border-active);
+    transform: scale(1.01) translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.btn-indigo {
+    background: var(--action-primary);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s var(--spring-bounce);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+}
+
+.btn-indigo:hover {
+    background: #4338CA;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.btn-indigo:active {
+    transform: translateY(0);
+}
+
+.narrative-text {
+    font-family: var(--font-narrative);
+}
+
+/* Animations */
+@keyframes pulse-thinking {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+}
+
+.animate-thinking {
+    animation: pulse-thinking 1.5s ease-in-out infinite;
+}
