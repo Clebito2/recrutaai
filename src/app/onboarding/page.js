@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
-import { Building2, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -14,12 +14,10 @@ export default function Onboarding() {
   const { user, loading: authLoading, updateCompanyName } = useAuth();
   const router = useRouter();
 
-  // Mark as mounted (client-side only)
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Redirect if not authenticated (only after mount)
   useEffect(() => {
     if (mounted && !authLoading && !user) {
       router.push("/login");
@@ -42,35 +40,42 @@ export default function Onboarding() {
     }
   };
 
-  // Show loading during SSR or auth check
   if (!mounted || authLoading) {
     return (
       <div className="onboarding-container">
         <div className="loading-screen">Carregando...</div>
+        <style jsx>{`
+          .onboarding-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .loading-screen {
+            color: rgba(255, 255, 255, 0.4);
+          }
+        `}</style>
       </div>
     );
   }
 
-  // Don't render if not authenticated
   if (!user) {
     return null;
   }
 
   return (
     <div className="onboarding-container">
-      <main className="onboarding-main animate-fade">
+      <main className="onboarding-main">
         <GlassCard className="onboarding-card">
           <div className="card-header">
-            <div className="icon-wrapper">
-              <Building2 size={32} color="var(--action-primary)" />
-            </div>
-            <h1 className="narrative-text">Identificação Corporativa</h1>
-            <p>Para carregar os parâmetros de análise, precisamos identificar o ambiente cliente.</p>
+            <span className="step-badge">Passo 1 de 1</span>
+            <h1>Identificação Corporativa</h1>
+            <p>Para configurar sua conta, precisamos identificar sua empresa.</p>
           </div>
 
           <form onSubmit={handleStart} className="onboarding-form">
             <div className="input-group">
-              <label htmlFor="company">Nome da Organização</label>
+              <label htmlFor="company">Nome da Empresa</label>
               <input
                 id="company"
                 type="text"
@@ -85,11 +90,11 @@ export default function Onboarding() {
             <button type="submit" className="btn-indigo full-width" disabled={loading || !companyName.trim()}>
               {loading ? (
                 <>
-                  <Loader2 className="spin" size={20} /> Carregando Módulos...
+                  <Loader2 className="spin" size={18} /> Configurando...
                 </>
               ) : (
                 <>
-                  Inicializar Cockpit <ArrowRight size={20} />
+                  Acessar Dashboard <ArrowRight size={18} />
                 </>
               )}
             </button>
@@ -103,49 +108,39 @@ export default function Onboarding() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 20px;
-        }
-
-        .loading-screen {
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 1rem;
+          padding: 24px;
         }
 
         .onboarding-card {
           width: 100%;
           max-width: 480px;
-          padding: 50px;
+          padding: 56px 48px;
         }
 
         .card-header {
-          text-align: center;
           margin-bottom: 40px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
         }
 
-        .icon-wrapper {
-          width: 64px;
-          height: 64px;
-          border-radius: 16px;
-          background: rgba(79, 70, 229, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 8px;
+        .step-badge {
+          display: inline-block;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--action-primary);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 20px;
         }
 
         .card-header h1 {
           font-size: 1.75rem;
-          font-weight: 700;
+          font-weight: 800;
+          margin-bottom: 12px;
         }
 
         .card-header p {
-          opacity: 0.6;
-          font-size: 0.95rem;
-          line-height: 1.5;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 1rem;
+          line-height: 1.6;
         }
 
         .onboarding-form {
@@ -157,40 +152,10 @@ export default function Onboarding() {
         .input-group {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-        }
-
-        .input-group label {
-          font-size: 0.85rem;
-          font-weight: 600;
-          opacity: 0.7;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        input {
-          background: rgba(0, 0, 0, 0.2);
-          border: 1px solid var(--border-glass);
-          padding: 16px;
-          border-radius: 10px;
-          color: white;
-          font-size: 1rem;
-          font-family: var(--font-ui);
-          transition: all 0.2s ease;
-        }
-
-        input:focus {
-          outline: none;
-          border-color: var(--action-primary);
-          background: rgba(0, 0, 0, 0.4);
-          box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
         .full-width {
           width: 100%;
-          justify-content: center;
-          padding: 16px;
-          font-size: 1rem;
         }
 
         .spin {
@@ -200,15 +165,6 @@ export default function Onboarding() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
-        }
-
-        .animate-fade {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
