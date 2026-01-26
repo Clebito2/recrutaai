@@ -12,6 +12,7 @@ export default function CandidatesPage() {
   const [activeTab, setActiveTab] = useState("upload");
   const [file, setFile] = useState(null);
   const [transcript, setTranscript] = useState("");
+  const [profileLevel, setProfileLevel] = useState("tecnico");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -55,7 +56,8 @@ export default function CandidatesPage() {
         body: JSON.stringify({
           companyName,
           cvContent: content,
-          jobContext: "" // Could be linked to a specific job
+          jobContext: "", // Could be linked to a specific job
+          profileLevel: profileLevel
         })
       });
 
@@ -151,6 +153,26 @@ export default function CandidatesPage() {
                 <AlertCircle size={16} /> {error}
               </div>
             )}
+
+            <div className="profile-selector">
+              <span className="selector-label">Perfil Buscado:</span>
+              <div className="selector-buttons">
+                <button
+                  type="button"
+                  className={`selector-btn ${profileLevel === 'tecnico' ? 'active' : ''}`}
+                  onClick={() => setProfileLevel('tecnico')}
+                >
+                  Técnico/Especialista
+                </button>
+                <button
+                  type="button"
+                  className={`selector-btn ${profileLevel === 'lideranca' ? 'active' : ''}`}
+                  onClick={() => setProfileLevel('lideranca')}
+                >
+                  Liderança/Gestão
+                </button>
+              </div>
+            </div>
 
             {activeTab === "upload" && (
               <div className="upload-section">
@@ -339,6 +361,47 @@ export default function CandidatesPage() {
             display: flex;
             align-items: center;
             gap: 8px;
+          }
+
+          .profile-selector {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .selector-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+          }
+
+          .selector-buttons {
+            display: flex;
+            gap: 8px;
+          }
+
+          .selector-btn {
+            padding: 10px 18px;
+            border: 1px solid var(--border-glass);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .selector-btn:hover {
+            border-color: rgba(79, 70, 229, 0.5);
+            color: white;
+          }
+
+          .selector-btn.active {
+            background: var(--action-primary);
+            border-color: var(--action-primary);
+            color: white;
           }
 
           .drop-zone {

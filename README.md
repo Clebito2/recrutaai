@@ -1,100 +1,24 @@
-# Recruit-AI
+# RecruitAI - Plataforma de Recrutamento Inteligente
 
-> **Humanidade Sintética** — Sistema de Recrutamento e Seleção de Alta Performance
+Sistema de recrutamento e seleção com IA generativa para criação de vagas, análise de candidatos e geração de relatórios executivos.
 
-Uma plataforma SaaS de curadoria de talentos que combina inteligência artificial com metodologias científicas de R&S.
+## Tecnologias Utilizadas
 
----
+- **Frontend**: Next.js 15, React 19
+- **Backend**: Next.js API Routes
+- **Banco de Dados**: Firebase Firestore
+- **Autenticação**: Firebase Auth (Email/Senha + Google)
+- **IA**: Google Gemini 2.0 Flash
+- **Deploy**: Netlify
 
-## Visão Geral
-
-O Recruit-AI é uma ferramenta de recrutamento inteligente que automatiza:
-- **Arquitetura de Vagas** (Mode 1): Geração de anúncios estratégicos sem viés
-- **Análise de Perfil** (Mode 2): Processamento de CVs/Transcrições com metodologia STAR e Matriz SWOT
-
-### Stack Tecnológica
-
-| Camada | Tecnologia |
-|--------|------------|
-| Frontend | Next.js 15 (App Router) |
-| Estilização | CSS Variables + Glassmorphism |
-| Autenticação | Firebase Auth (Email/Google) |
-| Banco de Dados | Firebase Firestore |
-| IA | Google Gemini API |
-| Hospedagem | Netlify |
-
----
-
-## Design System: "Humanidade Sintética"
-
-Estética **Neo-Clean** com foco em alto contraste e redução de fadiga visual.
-
-### Paleta de Cores
-- **Canvas**: `#05050A` (Obsidian Deep)
-- **Ação Primária**: `#4F46E5` (Electric Indigo)
-- **Ação Secundária**: `#00F0FF` (Neon Teal)
-- **Accent**: `#8B5CF6` (Violet)
-
-### Tipografia
-- **UI**: Plus Jakarta Sans
-- **Narrativa**: Merriweather (humanização de nomes e resumos)
-
-### Layout
-- Dashboard: Bento Grid Assimétrico
-- Pipeline: Kanban "Líquido" com Glassmorphism
-
----
-
-## Modelo de Negócio
-
-| Plano | Preço | Limites |
-|-------|-------|---------|
-| Trial | Grátis (7 dias) | 1 vaga, 2 análises de CV |
-| Essencial | R$ 99/mês | 4 vagas, 20 análises de CV |
-| Elite | R$ 249/mês | Ilimitado + Dashboard Analytics |
-
----
-
-## Estrutura do Projeto
-
-```
-recruit-ai/
-├── src/
-│   ├── app/
-│   │   ├── layout.js          # Root layout com AuthProvider
-│   │   ├── page.js            # Landing page (Bento Grid)
-│   │   ├── login/page.js      # Autenticação
-│   │   ├── onboarding/page.js # Setup da empresa
-│   │   └── dashboard/
-│   │       ├── layout.js      # Dashboard layout protegido
-│   │       ├── page.js        # Visão geral (Bento)
-│   │       └── jobs/new/page.js # Formulário diagnóstico
-│   ├── components/
-│   │   └── common/
-│   │       ├── GlassCard.js
-│   │       └── SubscriptionGuard.js
-│   ├── context/
-│   │   └── AuthContext.js     # Firebase Auth wrapper
-│   ├── hooks/
-│   │   └── useSubscription.js # Lógica de trial e limites
-│   ├── lib/
-│   │   └── firebase.js        # Configuração Firebase
-│   └── services/
-│       └── aiService.js       # Integração com LLM
-├── firestore.rules            # Regras de segurança
-├── .env.local.example         # Template de variáveis
-└── README.md
-```
-
----
-
-## Configuração
+## Configuração do Ambiente
 
 ### 1. Variáveis de Ambiente
 
-Copie `.env.local.example` para `.env.local` e preencha:
+Crie um arquivo `.env.local` na raiz do projeto:
 
 ```env
+# Firebase Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_projeto
@@ -102,66 +26,120 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
 
+# Gemini AI (server-side only - não expor no cliente)
 GEMINI_API_KEY=sua_chave_gemini
 ```
 
-### 2. Firebase Console
+### 2. Firebase Setup
 
-1. Ative **Authentication** > Email/Senha e Google
-2. Crie o banco **Firestore Database**
-3. Deploy das regras: `firebase deploy --only firestore:rules`
+1. Acesse [Firebase Console](https://console.firebase.google.com)
+2. Crie um novo projeto ou use um existente
+3. Ative **Authentication** com providers Email/Senha e Google
+4. Crie um banco **Firestore Database** em modo test
+5. Em Authentication → Settings → Authorized domains, adicione seu domínio Netlify
 
-### 3. Executar Localmente
+### 3. Gemini API Key
+
+1. Acesse [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Crie uma API Key
+3. Adicione ao `.env.local` como `GEMINI_API_KEY`
+
+## Instalação e Execução
 
 ```bash
+# Instalar dependências
 npm install
-npm run dev -- -p 3001
+
+# Rodar em desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
 ```
 
+## Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── analyze-candidate/    # API de análise de candidatos
+│   │   ├── generate-job/         # API de geração de vagas
+│   │   └── generate-report/      # API de relatórios HTML/PDF
+│   ├── dashboard/
+│   │   ├── candidates/           # Página de análise de talentos
+│   │   ├── jobs/                 # Página de vagas
+│   │   └── settings/             # Configurações
+│   ├── login/                    # Autenticação
+│   └── onboarding/               # Configuração inicial
+├── components/
+├── context/                      # AuthContext
+├── hooks/                        # useSubscription
+├── lib/                          # Firebase config
+└── services/
+    └── aiService.js              # Prompts e integração Gemini
+```
+
+## Funcionalidades
+
+### Modo 1: Arquiteto de Vagas
+- Wizard de 4 etapas para criar anúncios otimizados
+- Seleção de perfil psicológico (Hunter/Farmer)
+- Seleção de nível de atuação (Técnico/Liderança)
+- Driver motivacional (Financeiro/Competição/Propósito)
+- Geração automática de texto persuasivo
+
+### Modo 2: Analista de Perfil (Protocolo Elite V6.0)
+- Upload de CV (.txt, .pdf, .doc, .docx)
+- Transcrição de entrevistas
+- Análise STAR diferenciada por perfil
+- Scorecard com competências específicas:
+  - **Técnico**: Domínio Hard Skills, Resolução Problemas, Qualidade Entrega, Profundidade Técnica
+  - **Liderança**: Tomada Decisão, Gestão Conflitos, Mentoria/Delegar, Visão Estratégica
+- Identificação de temperamento
+- Red Flags para perfis de liderança (centralização)
+- Geração de relatório HTML exportável
+
+## Deploy no Netlify
+
+1. Push do código para GitHub
+2. Conecte o repositório no Netlify
+3. Configure as variáveis de ambiente no Netlify:
+   - Todas as `NEXT_PUBLIC_FIREBASE_*`
+   - `GEMINI_API_KEY`
+4. Build command: `npm run build`
+5. Publish directory: `.next`
+6. Adicione o domínio do Netlify no Firebase Auth → Authorized domains
+
+## Protocolo Elite V6.0
+
+### Diferenciação Técnico vs Liderança
+
+| Aspecto | Perfil Técnico | Perfil Liderança |
+|---------|----------------|------------------|
+| Foco STAR | Eficiência individual | Resultados de equipe |
+| Verbos | Executar, Analisar, Solucionar | Disseminar, Treinar, Planejar |
+| Temperamentos ideais | Melancólico, Fleumático | Colérico, Sanguíneo |
+| Red Flags | - | "Eu fiz" sem mencionar equipe |
+
+### Competências Avaliadas
+
+**Técnico:**
+1. Domínio de Hard Skills
+2. Resolução de Problemas
+3. Qualidade de Entrega
+4. Profundidade Técnica
+
+**Liderança:**
+1. Tomada de Decisão
+2. Gestão de Conflitos
+3. Mentoria/Delegar
+4. Visão Estratégica
+
+## Suporte
+
+Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para suporte.
+
 ---
 
-## Funcionalidades Implementadas
-
-- [x] Landing Page com Bento Grid
-- [x] Sistema de Autenticação (Email + Google OAuth)
-- [x] Onboarding com identificação corporativa
-- [x] Dashboard com layout modular
-- [x] Lógica de Trial (7 dias) e Tiers
-- [x] Formulário diagnóstico para vagas (4 etapas)
-- [x] Geração de anúncio com IA (Gemini)
-- [x] Listagem de vagas criadas
-- [x] Análise de CV/Transcrição com STAR/SWOT
-- [x] Scorecard de competências automático
-- [x] Relatório Elite HTML com export PDF
-- [x] SubscriptionGuard para bloqueio de limites
-- [x] Firestore Security Rules
-
----
-
-## Pendências (TODO)
-
-### Alta Prioridade
-- [ ] Integração completa do AI Service com Gemini API
-- [ ] Geração de texto do anúncio via IA (Mode 1)
-- [ ] Tela de listagem de vagas criadas
-- [ ] Upload e processamento de CV (Mode 2)
-- [ ] Análise STAR/SWOT automatizada
-- [ ] Geração do relatório HTML Elite
-
-### Média Prioridade
-- [ ] Página de Pricing/Upgrade
-- [ ] Integração com gateway de pagamento
-- [ ] Notificações de limite (email/push)
-- [ ] Dashboard Analytics (Tier 2)
-
-### Baixa Prioridade
-- [ ] Processamento em lote de CVs
-- [ ] Exportação de relatórios em PDF
-- [ ] Integração com ATS externos
-- [ ] Modo offline/PWA
-
----
-
-## Licença
-
-Proprietário — Live Consultoria Empresarial
+© 2026 RecruitAI. Todos os direitos reservados.

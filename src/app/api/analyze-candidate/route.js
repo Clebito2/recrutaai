@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { companyName, cvContent, jobContext } = body;
+        const { companyName, cvContent, jobContext, profileLevel } = body;
 
         if (!cvContent) {
             return NextResponse.json(
@@ -13,7 +13,13 @@ export async function POST(request) {
             );
         }
 
-        const analysis = await analyzeCandidate(companyName, cvContent, jobContext);
+        // Pass profileLevel to get differentiated analysis (tecnico or lideranca)
+        const analysis = await analyzeCandidate(
+            companyName,
+            cvContent,
+            jobContext,
+            profileLevel || 'tecnico'
+        );
 
         return NextResponse.json({
             success: true,
