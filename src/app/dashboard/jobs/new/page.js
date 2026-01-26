@@ -312,6 +312,14 @@ export default function NewJob() {
           .form-card {
             padding: 50px;
           }
+          
+          /* Disable hover effect for the form card */
+          :global(.form-card:hover) {
+            background: var(--canvas-card) !important;
+            transform: none !important;
+            box-shadow: none !important;
+            border-color: var(--border-glass) !important;
+          }
 
           .stepper {
             display: flex;
