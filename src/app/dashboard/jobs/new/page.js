@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSubscription } from "../../../../hooks/useSubscription";
 import { useAuth } from "../../../../context/AuthContext";
-import { db } from "../../../../config/firebase";
+import { db } from "../../../../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function NewJob() {
