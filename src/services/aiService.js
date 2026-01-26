@@ -145,6 +145,9 @@ export async function generateJobAd(companyName, diagnosticData) {
 
     if (!response.ok) {
         const error = await response.json();
+        if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
+            throw new Error("Erro de configuração: Chave de API inválida.");
+        }
         throw new Error(error.error?.message || "Erro na API Gemini");
     }
 
@@ -243,11 +246,12 @@ Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profil
  * Now with profile level differentiation
  */
 function buildJobPrompt(companyName, data) {
-    const profileType = data.type === 'a' ? 'Hunter (agressivo, prospector, abre mercado)' : 'Farmer (relacionamento, manutenção, LTV)';
-
-    const profileLevel = data.profileLevel === 'lideranca'
-        ? 'Liderança/Gestão (foco em gestão de KPIs, desenvolvimento de pessoas, visão estratégica)'
-        : 'Técnico/Especialista (foco em profundidade técnica, execução de processos, entrega individual)';
+    const profileMap = {
+        'hunter': 'Hunter (agressividade comercial, foco em abertura, prospecção e vendas)',
+        'farmer': 'Farmer (relacionamento, gestão de carteira, manutenção e LTV)',
+        'tecnico': 'Técnico/Especialista (profundidade técnica, execução, qualidade de entrega)',
+        'lideranca': 'Liderança/Gestão (gestão de KPIs, desenvolvimento de pessoas, estratégia)'
+    };
 
     const motivators = {
         'a': 'Ambição Financeira (comissões, bônus, ganho variável)',
@@ -255,13 +259,16 @@ function buildJobPrompt(companyName, data) {
         'c': 'Estabilidade e Propósito (segurança, carreira longa, missão)'
     };
 
+    const profileDescription = profileMap[data.profileType] || profileMap['hunter'];
+    const isLeadership = data.profileType === 'lideranca';
+    const isTechnical = data.profileType === 'tecnico';
+
     return `
 EMPRESA CLIENTE: ${companyName}
 
 DIAGNÓSTICO DA VAGA:
 - Título: ${data.title}
-- Perfil Psicológico: ${profileType}
-- Nível de Atuação: ${profileLevel}
+- Arquetipo Mental: ${profileDescription}
 - Motivador Principal: ${motivators[data.motivator] || 'Não especificado'}
 - Modelo de Trabalho: ${data.workModel}
 - Faixa Salarial: ${data.salary || 'A combinar'}
@@ -275,8 +282,8 @@ ${data.niceToHaves || 'Não especificados'}
 BENEFÍCIOS:
 ${data.benefits || 'Não especificados'}
 
-Gere o anúncio completo seguindo a estrutura obrigatória. 
-- Adapte o tom para atrair o perfil ${data.type === 'a' ? 'Hunter' : 'Farmer'}.
-- As RESPONSABILIDADES devem ser adaptadas para nível ${data.profileLevel === 'lideranca' ? 'LIDERANÇA' : 'TÉCNICO'}.
-- Foque no motivador ${motivators[data.motivator]?.split(' ')[0] || 'identificado'}.`;
+Gere o anúncio completo seguindo a estrutura obrigatória e as regras do Protocolo Elite V6.0:
+1. Adapte totalmente o tom para o arquétipo: ${profileDescription}
+2. As RESPONSABILIDADES devem ser específicas para nível ${isLeadership ? 'LIDERANÇA (verbos: gerir, liderar, desenvolver)' : 'EXECUÇÃO (verbos: executar, operar, criar)'}.
+3. Foque no motivador ${motivators[data.motivator]?.split(' ')[0] || 'identificado'}.`;
 }

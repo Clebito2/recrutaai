@@ -198,23 +198,27 @@ export default function DashboardLayout({ children }) {
         }
 
         .nav-item {
-          padding: 12px 16px;
+          padding: 12px 18px;
           border-radius: 8px;
-          color: rgba(255, 255, 255, 0.65);
+          color: white;
           text-decoration: none;
           font-weight: 600;
           font-size: 0.95rem;
-          transition: all 0.15s ease;
+          transition: all 0.2s ease;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.02);
+          margin-bottom: 8px;
         }
 
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.04);
-          color: white;
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.3);
+          transform: translateX(4px);
         }
 
         .nav-item.active {
           background: var(--action-primary);
-          color: white;
+          border-color: var(--action-primary);
           box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
         }
 

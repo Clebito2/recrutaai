@@ -13,8 +13,7 @@ export default function NewJob() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
-    type: "a",
-    profileLevel: "tecnico", // 'tecnico' or 'lideranca'
+    profileType: "hunter", // hunter, farmer, tecnico, lideranca
     motivator: "a",
     mustHaves: "",
     niceToHaves: "",
@@ -111,36 +110,34 @@ export default function NewJob() {
             {step === 1 && (
               <div className="step-content animate-fade-right">
                 <h3 className="narrative-text">Arquétipo Mental</h3>
-                <p className="step-desc">Qual a estrutura psicológica predominante para esta posição?</p>
+                <p className="step-desc">Selecione a estrutura psicológica predominante para esta posição:</p>
                 <div className="selection-grid">
-                  <label className={`selection-card ${formData.type === 'a' ? 'selected' : ''}`}>
-                    <input type="radio" value="a" checked={formData.type === 'a'} onChange={e => setFormData({ ...formData, type: e.target.value })} />
+                  <label className={`selection-card ${formData.profileType === 'hunter' ? 'selected' : ''}`}>
+                    <input type="radio" value="hunter" checked={formData.profileType === 'hunter'} onChange={e => setFormData({ ...formData, profileType: e.target.value })} />
                     <span className="card-number">A</span>
                     <strong>Hunter</strong>
                     <span>Agressividade comercial, foco em abertura e prospecção.</span>
                   </label>
-                  <label className={`selection-card ${formData.type === 'b' ? 'selected' : ''}`}>
-                    <input type="radio" value="b" checked={formData.type === 'b'} onChange={e => setFormData({ ...formData, type: e.target.value })} />
+
+                  <label className={`selection-card ${formData.profileType === 'farmer' ? 'selected' : ''}`}>
+                    <input type="radio" value="farmer" checked={formData.profileType === 'farmer'} onChange={e => setFormData({ ...formData, profileType: e.target.value })} />
                     <span className="card-number">B</span>
                     <strong>Farmer</strong>
                     <span>Relacionamento, gestão de carteira e resiliência.</span>
                   </label>
-                </div>
 
-                <h3 className="narrative-text" style={{ marginTop: '40px' }}>Nível de Atuação</h3>
-                <p className="step-desc">Para esta vaga, o foco é execução técnica ou gestão de pessoas?</p>
-                <div className="selection-grid">
-                  <label className={`selection-card ${formData.profileLevel === 'tecnico' ? 'selected' : ''}`}>
-                    <input type="radio" value="tecnico" checked={formData.profileLevel === 'tecnico'} onChange={e => setFormData({ ...formData, profileLevel: e.target.value })} />
-                    <span className="card-number">T</span>
-                    <strong>Perfil Técnico/Especialista</strong>
-                    <span>Profundidade técnica, execução de processos complexos e entrega individual.</span>
+                  <label className={`selection-card ${formData.profileType === 'tecnico' ? 'selected' : ''}`}>
+                    <input type="radio" value="tecnico" checked={formData.profileType === 'tecnico'} onChange={e => setFormData({ ...formData, profileType: e.target.value })} />
+                    <span className="card-number">C</span>
+                    <strong>Técnico / Especialista</strong>
+                    <span>Profundidade técnica, execução de processos complexos.</span>
                   </label>
-                  <label className={`selection-card ${formData.profileLevel === 'lideranca' ? 'selected' : ''}`}>
-                    <input type="radio" value="lideranca" checked={formData.profileLevel === 'lideranca'} onChange={e => setFormData({ ...formData, profileLevel: e.target.value })} />
-                    <span className="card-number">L</span>
-                    <strong>Perfil Liderança/Gestão</strong>
-                    <span>Gestão de KPIs, desenvolvimento de pessoas e visão estratégica.</span>
+
+                  <label className={`selection-card ${formData.profileType === 'lideranca' ? 'selected' : ''}`}>
+                    <input type="radio" value="lideranca" checked={formData.profileType === 'lideranca'} onChange={e => setFormData({ ...formData, profileType: e.target.value })} />
+                    <span className="card-number">D</span>
+                    <strong>Liderança / Gestão</strong>
+                    <span>Gestão de KPIs, desenvolvimento de pessoas e estratégia.</span>
                   </label>
                 </div>
               </div>
