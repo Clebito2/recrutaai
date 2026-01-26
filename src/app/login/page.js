@@ -173,7 +173,7 @@ export default function Login() {
           font-size: 1.5rem;
           font-weight: 800;
           text-decoration: none;
-          color: white;
+          color: var(--text-primary);
           margin-bottom: 40px;
         }
 
@@ -194,17 +194,18 @@ export default function Login() {
           font-size: 1.5rem;
           font-weight: 800;
           margin-bottom: 8px;
+          color: var(--text-primary);
         }
 
         .card-header p {
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
           font-size: 0.95rem;
         }
 
         .error-message {
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.2);
-          color: #FCA5A5;
+          background: rgba(196, 92, 75, 0.1);
+          border: 1px solid rgba(196, 92, 75, 0.3);
+          color: var(--status-danger);
           padding: 14px 16px;
           border-radius: 8px;
           margin-bottom: 24px;
@@ -244,7 +245,7 @@ export default function Login() {
 
         .divider span {
           font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -253,7 +254,7 @@ export default function Login() {
           width: 100%;
           background: transparent;
           border: 1px solid var(--border-glass);
-          color: rgba(255, 255, 255, 0.8);
+          color: var(--text-muted);
           padding: 14px;
           border-radius: 8px;
           font-size: 0.95rem;
@@ -263,9 +264,9 @@ export default function Login() {
         }
 
         .btn-google:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(255, 255, 255, 0.15);
-          color: white;
+          background: rgba(251, 247, 240, 0.05);
+          border-color: rgba(251, 247, 240, 0.15);
+          color: var(--text-primary);
         }
 
         .btn-google:disabled {
@@ -276,7 +277,7 @@ export default function Login() {
         .toggle-mode {
           margin-top: 28px;
           text-align: center;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
           font-size: 0.9rem;
         }
 

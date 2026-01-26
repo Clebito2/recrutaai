@@ -25,8 +25,16 @@ export function useSubscription() {
                 const expiresAt = new Date(createdAt);
                 expiresAt.setDate(expiresAt.getDate() + trialDays);
 
-                const isExpired = new Date() > expiresAt;
-                const daysRemaining = Math.max(0, Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24)));
+                // GOD MODE for specific user
+                const isGodUser = user.email === "cleber.ihs@gmail.com";
+
+                let isExpired = new Date() > expiresAt;
+                let daysRemaining = Math.max(0, Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24)));
+
+                if (isGodUser) {
+                    isExpired = false;
+                    daysRemaining = 9999;
+                }
 
                 // Define limits based on plan
                 const limits = {
@@ -35,7 +43,12 @@ export function useSubscription() {
                     tier2: { jobs: Infinity, cvs: Infinity }
                 };
 
-                const currentLimits = limits[userProfile.plan || "trial"];
+                let currentLimits = limits[userProfile.plan || "trial"];
+
+                if (isGodUser) {
+                    currentLimits = limits.tier2;
+                }
+
                 const hasReachedJobLimit = (userProfile.jobsCount || 0) >= currentLimits.jobs;
                 const hasReachedCVLimit = (userProfile.cvCount || 0) >= currentLimits.cvs;
 

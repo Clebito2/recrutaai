@@ -86,13 +86,28 @@ export default function CandidatesPage() {
       let content = "";
 
       if (activeTab === "upload" && file) {
-        // Read file content
-        content = await readFileContent(file);
+        // Read file content using server-side API
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const parseResponse = await fetch("/api/parse-file", {
+          method: "POST",
+          body: formData,
+        });
+
+        const parseData = await parseResponse.json();
+
+        if (!parseResponse.ok) {
+          throw new Error(parseData.error || "Erro ao ler arquivo");
+        }
+
+        content = parseData.text;
+
       } else if (activeTab === "transcript") {
         content = transcript;
       }
 
-      if (!content.trim()) {
+      if (!content || !content.trim()) {
         throw new Error("Nenhum conteúdo para analisar");
       }
 
@@ -105,7 +120,7 @@ export default function CandidatesPage() {
           companyName,
           cvContent: content,
           jobContext: "", // Could be linked to a specific job
-          profileLevel: profileLevel
+          profileLevel: "tecnico" // Default to tecnico since we removed the selector
         })
       });
 
@@ -128,15 +143,6 @@ export default function CandidatesPage() {
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  const readFileContent = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result || "");
-      reader.onerror = () => reject(new Error("Erro ao ler arquivo"));
-      reader.readAsText(file);
-    });
   };
 
   const handleGenerateReport = async () => {
@@ -214,25 +220,6 @@ export default function CandidatesPage() {
 
             {activeTab === "upload" && (
               <div className="upload-section animate-fade">
-                <div className="profile-selector">
-                  <span className="selector-label">Nível de Análise:</span>
-                  <div className="selector-buttons">
-                    <button
-                      type="button"
-                      className={`selector-btn ${profileLevel === 'tecnico' ? 'active' : ''}`}
-                      onClick={() => setProfileLevel('tecnico')}
-                    >
-                      Técnico / Operacional
-                    </button>
-                    <button
-                      type="button"
-                      className={`selector-btn ${profileLevel === 'lideranca' ? 'active' : ''}`}
-                      onClick={() => setProfileLevel('lideranca')}
-                    >
-                      Liderança / Gestão
-                    </button>
-                  </div>
-                </div>
 
                 <div
                   className={`drop-zone ${file ? 'has-file' : ''}`}
@@ -242,7 +229,7 @@ export default function CandidatesPage() {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    accept=".txt,.pdf,.doc,.docx"
+                    accept=".txt,.pdf,.docx"
                     hidden
                   />
                   {file ? (
@@ -255,7 +242,7 @@ export default function CandidatesPage() {
                     <>
                       <Upload size={32} color="var(--action-primary)" />
                       <span>Arraste o CV aqui ou clique para selecionar</span>
-                      <small>Suporta .txt, .pdf, .doc, .docx</small>
+                      <small>Suporta .txt, .pdf, .docx</small>
                     </>
                   )}
                 </div>

@@ -163,7 +163,7 @@ export default function Home() {
         }
 
         .nav-link {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--text-muted);
           text-decoration: none;
           font-weight: 600;
           font-size: 0.95rem;
@@ -171,7 +171,7 @@ export default function Home() {
         }
 
         .nav-link:hover {
-          color: white;
+          color: var(--text-primary);
         }
 
         /* Hero */
@@ -197,6 +197,7 @@ export default function Home() {
           line-height: 1.1;
           margin-bottom: 28px;
           letter-spacing: -0.03em;
+          color: var(--text-primary);
         }
 
         .text-gradient {
@@ -209,7 +210,7 @@ export default function Home() {
         .hero-subtitle {
           font-size: 1.2rem;
           line-height: 1.7;
-          color: rgba(255, 255, 255, 0.65);
+          color: rgba(251, 247, 240, 0.75);
           margin-bottom: 48px;
           max-width: 640px;
           margin-left: auto;
@@ -237,12 +238,14 @@ export default function Home() {
         .btn-primary-large:hover {
           background: var(--action-primary) !important;
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.5);
+          box-shadow: 0 8px 24px rgba(244, 169, 0, 0.5) !important;
+          color: var(--text-dark) !important;
         }
 
         .hero-disclaimer {
           font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: var(--text-muted);
+          opacity: 0.7;
         }
 
         /* Contrast Section */
@@ -260,14 +263,14 @@ export default function Home() {
 
         .contrast-card {
           padding: 40px;
-          background: linear-gradient(180deg, rgba(30, 32, 45, 0.9) 0%, rgba(20, 22, 35, 0.8) 100%);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: linear-gradient(180deg, rgba(42, 36, 32, 0.9) 0%, rgba(26, 22, 20, 0.8) 100%);
+          border: 1px solid var(--border-glass);
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .contrast-card.old {
           opacity: 0.7;
-          border-left: 3px solid rgba(255, 255, 255, 0.1);
+          border-left: 3px solid rgba(212, 184, 150, 0.1);
         }
 
         .contrast-card.new {
@@ -281,13 +284,14 @@ export default function Home() {
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 20px;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
         }
 
         .contrast-card p {
           font-size: 1.1rem;
           line-height: 1.6;
           font-style: italic;
+          color: var(--text-primary);
         }
 
         /* Pillars Section */
@@ -310,7 +314,7 @@ export default function Home() {
 
         .section-header p {
           font-size: 1.1rem;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
         }
 
         .pillars-grid {
@@ -321,8 +325,8 @@ export default function Home() {
 
         .pillar-card {
           padding: 48px 36px;
-          background: linear-gradient(180deg, rgba(30, 32, 45, 0.9) 0%, rgba(20, 22, 35, 0.8) 100%);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: linear-gradient(180deg, rgba(42, 36, 32, 0.9) 0%, rgba(26, 22, 20, 0.8) 100%);
+          border: 1px solid var(--border-glass);
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
@@ -339,18 +343,19 @@ export default function Home() {
           font-size: 1.25rem;
           font-weight: 700;
           margin-bottom: 16px;
+          color: var(--text-primary);
         }
 
         .pillar-card p {
           font-size: 0.95rem;
           line-height: 1.7;
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(251, 247, 240, 0.7);
         }
 
         /* Stats Section */
         .stats-section {
           padding: 100px 6%;
-          background: linear-gradient(180deg, transparent, rgba(79, 70, 229, 0.03), transparent);
+          background: linear-gradient(180deg, transparent, rgba(244, 169, 0, 0.03), transparent);
         }
 
         .stats-grid {
@@ -376,7 +381,7 @@ export default function Home() {
 
         .stat-label {
           font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--text-muted);
           font-weight: 500;
         }
 
@@ -396,7 +401,7 @@ export default function Home() {
           font-size: 1.15rem;
           line-height: 1.8;
           font-style: italic;
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(251, 247, 240, 0.8);
         }
 
         /* Final CTA */
@@ -428,6 +433,7 @@ export default function Home() {
         .footer-brand {
           font-weight: 800;
           font-size: 1.1rem;
+          color: var(--text-primary);
         }
 
         .footer-links {
@@ -436,7 +442,7 @@ export default function Home() {
         }
 
         .footer-links a {
-          color: rgba(255, 255, 255, 0.4);
+          color: var(--text-muted);
           text-decoration: none;
           font-size: 0.9rem;
           font-weight: 500;
@@ -444,12 +450,12 @@ export default function Home() {
         }
 
         .footer-links a:hover {
-          color: white;
+          color: var(--action-primary);
         }
 
         .footer-copy {
           font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.3);
+          color: rgba(251, 247, 240, 0.4);
         }
 
         /* Mobile */

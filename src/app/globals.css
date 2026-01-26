@@ -1,27 +1,32 @@
 :root {
-    /* --- Canvas (Corporate Dark) --- */
-    --canvas-bg: #0A0A0F;
-    --canvas-card: rgba(18, 18, 24, 0.85);
-    --canvas-card-hover: rgba(28, 28, 38, 0.9);
+    /* --- Canvas (Golden Hour) --- */
+    --canvas-bg: #1A1614;
+    --canvas-card: rgba(42, 36, 32, 0.9);
+    --canvas-card-hover: rgba(52, 44, 38, 0.95);
 
-    /* --- Brand Colors --- */
-    --action-primary: #4F46E5;
-    --action-secondary: #00D4E8;
-    --action-accent: #7C3AED;
+    /* --- Brand Colors (Golden Hour) --- */
+    --action-primary: #F4A900;
+    --action-secondary: #C1666B;
+    --action-accent: #D4B896;
 
-    /* --- Semantic --- */
-    --status-success: #10B981;
-    --status-warning: #F59E0B;
-    --status-danger: #EF4444;
+    /* --- Text Colors --- */
+    --text-primary: #FBF7F0;
+    --text-muted: #D4B896;
+    --text-dark: #4A403A;
 
-    /* --- Borders & Glass --- */
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --border-active: rgba(79, 70, 229, 0.5);
+    /* --- Semantic (Warm Tones) --- */
+    --status-success: #7D9B6A;
+    --status-warning: #E8A838;
+    --status-danger: #C45C4B;
+
+    /* --- Borders & Glass (Warm) --- */
+    --border-glass: rgba(212, 184, 150, 0.15);
+    --border-active: rgba(244, 169, 0, 0.5);
     --glass-blur: blur(20px) saturate(150%);
 
-    /* --- Typography --- */
-    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-heading: 'Inter', sans-serif;
+    /* --- Typography (FreeSans) --- */
+    --font-ui: 'FreeSans', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heading: 'FreeSans', 'Open Sans', sans-serif;
 
     /* --- Animation --- */
     --transition-fast: 0.15s ease;
@@ -38,8 +43,8 @@ body {
     background-color: var(--canvas-bg);
     background-image:
         url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79, 70, 229, 0.1) 0%, transparent 50%);
-    color: #E5E5E7;
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(244, 169, 0, 0.08) 0%, transparent 50%);
+    color: var(--text-primary);
     font-family: var(--font-ui);
     font-size: 15px;
     min-height: 100vh;
@@ -293,10 +298,10 @@ label {
 /* --- EMERGENCY OVERRIDES (FORCE VISIBILITY) --- */
 /* Landing Page Button */
 .btn-primary-large {
-    background: rgba(79, 70, 229, 0.15) !important;
-    border: 2px solid #4F46E5 !important;
-    color: white !important;
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.3) !important;
+    background: rgba(244, 169, 0, 0.15) !important;
+    border: 2px solid var(--action-primary) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 0 20px rgba(244, 169, 0, 0.3) !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center;
@@ -306,9 +311,9 @@ label {
 
 /* Sidebar Items */
 .dashboard-layout .sidebar .nav-item {
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(212, 184, 150, 0.15) !important;
+    background: rgba(52, 44, 38, 0.4) !important;
+    color: rgba(251, 247, 240, 0.8) !important;
     border-radius: 12px !important;
 
     /* Layout & Text overrides */
@@ -322,14 +327,16 @@ label {
 .dashboard-layout .sidebar .nav-item.active {
     border: 1px solid var(--action-primary) !important;
     background: var(--action-primary) !important;
-    color: white !important;
+    color: var(--text-dark) !important;
+    /* Contraste melhor no amarelo */
     opacity: 1 !important;
+    font-weight: 700 !important;
 }
 
 /* Login Toggle Button */
 .toggle-mode button {
     border: 1px solid var(--action-primary) !important;
-    background: rgba(79, 70, 229, 0.1) !important;
+    background: rgba(244, 169, 0, 0.1) !important;
     padding: 8px 24px !important;
     border-radius: 50px !important;
     color: var(--action-primary) !important;

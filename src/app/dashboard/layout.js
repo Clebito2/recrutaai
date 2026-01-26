@@ -122,8 +122,8 @@ export default function DashboardLayout({ children }) {
 
         .sidebar {
           width: 280px;
-          background: linear-gradient(180deg, rgba(15, 15, 22, 0.98) 0%, rgba(10, 10, 15, 0.98) 100%);
-          border-right: 1px solid rgba(255, 255, 255, 0.06);
+          background: #1A1614;
+          border-right: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
           position: fixed;
@@ -133,14 +133,14 @@ export default function DashboardLayout({ children }) {
 
         .sidebar-header {
           padding: 28px 24px 20px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          border-bottom: 1px solid var(--border-glass);
         }
 
         .brand {
           font-size: 1.5rem;
           font-weight: 800;
           text-decoration: none;
-          color: white;
+          color: var(--text-primary);
           letter-spacing: -0.02em;
         }
 
@@ -151,8 +151,8 @@ export default function DashboardLayout({ children }) {
         .company-badge {
           margin: 20px 20px 0;
           padding: 16px 18px;
-          background: rgba(79, 70, 229, 0.08);
-          border: 1px solid rgba(79, 70, 229, 0.15);
+          background: rgba(244, 169, 0, 0.08);
+          border: 1px solid rgba(244, 169, 0, 0.15);
           border-radius: 10px;
         }
 
@@ -170,7 +170,7 @@ export default function DashboardLayout({ children }) {
           display: block;
           font-size: 1rem;
           font-weight: 600;
-          color: white;
+          color: var(--text-primary);
         }
 
         .sidebar-nav {
@@ -190,17 +190,18 @@ export default function DashboardLayout({ children }) {
         .nav-section-title {
           font-size: 0.7rem;
           font-weight: 700;
-          color: rgba(255, 255, 255, 0.35);
+          color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 1.5px;
           padding: 0 12px;
           margin-bottom: 8px;
+          opacity: 0.6;
         }
 
         .nav-item {
           padding: 12px 18px;
           border-radius: 8px;
-          color: white;
+          color: var(--text-primary);
           text-decoration: none !important;
           font-weight: 600;
           font-size: 0.95rem;
@@ -213,20 +214,21 @@ export default function DashboardLayout({ children }) {
         }
 
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.6) !important;
+          background: rgba(251, 247, 240, 0.1);
+          border-color: rgba(251, 247, 240, 0.6) !important;
           transform: translateX(4px);
         }
 
         .nav-item.active {
           background: var(--action-primary) !important;
           border-color: var(--action-primary) !important;
-          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+          box-shadow: 0 4px 12px rgba(244, 169, 0, 0.4);
+          color: var(--text-dark) !important;
         }
 
         .sidebar-footer {
           padding: 20px;
-          border-top: 1px solid rgba(255, 255, 255, 0.04);
+          border-top: 1px solid var(--border-glass);
           margin-top: auto;
         }
 
@@ -238,23 +240,24 @@ export default function DashboardLayout({ children }) {
           display: block;
           font-size: 0.7rem;
           font-weight: 600;
-          color: rgba(255, 255, 255, 0.35);
+          color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 1px;
           margin-bottom: 4px;
+          opacity: 0.6;
         }
 
         .user-email {
           font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--text-muted);
           word-break: break-all;
         }
 
         .logout-btn {
           width: 100%;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: rgba(255, 255, 255, 0.6);
+          background: rgba(251, 247, 240, 0.03);
+          border: 1px solid var(--border-glass);
+          color: var(--text-muted);
           padding: 12px;
           border-radius: 8px;
           font-weight: 600;
@@ -264,9 +267,9 @@ export default function DashboardLayout({ children }) {
         }
 
         .logout-btn:hover {
-          background: rgba(239, 68, 68, 0.1);
-          border-color: rgba(239, 68, 68, 0.3);
-          color: #FCA5A5;
+          background: rgba(196, 92, 75, 0.1);
+          border-color: rgba(196, 92, 75, 0.3);
+          color: var(--status-danger);
         }
 
         .main-content {
