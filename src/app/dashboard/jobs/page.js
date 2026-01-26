@@ -19,9 +19,25 @@ export default function JobsPage() {
       if (!user) return;
 
       try {
-        // For now, we'll show placeholder data
-        // In production, this would fetch from Firestore
-        setJobs([]);
+        const jobsRef = collection(db, "jobs");
+        const q = query(
+          jobsRef,
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
+        );
+
+        const querySnapshot = await getDocs(q);
+        const jobsData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            // Convert Firestore Timestamp to JS Date
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date()
+          };
+        });
+
+        setJobs(jobsData);
       } catch (error) {
         console.error("Error fetching jobs:", error);
       } finally {
