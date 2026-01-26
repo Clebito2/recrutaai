@@ -281,20 +281,22 @@ export default function Login() {
         }
 
         .toggle-mode button {
-          background: transparent;
-          border: 1px solid var(--action-primary);
-          padding: 8px 16px;
-          border-radius: 6px;
-          color: var(--action-primary);
-          font-weight: 600;
+          background: rgba(79, 70, 229, 0.05) !important;
+          border: 1px solid var(--action-primary) !important;
+          padding: 10px 20px;
+          border-radius: 8px;
+          color: var(--action-primary) !important;
+          font-weight: 700;
           cursor: pointer;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           transition: all 0.2s;
+          text-decoration: none !important;
         }
 
         .toggle-mode button:hover {
-          background: rgba(79, 70, 229, 0.1);
-          transform: translateY(-1px);
+          background: var(--action-primary) !important;
+          color: white !important;
+          transform: translateY(-2px);
         }
 
 

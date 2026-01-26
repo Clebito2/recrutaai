@@ -200,26 +200,26 @@ export default function DashboardLayout({ children }) {
         .nav-item {
           padding: 12px 18px;
           border-radius: 8px;
-          color: white;
+          color: white !important;
           text-decoration: none;
           font-weight: 600;
           font-size: 0.95rem;
           transition: all 0.2s ease;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.3) !important;
+          background: rgba(255, 255, 255, 0.05);
           margin-bottom: 8px;
         }
 
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.6) !important;
           transform: translateX(4px);
         }
 
         .nav-item.active {
-          background: var(--action-primary);
-          border-color: var(--action-primary);
-          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+          background: var(--action-primary) !important;
+          border-color: var(--action-primary) !important;
+          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
 
         .sidebar-footer {

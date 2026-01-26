@@ -227,22 +227,22 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          background: transparent;
-          color: white;
-          border: 2px solid var(--action-primary);
+          background: rgba(79, 70, 229, 0.1) !important;
+          color: white !important;
+          border: 2px solid var(--action-primary) !important;
           padding: 18px 40px;
           border-radius: 10px;
           font-weight: 700;
           font-size: 1.05rem;
           text-decoration: none;
           transition: all 0.2s;
-          box-shadow: 0 0 15px rgba(79, 70, 229, 0.15);
+          box-shadow: 0 0 15px rgba(79, 70, 229, 0.25);
         }
 
         .btn-primary-large:hover {
-          background: var(--action-primary);
+          background: var(--action-primary) !important;
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.5);
         }
 
         .hero-disclaimer {
