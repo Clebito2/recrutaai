@@ -31,7 +31,7 @@ export default function NewJob() {
 
   const router = useRouter();
   const { subscription, incrementUsage } = useSubscription();
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
 
   const handleNext = () => setStep(s => s + 1);
   const handlePrev = () => setStep(s => s - 1);

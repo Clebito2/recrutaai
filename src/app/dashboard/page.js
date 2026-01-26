@@ -23,7 +23,7 @@ export default function DashboardHome() {
           <div className="hero-content">
             <span className="badge-new">Novo Ciclo</span>
             <h2>Inicie uma arquitetura de vaga estratégica</h2>
-            <p>Use o Modo 1 para desenhar perfis Hunter ou Farmer com precisão cirúrgica sem viés.</p>
+            <p>Use o Modo 1 para desenhar perfis Hunter, Farmer, Técnico ou Liderança com precisão cirúrgica sem viés.</p>
             <Link href="/dashboard/jobs/new" className="btn-indigo">
               <Plus size={18} />
               Criar Nova Vaga
