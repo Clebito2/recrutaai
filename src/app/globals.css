@@ -301,6 +301,7 @@ label {
     display: inline-flex !important;
     align-items: center;
     gap: 12px;
+    border-radius: 50px !important;
 }
 
 /* Sidebar Items */
@@ -308,6 +309,7 @@ label {
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     background: rgba(255, 255, 255, 0.03) !important;
     color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 12px !important;
 }
 
 .dashboard-layout .sidebar .nav-item.active {
@@ -321,8 +323,8 @@ label {
 .toggle-mode button {
     border: 1px solid var(--action-primary) !important;
     background: rgba(79, 70, 229, 0.1) !important;
-    padding: 8px 16px !important;
-    border-radius: 6px !important;
+    padding: 8px 24px !important;
+    border-radius: 50px !important;
     color: var(--action-primary) !important;
     text-decoration: none !important;
     display: inline-block !important;
