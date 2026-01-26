@@ -144,21 +144,24 @@ Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para s
 ---
 
 
-### Atualizações Recentes (v0.2.1)
+### Atualizações Recentes (v0.3.0 - Hotfix & Stabilization)
 
-#### 1. Segurança & API
-- **Proteção de Chave**: Instruções para não commitar `.env.local` e uso de script de diagnóstico (`scripts/test-key.js`).
-- **Resolução de Problemas**: 
-  - Correção do erro "Referer Blocked": Instrução para remover restrições de website no Google Console.
-  - Correção do erro "API Invalid": Downgrade para `gemini-1.5-flash` e verificação de ativação da API.
+#### 1. Core & IA
+- **Modelo Atualizado**: Migração para `gemini-2.5-flash` (Único modelo estável/disponível no ambiente atual).
+- **Prompt Engineering**: Ajuste para gerar "LinkedIn Posts" formatados (Bullets, Hook e CTA) ao invés de cartas.
+- **Tokens**: Aumento de limite para 4096 tokens (evita cortes no texto).
 
-#### 2. Interface (UI - Polish)
-- **Botões**: Padronização para formato arredondado (Pill Shape / 50px radius).
-- **Visibilidade**: Aplicação de estilos globais (`!important`) para garantir bordas e contrastes visíveis em todos os ambientes.
-- **Formulários**: Remoção de efeitos de hover/opacidade no card de criação de vagas para melhor usabilidade.
+#### 2. Funcionalidades Críticas
+- **Auto-Save**: Vagas geradas são salvas automaticamente no Firestore.
+- **Correção de Deploy**: Ajuste no caminho de importação do Firebase (`config` -> `lib`) que quebrava o build.
 
-#### 3. Limpeza de Dados
-- Remoção de dados de exemplo (placeholders) e seletores legados.
+#### 3. Interface (UI)
+- **Texto**: Dashboard atualizado para refletir todos os perfis (Hunter, Farmer, Técnico, Liderança).
+- **Layout**: Altura da caixa de texto aumentada para 70vh.
+- **Estilo**: Botões arredondados e remoção de efeitos indesejados no card de formulário.
+
+#### 4. Backlog & Manutenção
+- **Backlog**: Criação de `product_backlog.md` para rastrear melhorias futuras (Tradução e Suporte).
 
 
 ---
