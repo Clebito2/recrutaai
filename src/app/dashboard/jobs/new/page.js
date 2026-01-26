@@ -91,7 +91,7 @@ export default function NewJob() {
           </div>
         </header>
 
-        <GlassCard className="form-card">
+        <GlassCard className="form-card static-card">
           {step <= 4 && (
             <div className="stepper">
               {[1, 2, 3, 4].map(s => (
@@ -313,11 +313,11 @@ export default function NewJob() {
             padding: 50px;
           }
           
-          /* Disable hover effect for the form card */
-          :global(.form-card:hover) {
-            background: var(--canvas-card) !important;
+          /* Strict override for static card to remove ANY hover effect */
+          :global(.glass-card.static-card:hover) {
             transform: none !important;
             box-shadow: none !important;
+            background: var(--canvas-card) !important;
             border-color: var(--border-glass) !important;
           }
 

@@ -201,11 +201,15 @@ export default function DashboardLayout({ children }) {
           padding: 12px 18px;
           border-radius: 8px;
           color: white;
-          text-decoration: none;
+          text-decoration: none !important;
           font-weight: 600;
           font-size: 0.95rem;
           transition: all 0.2s ease;
           margin-bottom: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
         }
 
         .nav-item:hover {
