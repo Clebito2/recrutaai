@@ -144,16 +144,22 @@ Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para s
 ---
 
 
-## Atualizações Recentes (v0.2.0)
+### Atualizações Recentes (v0.2.1)
 
-### Correções e Melhorias
-1. **API Gemini**: Downgrade para modelo `gemini-1.5-flash` para estabilidade e correção do erro "API Invalid".
-2. **Interface (UI)**:
-   - Adição de bordas de alto contraste e fundos sólidos em botões chave ("Entrar", "Começar Agora").
-   - Melhoria na visibilidade dos itens do menu lateral (sidebar).
-3. **Limpeza de Dados**:
-   - Remoção de vagas de exemplo (placeholder) na inicialização.
-   - Remoção do seletor de perfil (Técnico/Liderança) na tela de upload de candidatos (agora definido via lógica interna ou padrão).
+#### 1. Segurança & API
+- **Proteção de Chave**: Instruções para não commitar `.env.local` e uso de script de diagnóstico (`scripts/test-key.js`).
+- **Resolução de Problemas**: 
+  - Correção do erro "Referer Blocked": Instrução para remover restrições de website no Google Console.
+  - Correção do erro "API Invalid": Downgrade para `gemini-1.5-flash` e verificação de ativação da API.
+
+#### 2. Interface (UI - Polish)
+- **Botões**: Padronização para formato arredondado (Pill Shape / 50px radius).
+- **Visibilidade**: Aplicação de estilos globais (`!important`) para garantir bordas e contrastes visíveis em todos os ambientes.
+- **Formulários**: Remoção de efeitos de hover/opacidade no card de criação de vagas para melhor usabilidade.
+
+#### 3. Limpeza de Dados
+- Remoção de dados de exemplo (placeholders) e seletores legados.
+
 
 ---
 
