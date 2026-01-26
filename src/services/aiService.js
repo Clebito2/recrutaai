@@ -4,7 +4,7 @@
  * With differentiated competencies for Technical vs Leadership profiles
  */
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent";
 
 // System prompts for different modes
 const SYSTEM_PROMPTS = {

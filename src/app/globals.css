@@ -310,6 +310,13 @@ label {
     background: rgba(255, 255, 255, 0.03) !important;
     color: rgba(255, 255, 255, 0.9) !important;
     border-radius: 12px !important;
+
+    /* Layout & Text overrides */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    text-decoration: none !important;
 }
 
 .dashboard-layout .sidebar .nav-item.active {
