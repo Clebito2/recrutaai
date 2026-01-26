@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
 import { Building2, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -9,9 +9,22 @@ import { useRouter } from "next/navigation";
 export default function Onboarding() {
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const { user, updateCompanyName } = useAuth();
+  const { user, loading: authLoading, updateCompanyName } = useAuth();
   const router = useRouter();
+
+  // Mark as mounted (client-side only)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Redirect if not authenticated (only after mount)
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      router.push("/login");
+    }
+  }, [mounted, authLoading, user, router]);
 
   const handleStart = async (e) => {
     e.preventDefault();
@@ -29,9 +42,17 @@ export default function Onboarding() {
     }
   };
 
-  // Redirect if not authenticated
+  // Show loading during SSR or auth check
+  if (!mounted || authLoading) {
+    return (
+      <div className="onboarding-container">
+        <div className="loading-screen">Carregando...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
   if (!user) {
-    router.push("/login");
     return null;
   }
 
@@ -83,6 +104,11 @@ export default function Onboarding() {
           align-items: center;
           justify-content: center;
           padding: 20px;
+        }
+
+        .loading-screen {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 1rem;
         }
 
         .onboarding-card {
