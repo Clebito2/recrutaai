@@ -7,6 +7,8 @@ import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight,
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
+import { db } from "../../../lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function CandidatesPage() {
   const [activeTab, setActiveTab] = useState("upload");
@@ -19,8 +21,24 @@ export default function CandidatesPage() {
   const [error, setError] = useState("");
 
   const fileInputRef = useRef(null);
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const { incrementUsage } = useSubscription();
+
+  const saveAnalysisToHistory = async (analysisData) => {
+    try {
+      if (!user) return;
+      await addDoc(collection(db, "candidates"), {
+        userId: user.uid,
+        name: analysisData.nome || "Candidato",
+        role: profileLevel === 'lideranca' ? 'Liderança' : 'Técnico',
+        analysis: analysisData,
+        createdAt: serverTimestamp()
+      });
+      console.log("Analysis auto-saved");
+    } catch (e) {
+      console.error("Failed to auto-save analysis:", e);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
@@ -68,6 +86,10 @@ export default function CandidatesPage() {
       }
 
       setAnalysisResult(data.analysis);
+
+      // Auto-save
+      await saveAnalysisToHistory(data.analysis);
+
       await incrementUsage("cv");
 
     } catch (err) {
