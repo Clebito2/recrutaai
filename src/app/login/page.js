@@ -86,8 +86,8 @@ export default function Login() {
   return (
     <div className="login-container">
       <main className="login-main">
-        <Link href="/" className="brand-link">
-          Recruit<span className="text-accent">AI</span>
+        <Link href="/" className="brand-link brand-underline" style={{ textDecoration: 'none' }}>
+          <span className="text-brand-recruit">Recruit</span><span className="text-brand-ai">AI</span>
         </Link>
 
         <GlassCard className="login-card">

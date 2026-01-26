@@ -85,8 +85,8 @@ export default function CandidatesPage() {
     try {
       let content = "";
 
-      if (activeTab === "upload" && file) {
-        // Read file content using server-side API
+      // Handle File Upload (for both tabs)
+      if (file && (activeTab === "upload" || activeTab === "transcript")) {
         const formData = new FormData();
         formData.append("file", file);
 
@@ -94,6 +94,14 @@ export default function CandidatesPage() {
           method: "POST",
           body: formData,
         });
+
+        // Debug: Check if response is JSON
+        const contentType = parseResponse.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const textBody = await parseResponse.text();
+          console.error("API Error Response (Not JSON):", textBody);
+          throw new Error(`Erro na leitura do arquivo (Status ${parseResponse.status}). Verifique o console.`);
+        }
 
         const parseData = await parseResponse.json();
 
@@ -103,7 +111,8 @@ export default function CandidatesPage() {
 
         content = parseData.text;
 
-      } else if (activeTab === "transcript") {
+        // Handle Text Paste (Transcript only)
+      } else if (activeTab === "transcript" && transcript.trim()) {
         content = transcript;
       }
 
@@ -263,16 +272,51 @@ export default function CandidatesPage() {
 
             {activeTab === "transcript" && (
               <div className="transcript-section animate-fade">
+                <div
+                  className={`drop-zone ${file ? 'has-file' : ''}`}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".txt,.pdf,.docx"
+                    hidden
+                  />
+                  {file ? (
+                    <>
+                      <CheckCircle size={32} color="var(--action-secondary)" />
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                      <button
+                        className="btn-text"
+                        onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                        style={{ marginTop: '10px', fontSize: '0.8rem', opacity: 0.8 }}
+                      >
+                        Remover arquivo
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={32} color="var(--action-primary)" />
+                      <span>Upload de arquivo de transcrição</span>
+                      <small>Suporta .txt, .pdf, .docx</small>
+                    </>
+                  )}
+                </div>
+
+                <div className="divider"><span>OU COLE O TEXTO</span></div>
+
                 <textarea
                   placeholder="Cole aqui a transcrição da entrevista ou anotações sobre o candidato..."
                   value={transcript}
                   onChange={(e) => setTranscript(e.target.value)}
-                  rows={12}
+                  rows={8}
                 />
                 <button
                   className="btn-indigo full-width"
                   onClick={handleAnalyze}
-                  disabled={isAnalyzing || !transcript.trim()}
+                  disabled={isAnalyzing || (!transcript.trim() && !file)}
                 >
                   {isAnalyzing ? (
                     <><Loader2 className="spin" size={20} /> Analisando com IA...</>

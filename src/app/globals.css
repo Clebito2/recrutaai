@@ -295,6 +295,35 @@ label {
     }
 }
 
+/* Logo Colors */
+.text-brand-recruit {
+    color: #7C3AED;
+    /* Roxo vibrante */
+}
+
+.text-brand-ai {
+    color: #F59E0B;
+    /* Amarelo Ouro */
+    font-weight: 800;
+}
+
+.brand-underline {
+    border-bottom: 3px solid #7C3AED;
+    padding-bottom: 2px;
+}
+
+/* Footer Links - Override */
+.footer-links a {
+    color: var(--action-primary) !important;
+    /* Dourado/Amarelo */
+}
+
+.footer-links a:hover {
+    color: var(--text-primary) !important;
+    text-decoration: underline;
+}
+
+/* Original overrides below... */
 /* --- EMERGENCY OVERRIDES (FORCE VISIBILITY) --- */
 /* Landing Page Button */
 .btn-primary-large {

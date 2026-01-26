@@ -61,8 +61,8 @@ export default function DashboardLayout({ children }) {
     <div className="dashboard-layout">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <Link href="/dashboard" className="brand">
-            Recruit<span className="accent">AI</span>
+          <Link href="/dashboard" className="brand brand-underline">
+            <span className="text-brand-recruit">Recruit</span><span className="text-brand-ai">AI</span>
           </Link>
         </div>
 

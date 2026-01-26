@@ -10,7 +10,10 @@ export default function Home() {
       {/* Navigation */}
       <nav className="nav-bar">
         <div className="nav-brand">
-          <span className="brand-text">Recruit<span className="text-accent">AI</span></span>
+          <span className="brand-text brand-underline">
+            <span className="text-brand-recruit">Recruit</span>
+            <span className="text-brand-ai">AI</span>
+          </span>
         </div>
         <div className="nav-links">
           <Link href="/login" className="btn-secondary">Entrar</Link>
