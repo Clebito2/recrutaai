@@ -91,7 +91,7 @@ export default function NewJob() {
           </div>
         </header>
 
-        <GlassCard className="form-card static-card">
+        <GlassCard className="form-card" noHover>
           {step <= 4 && (
             <div className="stepper">
               {[1, 2, 3, 4].map(s => (

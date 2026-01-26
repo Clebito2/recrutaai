@@ -18,12 +18,14 @@ const GlassCard = ({ children, className = '', ...props }) => {
           position: relative;
         }
 
-        .glass-card:hover {
-          background: var(--canvas-card-hover);
-          border-color: var(--border-active);
-          transform: translateY(-4px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
+        ${!props.noHover ? `
+          .glass-card:hover {
+            background: var(--canvas-card-hover);
+            border-color: var(--border-active);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+          }
+        ` : ''}
       `}</style>
     </div>
   );
