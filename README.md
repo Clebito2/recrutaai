@@ -143,4 +143,18 @@ Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para s
 
 ---
 
+
+## Atualizações Recentes (v0.2.0)
+
+### Correções e Melhorias
+1. **API Gemini**: Downgrade para modelo `gemini-1.5-flash` para estabilidade e correção do erro "API Invalid".
+2. **Interface (UI)**:
+   - Adição de bordas de alto contraste e fundos sólidos em botões chave ("Entrar", "Começar Agora").
+   - Melhoria na visibilidade dos itens do menu lateral (sidebar).
+3. **Limpeza de Dados**:
+   - Remoção de vagas de exemplo (placeholder) na inicialização.
+   - Remoção do seletor de perfil (Técnico/Liderança) na tela de upload de candidatos (agora definido via lógica interna ou padrão).
+
+---
+
 © 2026 RecruitAI. Todos os direitos reservados.
