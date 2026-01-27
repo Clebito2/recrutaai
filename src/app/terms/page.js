@@ -19,12 +19,12 @@ export default function Terms() {
           <div className="content">
             <section>
               <h2>1. Aceitação dos Termos</h2>
-              <p>Ao acessar e usar a plataforma RecruitAI, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso.</p>
+              <p>Ao acessar e usar a plataforma RecruteAI, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso.</p>
             </section>
 
             <section>
               <h2>2. Descrição do Serviço</h2>
-              <p>O RecruitAI é uma ferramenta de auxílio ao recrutamento e seleção baseada em inteligência artificial. O serviço é fornecido "como está" e destina-se a apoiar, não substituir, o julgamento humano.</p>
+              <p>O RecruteAI é uma ferramenta de auxílio ao recrutamento e seleção baseada em inteligência artificial. O serviço é fornecido "como está" e destina-se a apoiar, não substituir, o julgamento humano.</p>
             </section>
 
             <section>
@@ -34,7 +34,7 @@ export default function Terms() {
 
             <section>
               <h2>4. Propriedade Intelectual</h2>
-              <p>Todo o conteúdo, logotipos e tecnologia da plataforma são propriedade exclusiva do RecruitAI.</p>
+              <p>Todo o conteúdo, logotipos e tecnologia da plataforma são propriedade exclusiva do RecruteAI.</p>
             </section>
           </div>
         </GlassCard>

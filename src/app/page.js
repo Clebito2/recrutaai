@@ -11,7 +11,7 @@ export default function Home() {
       <nav className="nav-bar">
         <div className="nav-brand">
           <span className="brand-text brand-underline">
-            <span className="text-brand-recruit">Recruit</span>
+            <span className="text-brand-recruit">Recrute</span>
             <span className="text-brand-ai">AI</span>
           </span>
         </div>
@@ -38,7 +38,7 @@ export default function Home() {
           </p>
           <div className="hero-cta">
             <Link href="/login" className="btn-primary-large">
-              Experimente a Nova Era <ArrowRight size={18} />
+              <span>Experimente a Nova Era</span> <ArrowRight size={18} />
             </Link>
             <span className="hero-disclaimer">7 dias grátis • Sem cartão de crédito</span>
           </div>
@@ -118,19 +118,19 @@ export default function Home() {
       <section className="final-cta-section">
         <h2>Pronto para transformar<br />seu recrutamento?</h2>
         <Link href="/login" className="btn-primary-large">
-          Começar Agora <ArrowRight size={18} />
+          <span>Começar Agora</span> <ArrowRight size={18} />
         </Link>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <div className="footer-brand">RecruitAI</div>
+        <div className="footer-brand">RecruteAI</div>
         <div className="footer-links">
           <Link href="/terms">Termos</Link>
           <Link href="/privacy">Privacidade</Link>
           <Link href="/contact">Contato</Link>
         </div>
-        <p className="footer-copy">© 2026 RecruitAI. Todos os direitos reservados.</p>
+        <p className="footer-copy">© 2026 RecruteAI. Todos os direitos reservados.</p>
       </footer>
 
       <style jsx>{`
@@ -156,7 +156,11 @@ export default function Home() {
         }
 
         .text-accent {
-          color: var(--action-primary);
+          color: #F59E0B;
+        }
+
+        .text-brand-ai {
+           color: #F59E0B;
         }
 
         .nav-links {
@@ -256,6 +260,9 @@ export default function Home() {
           padding: 80px 6%;
           max-width: 1000px;
           margin: 0 auto;
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 20px;
+          margin-bottom: 40px;
         }
 
         .contrast-grid {
@@ -302,6 +309,7 @@ export default function Home() {
           padding: 120px 6%;
           max-width: 1200px;
           margin: 0 auto;
+          background: rgba(0, 0, 0, 0.2);
         }
 
         .section-header {

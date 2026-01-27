@@ -2,7 +2,7 @@ import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 
 export const metadata = {
-    title: "Recruit-AI | Curadoria de Talentos",
+    title: "RecruteAI | Curadoria de Talentos",
     description: "Plataforma de recrutamento inteligente com IA. Curadoria de alta performance em R&S.",
 };
 

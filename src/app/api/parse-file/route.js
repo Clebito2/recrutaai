@@ -21,10 +21,11 @@ export async function POST(req) {
                 const uint8Array = new Uint8Array(buffer);
 
                 // Load the PDF document
+                // Load the PDF document
                 const loadingTask = pdfjsLib.getDocument({
                     data: uint8Array,
-                    // Use a standard font for non-embedded fonts to avoid errors
-                    standardFontDataUrl: 'node_modules/pdfjs-dist/standard_fonts/',
+                    // Use CDN for standard fonts in serverless environments
+                    standardFontDataUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`,
                     disableFontFace: true,
                 });
 
@@ -41,8 +42,9 @@ export async function POST(req) {
 
                 text = fullText.join('\n');
             } catch (pdfError) {
-                console.error('PDF parsing error:', pdfError);
-                throw new Error(`Falha ao ler PDF: ${pdfError.message}`);
+                console.error('PDF parsing detailed error:', pdfError);
+                console.error('Stack:', pdfError.stack);
+                throw new Error(`Falha ao ler PDF: ${pdfError.message} (Code: ${pdfError.name})`);
             }
         } else if (
             file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
@@ -75,7 +77,11 @@ export async function POST(req) {
 
         return NextResponse.json({ text });
     } catch (error) {
-        console.error('Error parsing file:', error);
-        return NextResponse.json({ error: 'Erro ao processar arquivo: ' + error.message }, { status: 500 });
+        console.error('CRITICAL Error parsing file:', error);
+        console.error('Stack trace:', error.stack);
+        return NextResponse.json({
+            error: 'Erro ao processar arquivo: ' + error.message,
+            details: error.stack
+        }, { status: 500 });
     }
 }

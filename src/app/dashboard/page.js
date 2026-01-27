@@ -62,6 +62,7 @@ export default function DashboardHome() {
             <div className="stat-data">
               <span className="stat-val">{subscription?.jobsCount || 0}</span>
               <span className="stat-label">Vagas Ativas</span>
+              <span className="stat-desc">Oportunidades em aberto</span>
             </div>
           </GlassCard>
 
@@ -72,6 +73,7 @@ export default function DashboardHome() {
             <div className="stat-data">
               <span className="stat-val">{subscription?.cvCount || 0}</span>
               <span className="stat-label">Análises Realizadas</span>
+              <span className="stat-desc">Currículos processados</span>
             </div>
           </GlassCard>
 
@@ -82,6 +84,7 @@ export default function DashboardHome() {
             <div className="stat-data">
               <span className="stat-val">{interviewCount}</span>
               <span className="stat-label">Entrevistas</span>
+              <span className="stat-desc">Agendamentos futuros</span>
             </div>
           </GlassCard>
         </div>
@@ -128,7 +131,7 @@ export default function DashboardHome() {
         }
 
         .narrative-text {
-          color: var(--action-primary);
+          color: #F59E0B;
           font-style: italic;
         }
 
@@ -204,7 +207,9 @@ export default function DashboardHome() {
           padding: 20px;
           display: flex;
           align-items: center;
+          justify-content: center; /* Centering fix */
           gap: 16px;
+          text-align: center; /* Centering fix */
         }
 
         .stat-icon-wrapper {
@@ -220,6 +225,7 @@ export default function DashboardHome() {
         .stat-data {
           display: flex;
           flex-direction: column;
+          align-items: center; /* Centering fix */
         }
 
         .stat-val {
@@ -231,6 +237,12 @@ export default function DashboardHome() {
         .stat-label {
           font-size: 0.8rem;
           opacity: 0.6;
+          margin-bottom: 4px;
+        }
+
+        .stat-desc {
+            font-size: 0.7rem;
+            opacity: 0.4;
         }
 
         /* Analysis Cell */

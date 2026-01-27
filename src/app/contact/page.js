@@ -22,7 +22,7 @@ export default function Contact() {
                 <div className="icon-box"><Mail size={20} /></div>
                 <div>
                   <h3>Email</h3>
-                  <p>suporte@recruitai.com</p>
+                  <p>suporte@recruteai.com</p>
                 </div>
               </div>
 

@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }) {
       <aside className="sidebar">
         <div className="sidebar-header">
           <Link href="/dashboard" className="brand brand-underline">
-            <span className="text-brand-recruit">Recruit</span><span className="text-brand-ai">AI</span>
+            <span className="text-brand-recruit">Recrute</span><span className="text-brand-ai" style={{ color: "#F59E0B" }}>AI</span>
           </Link>
         </div>
 
