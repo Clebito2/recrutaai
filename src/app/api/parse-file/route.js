@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
-import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 export async function POST(req) {
     try {
@@ -16,14 +16,48 @@ export async function POST(req) {
         let text = '';
 
         if (file.type === 'application/pdf') {
-            const data = await pdf(buffer);
-            text = data.text;
+            try {
+                // Convert Buffer to Uint8Array for pdfjs-dist
+                const uint8Array = new Uint8Array(buffer);
+
+                // Load the PDF document
+                const loadingTask = pdfjsLib.getDocument({
+                    data: uint8Array,
+                    // Use a standard font for non-embedded fonts to avoid errors
+                    standardFontDataUrl: 'node_modules/pdfjs-dist/standard_fonts/',
+                    disableFontFace: true,
+                });
+
+                const doc = await loadingTask.promise;
+                const numPages = doc.numPages;
+                let fullText = [];
+
+                for (let i = 1; i <= numPages; i++) {
+                    const page = await doc.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map((item) => item.str).join(' ');
+                    fullText.push(pageText);
+                }
+
+                text = fullText.join('\n');
+            } catch (pdfError) {
+                console.error('PDF parsing error:', pdfError);
+                throw new Error(`Falha ao ler PDF: ${pdfError.message}`);
+            }
         } else if (
             file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
             file.name.endsWith('.docx')
         ) {
-            const result = await mammoth.extractRawText({ buffer });
-            text = result.value;
+            try {
+                const result = await mammoth.extractRawText({ buffer });
+                text = result.value;
+                if (result.messages.length > 0) {
+                    console.log('Mammoth messages:', result.messages);
+                }
+            } catch (docxError) {
+                console.error('DOCX parsing error:', docxError);
+                throw new Error(`Falha ao ler DOCX: ${docxError.message}`);
+            }
         } else if (file.type === 'text/plain') {
             text = await file.text();
         } else {
@@ -35,8 +69,8 @@ export async function POST(req) {
             }
         }
 
-        if (!text.trim()) {
-            return NextResponse.json({ error: 'Não foi possível extrair texto do arquivo' }, { status: 400 });
+        if (!text || !text.trim()) {
+            return NextResponse.json({ error: 'Não foi possível extrair texto do arquivo (arquivo vazio ou ilegível)' }, { status: 400 });
         }
 
         return NextResponse.json({ text });

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
 import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
-import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft } from "lucide-react";
+import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft, Clock, X, Check } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
@@ -21,6 +21,10 @@ export default function CandidatesPage() {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleData, setScheduleData] = useState({ date: '', time: '', notes: '' });
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduleSuccess, setScheduleSuccess] = useState(false);
 
   const fileInputRef = useRef(null);
   const { user, userProfile } = useAuth();
@@ -45,7 +49,7 @@ export default function CandidatesPage() {
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date()
-      })).sort((a, b) => b.createdAt - a.createdAt); // Client side sort
+      })).sort((a, b) => b.createdAt-a.createdAt); // Client side sort
       setHistory(data);
     } catch (err) {
       console.error("Error loading history:", err);
@@ -185,6 +189,36 @@ export default function CandidatesPage() {
       setError(err.message);
     } finally {
       setIsGeneratingReport(false);
+    }
+  };
+
+  const handleScheduleInterview = async () => {
+    if (!scheduleData.date || !scheduleData.time) {
+      alert("Por favor, selecione data e hora.");
+      return;
+    }
+
+    setIsScheduling(true);
+    try {
+      await addDoc(collection(db, "interviews"), {
+        userId: user.uid,
+        candidateName: analysisResult.nome || "Candidato",
+        scheduledAt: new Date(`${scheduleData.date}T${scheduleData.time}`),
+        status: "scheduled",
+        notes: scheduleData.notes,
+        createdAt: serverTimestamp()
+      });
+      setScheduleSuccess(true);
+      setTimeout(() => {
+        setShowScheduleModal(false);
+        setScheduleSuccess(false);
+        setScheduleData({ date: '', time: '', notes: '' });
+      }, 2000);
+    } catch (e) {
+      console.error("Error scheduling interview:", e);
+      alert("Erro ao agendar entrevista. Tente novamente.");
+    } finally {
+      setIsScheduling(false);
     }
   };
 
@@ -407,6 +441,12 @@ export default function CandidatesPage() {
               </button>
               <button
                 className="btn-indigo"
+                onClick={() => setShowScheduleModal(true)}
+              >
+                <Calendar size={18} /> Agendar Entrevista
+              </button>
+              <button
+                className="btn-purple"
                 onClick={handleGenerateReport}
                 disabled={isGeneratingReport}
               >
@@ -420,10 +460,173 @@ export default function CandidatesPage() {
           </div>
         )}
 
+        {showScheduleModal && (
+          <div className="modal-overlay">
+            <GlassCard className="modal-content animate-fade">
+              <div className="modal-header">
+                <h3>Agendar Entrevista</h3>
+                <button onClick={() => setShowScheduleModal(false)} className="close-btn"><X size={20} /></button>
+              </div>
+              {scheduleSuccess ? (
+                <div className="success-state">
+                  <CheckCircle size={48} color="var(--success)" />
+                  <p>Entrevista agendada com sucesso!</p>
+                </div>
+              ) : (
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label>Candidato</label>
+                    <input type="text" value={analysisResult?.nome || "Candidato"} disabled className="input-glass" />
+                  </div>
+                  <div className="row-inputs">
+                    <div className="form-group">
+                      <label>Data</label>
+                      <input
+                        type="date"
+                        className="input-glass"
+                        value={scheduleData.date}
+                        onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Hora</label>
+                      <input
+                        type="time"
+                        className="input-glass"
+                        value={scheduleData.time}
+                        onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Notas / Pauta</label>
+                    <textarea
+                      className="input-glass"
+                      rows={3}
+                      placeholder="Ex: Validar fit cultural, teste técnico..."
+                      value={scheduleData.notes}
+                      onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })}
+                    />
+                  </div>
+                  <button
+                    className="btn-indigo full-width"
+                    onClick={handleScheduleInterview}
+                    disabled={isScheduling}
+                  >
+                    {isScheduling ? <Loader2 className="spin" size={18} /> : "Confirmar Agendamento"}
+                  </button>
+                </div>
+              )}
+            </GlassCard>
+          </div>
+        )}
+
+        <style jsx>{`
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .modal-content {
+            width: 100%;
+            max-width: 450px;
+            padding: 24px;
+            border: 1px solid var(--border-glass);
+          }
+
+          .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+          }
+
+          .close-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            opacity: 0.6;
+            cursor: pointer;
+            padding: 4px;
+          }
+          
+          .close-btn:hover { opacity: 1; }
+
+          .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .form-group label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+          }
+
+          .input-glass {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-glass);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-family: var(--font-ui);
+          }
+
+          .input-glass:focus {
+             outline: none;
+             border-color: var(--action-primary);
+          }
+
+          .row-inputs {
+            display: flex;
+            gap: 12px;
+          }
+          
+          .row-inputs .form-group { flex: 1; }
+
+          .success-state {
+            text-align: center;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .btn-purple {
+             background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+             color: white;
+             border: none;
+             padding: 14px 24px;
+             border-radius: 10px;
+             font-weight: 600;
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             transition: all 0.2s;
+             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+          }
+          .btn-purple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+          }
+        `}</style>
+
         <style jsx>{`
           .candidates-page {
             max-width: 900px;
-            margin: 0 auto;
+          margin: 0 auto;
           }
 
           .page-header {
@@ -432,16 +635,16 @@ export default function CandidatesPage() {
 
           .header-info h1 {
             font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 8px;
+          font-weight: 800;
+          margin-bottom: 8px;
           }
 
           .header-info small {
             color: var(--action-secondary);
-            font-weight: 400;
-            font-size: 1rem;
-            margin-left: 8px;
-            text-transform: uppercase;
+          font-weight: 400;
+          font-size: 1rem;
+          margin-left: 8px;
+          text-transform: uppercase;
           }
 
           .header-info p {
@@ -454,296 +657,296 @@ export default function CandidatesPage() {
 
           .tabs {
             display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 10px;
-            margin-bottom: 32px;
+          gap: 8px;
+          background: rgba(0, 0, 0, 0.2);
+          padding: 4px;
+          border-radius: 10px;
+          margin-bottom: 32px;
           }
 
           .tab {
             flex: 1;
-            padding: 14px;
-            border: none;
-            background: transparent;
-            color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
+          padding: 14px;
+          border: none;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          border-radius: 8px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: all 0.2s;
           }
 
           .tab.active {
             background: var(--action-primary);
-            color: white;
+          color: white;
           }
 
           .error-banner {
             background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #FCA5A5;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #FCA5A5;
+          padding: 12px 16px;
+          border-radius: 8px;
+          margin-bottom: 24px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           }
 
           .profile-selector {
             margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
           }
 
           .selector-label {
             font-size: 0.85rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.6);
           }
 
           .selector-buttons {
             display: flex;
-            gap: 8px;
+          gap: 8px;
           }
 
           .selector-btn {
             padding: 10px 18px;
-            border: 1px solid var(--border-glass);
-            background: transparent;
-            color: rgba(255, 255, 255, 0.6);
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
+          border: 1px solid var(--border-glass);
+          background: transparent;
+          color: rgba(255, 255, 255, 0.6);
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.85rem;
+          cursor: pointer;
+          transition: all 0.2s;
           }
 
           .selector-btn:hover {
             border-color: rgba(79, 70, 229, 0.5);
-            color: white;
+          color: white;
           }
 
           .selector-btn.active {
             background: var(--action-primary);
-            border-color: var(--action-primary);
-            color: white;
+          border-color: var(--action-primary);
+          color: white;
           }
 
           .drop-zone {
             border: 2px dashed var(--border-glass);
-            border-radius: 12px;
-            padding: 60px 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 32px;
+          border-radius: 12px;
+          padding: 60px 40px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 32px;
           }
 
           .drop-zone:hover {
             border-color: var(--action-primary);
-            background: rgba(79, 70, 229, 0.05);
+          background: rgba(79, 70, 229, 0.05);
           }
 
           .drop-zone.has-file {
             border-color: var(--action-secondary);
-            background: rgba(0, 240, 255, 0.05);
+          background: rgba(0, 240, 255, 0.05);
           }
 
           .drop-zone small {
             opacity: 0.5;
-            font-size: 0.85rem;
+          font-size: 0.85rem;
           }
 
           .file-name {
             font-weight: 600;
-            color: var(--action-secondary);
+          color: var(--action-secondary);
           }
 
           .file-size {
             opacity: 0.5;
-            font-size: 0.85rem;
+          font-size: 0.85rem;
           }
 
           .transcript-section textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-glass);
-            padding: 20px;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            font-family: var(--font-ui);
-            resize: vertical;
-            margin-bottom: 32px;
-            line-height: 1.6;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid var(--border-glass);
+          padding: 20px;
+          border-radius: 12px;
+          color: white;
+          font-size: 1rem;
+          font-family: var(--font-ui);
+          resize: vertical;
+          margin-bottom: 32px;
+          line-height: 1.6;
           }
 
           .transcript-section textarea:focus {
             outline: none;
-            border-color: var(--action-primary);
+          border-color: var(--action-primary);
           }
 
           .full-width {
             width: 100%;
-            justify-content: center;
-            padding: 16px;
+          justify-content: center;
+          padding: 16px;
           }
 
           /* History Section */
           .history-list {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+          flex-direction: column;
+          gap: 12px;
           }
 
           .history-item {
             display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-glass);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-glass);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
           }
 
           .history-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            border-color: var(--action-primary);
+          border-color: var(--action-primary);
           }
 
           .history-avatar {
             width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
           }
 
           .history-info {
             flex: 1;
-            display: flex;
-            flex-direction: column;
+          display: flex;
+          flex-direction: column;
           }
 
           .history-info strong {
             font-size: 1rem;
-            color: white;
+          color: white;
           }
 
           .history-info span {
-             font-size: 0.85rem;
-             opacity: 0.6;
+            font-size: 0.85rem;
+          opacity: 0.6;
           }
 
           .history-date {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            opacity: 0.5;
-            margin-right: 12px;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.8rem;
+          opacity: 0.5;
+          margin-right: 12px;
           }
 
           .loading-state, .empty-history {
-             padding: 40px;
-             text-align: center;
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-             gap: 16px;
-             opacity: 0.6;
+            padding: 40px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          opacity: 0.6;
           }
 
           /* Result Section */
           .result-section {
             display: flex;
-            flex-direction: column;
-            gap: 24px;
+          flex-direction: column;
+          gap: 24px;
           }
 
           .result-header-card {
             padding: 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           }
 
           .candidate-info {
             display: flex;
-            gap: 20px;
-            align-items: center;
+          gap: 20px;
+          align-items: center;
           }
 
           .avatar {
             width: 64px;
-            height: 64px;
-            background: var(--action-primary);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+          height: 64px;
+          background: var(--action-primary);
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
           }
 
           .candidate-info h2 {
             font-size: 1.5rem;
-            margin-bottom: 4px;
+          margin-bottom: 4px;
           }
 
           .candidate-info p {
             opacity: 0.7;
-            font-size: 0.95rem;
+          font-size: 0.95rem;
           }
 
           .recommendation {
             padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.85rem;
+          border-radius: 8px;
+          font-weight: 700;
+          text-transform: uppercase;
+          font-size: 0.85rem;
           }
 
           .recommendation.approved {
             background: rgba(0, 240, 255, 0.1);
-            color: var(--action-secondary);
+          color: var(--action-secondary);
           }
 
           .recommendation.review {
             background: rgba(139, 92, 246, 0.1);
-            color: var(--action-accent);
+          color: var(--action-accent);
           }
 
           .scores-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
           }
 
           .score-card {
             padding: 24px;
-            text-align: center;
+          text-align: center;
           }
 
           .score-label {
             font-size: 0.75rem;
-            text-transform: uppercase;
-            opacity: 0.6;
-            letter-spacing: 0.5px;
+          text-transform: uppercase;
+          opacity: 0.6;
+          letter-spacing: 0.5px;
           }
 
           .score-ring {
@@ -752,13 +955,13 @@ export default function CandidatesPage() {
 
           .score-value {
             font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--action-primary);
+          font-weight: 800;
+          color: var(--action-primary);
           }
 
           .score-max {
             font-size: 1rem;
-            opacity: 0.4;
+          opacity: 0.4;
           }
 
           .temperament-card, .justification-card {
@@ -767,45 +970,45 @@ export default function CandidatesPage() {
 
           .temperament-card h3, .justification-card h3 {
             font-size: 0.85rem;
-            text-transform: uppercase;
-            opacity: 0.6;
-            margin-bottom: 12px;
+          text-transform: uppercase;
+          opacity: 0.6;
+          margin-bottom: 12px;
           }
 
           .temperament-value {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--action-accent);
+          font-weight: 700;
+          color: var(--action-accent);
           }
 
           .justification-card p {
             line-height: 1.7;
-            opacity: 0.8;
+          opacity: 0.8;
           }
 
           .result-actions {
             display: flex;
-            gap: 16px;
-            justify-content: flex-end;
+          gap: 16px;
+          justify-content: flex-end;
           }
 
           .btn-secondary {
             background: transparent;
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid var(--border-glass);
-            padding: 14px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          color: rgba(255, 255, 255, 0.7);
+          border: 1px solid var(--border-glass);
+          padding: 14px 24px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           }
 
           .btn-secondary:hover {
             color: white;
-            background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.05);
           }
 
           .spin {
@@ -813,8 +1016,8 @@ export default function CandidatesPage() {
           }
 
           @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {transform: rotate(0deg); }
+          to {transform: rotate(360deg); }
           }
 
           .animate-fade {
@@ -822,22 +1025,22 @@ export default function CandidatesPage() {
           }
 
           .animate-fade-right {
-             animation: fadeInRight 0.4s ease-out forwards;
+            animation: fadeInRight 0.4s ease-out forwards;
           }
 
           @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {opacity: 0; }
+          to {opacity: 1; }
           }
-          
+
           @keyframes fadeInRight {
-             from { opacity: 0; transform: translateX(20px); }
-             to { opacity: 1; transform: translateX(0); }
+            from {opacity: 0; transform: translateX(20px); }
+          to {opacity: 1; transform: translateX(0); }
           }
 
           @media (max-width: 768px) {
             .scores-grid {
-              grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             }
           }
         `}</style>

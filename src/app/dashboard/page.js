@@ -1,12 +1,31 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
-import { Plus, Search, ChevronRight, Activity, Target, FileSearch } from "lucide-react";
+import { Plus, Search, ChevronRight, Activity, Target, FileSearch, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useSubscription } from "../../hooks/useSubscription";
+import { db } from "../../lib/firebase";
+import { collection, query, where, getCountFromServer } from "firebase/firestore";
 
 export default function DashboardHome() {
-  const { subscription } = useSubscription();
+  const { subscription, user } = useSubscription();
+  const [interviewCount, setInterviewCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchInterviews() {
+      if (user?.uid) {
+        try {
+          const q = query(collection(db, "interviews"), where("userId", "==", user.uid), where("status", "==", "scheduled"));
+          const snapshot = await getCountFromServer(q);
+          setInterviewCount(snapshot.data().count);
+        } catch (e) {
+          console.error("Error fetching interviews:", e);
+        }
+      }
+    }
+    fetchInterviews();
+  }, [user]);
 
   return (
     <div className="bento-dashboard animate-fade">
@@ -53,6 +72,16 @@ export default function DashboardHome() {
             <div className="stat-data">
               <span className="stat-val">{subscription?.cvCount || 0}</span>
               <span className="stat-label">Análises Realizadas</span>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="bento-cell stat-cell">
+            <div className="stat-icon-wrapper">
+              <Calendar size={24} color="#F59E0B" />
+            </div>
+            <div className="stat-data">
+              <span className="stat-val">{interviewCount}</span>
+              <span className="stat-label">Entrevistas</span>
             </div>
           </GlassCard>
         </div>
