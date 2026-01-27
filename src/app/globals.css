@@ -297,8 +297,8 @@ label {
 
 /* Logo Colors */
 .text-brand-recruit {
-    color: #7C3AED;
-    /* Roxo vibrante */
+    color: #F59E0B;
+    /* Amarelo Ouro */
 }
 
 .text-brand-ai {
@@ -308,7 +308,7 @@ label {
 }
 
 .brand-underline {
-    border-bottom: 3px solid #7C3AED;
+    border-bottom: 3px solid #F59E0B;
     padding-bottom: 2px;
 }
 
@@ -336,6 +336,11 @@ label {
     align-items: center;
     gap: 12px;
     border-radius: 50px !important;
+    white-space: nowrap;
+    /* Prevent drawing break */
+    min-width: 220px;
+    /* Ensure better centering */
+    justify-content: center;
 }
 
 /* Sidebar Items */
