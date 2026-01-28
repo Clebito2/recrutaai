@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
-import pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js';
+import * as pdfjsProxy from 'pdfjs-dist/legacy/build/pdf.js';
+
+// Handle CJS/ESM interop
+const pdfjsLib = pdfjsProxy.default || pdfjsProxy;
 
 // Configure worker for Node.js environment
 // In Node.js with legacy build, we generally don't need to specify workerSrc.
