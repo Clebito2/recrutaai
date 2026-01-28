@@ -45,7 +45,14 @@ const nextConfig = {
     poweredByHeader: false,
 
     // Enable strict mode
-    reactStrictMode: true
+    reactStrictMode: true,
+
+    // Fix for pdfjs-dist
+    webpack: (config) => {
+        config.resolve.alias.canvas = false;
+        config.resolve.alias.encoding = false;
+        return config;
+    }
 };
 
 export default nextConfig;

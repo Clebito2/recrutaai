@@ -1,7 +1,14 @@
-
 import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js';
+
+// Configure worker for Node.js environment
+if (typeof window === 'undefined') {
+    // Using legacy build in Node environment. 
+    // We set a dummy workerSrc to satisfy the library checks if needed, 
+    // although legacy build often runs fine without a real worker in this context.
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+}
 
 export async function POST(req) {
     try {
@@ -16,24 +23,23 @@ export async function POST(req) {
         let text = '';
 
         if (file.type === 'application/pdf') {
+            console.log('API: Iniciando análise de PDF (v3):', file.name);
             try {
-                // Convert Buffer to Uint8Array for pdfjs-dist
+                // Convert Buffer to Uint8Array which pdfjs accepts
                 const uint8Array = new Uint8Array(buffer);
 
-                // Load the PDF document
-                // Load the PDF document
+                // Load the document using the imported library instance
                 const loadingTask = pdfjsLib.getDocument({
                     data: uint8Array,
-                    // Use CDN for standard fonts in serverless environments
-                    standardFontDataUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`,
                     disableFontFace: true,
+                    verbosity: 0
                 });
 
                 const doc = await loadingTask.promise;
-                const numPages = doc.numPages;
-                let fullText = [];
+                console.log('API: PDF carregado, páginas:', doc.numPages);
 
-                for (let i = 1; i <= numPages; i++) {
+                let fullText = [];
+                for (let i = 1; i <= doc.numPages; i++) {
                     const page = await doc.getPage(i);
                     const textContent = await page.getTextContent();
                     const pageText = textContent.items.map((item) => item.str).join(' ');
@@ -41,10 +47,10 @@ export async function POST(req) {
                 }
 
                 text = fullText.join('\n');
+                console.log('API: Extração concluída, caracteres:', text.length);
             } catch (pdfError) {
-                console.error('PDF parsing detailed error:', pdfError);
-                console.error('Stack:', pdfError.stack);
-                throw new Error(`Falha ao ler PDF: ${pdfError.message} (Code: ${pdfError.name})`);
+                console.error('API [PDF EXCEPTION]:', pdfError);
+                throw new Error(`Erro no PDF parser: ${pdfError.message} (Code: ${pdfError.name || 'UNKNOWN'})`);
             }
         } else if (
             file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
@@ -63,7 +69,6 @@ export async function POST(req) {
         } else if (file.type === 'text/plain') {
             text = await file.text();
         } else {
-            // Fallback for potentially misinterpreted types or simple text files
             try {
                 text = buffer.toString('utf-8');
             } catch (e) {
