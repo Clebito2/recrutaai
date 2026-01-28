@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
-import * as pdfjsProxy from 'pdfjs-dist/legacy/build/pdf.js';
+import pdfParse from 'pdf-parse';
 
-// Handle CJS/ESM interop
-const pdfjsLib = pdfjsProxy.default || pdfjsProxy;
-
-// Configure worker for Node.js environment
-// In Node.js with legacy build, we generally don't need to specify workerSrc.
-// It falls back to a "fake worker" on the main thread which is what we want for text extraction.
-// Setting it to a non-existent file causes crashes in production.
+// Disable worker for pdf-parse if it tries to use one (it usually doesn't, but good practice for serverless)
+// Actually pdf-parse is a pure node wrapper, so it shouldn't need env config.
 
 export async function POST(req) {
     try {
@@ -23,34 +18,17 @@ export async function POST(req) {
         let text = '';
 
         if (file.type === 'application/pdf') {
-            console.log('API: Iniciando análise de PDF (v3):', file.name);
+            console.log('API: Iniciando análise de PDF (pdf-parse):', file.name);
             try {
-                // Convert Buffer to Uint8Array which pdfjs accepts
-                const uint8Array = new Uint8Array(buffer);
+                // pdf-parse library handles all the complexity of pdf.js internally in a node-friendly way
+                const data = await pdfParse(buffer);
+                text = data.text;
 
-                // Load the document using the imported library instance
-                const loadingTask = pdfjsLib.getDocument({
-                    data: uint8Array,
-                    disableFontFace: true,
-                    verbosity: 0
-                });
-
-                const doc = await loadingTask.promise;
-                console.log('API: PDF carregado, páginas:', doc.numPages);
-
-                let fullText = [];
-                for (let i = 1; i <= doc.numPages; i++) {
-                    const page = await doc.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map((item) => item.str).join(' ');
-                    fullText.push(pageText);
-                }
-
-                text = fullText.join('\n');
+                console.log('API: PDF pages:', data.numpages);
                 console.log('API: Extração concluída, caracteres:', text.length);
             } catch (pdfError) {
                 console.error('API [PDF EXCEPTION]:', pdfError);
-                throw new Error(`Erro no PDF parser: ${pdfError.message} (Code: ${pdfError.name || 'UNKNOWN'})`);
+                throw new Error(`Erro no PDF parser: ${pdfError.message}`);
             }
         } else if (
             file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
