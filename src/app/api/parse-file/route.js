@@ -3,12 +3,9 @@ import mammoth from 'mammoth';
 import pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js';
 
 // Configure worker for Node.js environment
-if (typeof window === 'undefined') {
-    // Using legacy build in Node environment. 
-    // We set a dummy workerSrc to satisfy the library checks if needed, 
-    // although legacy build often runs fine without a real worker in this context.
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
-}
+// In Node.js with legacy build, we generally don't need to specify workerSrc.
+// It falls back to a "fake worker" on the main thread which is what we want for text extraction.
+// Setting it to a non-existent file causes crashes in production.
 
 export async function POST(req) {
     try {
