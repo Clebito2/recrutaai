@@ -49,7 +49,7 @@ export default function CandidatesPage() {
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date()
-      })).sort((a, b) => b.createdAt-a.createdAt); // Client side sort
+      })).sort((a, b) => b.createdAt - a.createdAt); // Client side sort
       setHistory(data);
     } catch (err) {
       console.error("Error loading history:", err);
@@ -113,14 +113,19 @@ export default function CandidatesPage() {
           throw new Error(parseData.error || "Erro ao ler arquivo");
         }
 
-        content = parseData.text;
+        // Handle both Text and Multimodal (PDF) responses
+        if (parseData.type === 'pdf' && parseData.inlineData) {
+          content = parseData; // Pass structure: { type: 'pdf', inlineData: {...} }
+        } else {
+          content = parseData.text; // Text string
+        }
 
         // Handle Text Paste (Transcript only)
       } else if (activeTab === "transcript" && transcript.trim()) {
         content = transcript;
       }
 
-      if (!content || !content.trim()) {
+      if (!content) {
         throw new Error("Nenhum conteúdo para analisar");
       }
 

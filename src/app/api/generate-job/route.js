@@ -1,8 +1,14 @@
 import { generateJobAd } from "../../../services/aiService";
 import { NextResponse } from "next/server";
+import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
 
 export async function POST(request) {
     try {
+        const rateLimitResponse = checkRateLimit(request, RATE_LIMITS.generateJob);
+        if (rateLimitResponse) {
+            return rateLimitResponse;
+        }
+
         const body = await request.json();
         const { companyName, diagnosticData } = body;
 

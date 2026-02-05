@@ -13,6 +13,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Helper function to check if user owns the company
+    function ownsCompany(companyId) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/companies/$(companyId)).data.ownerId == request.auth.uid;
+    }
+    
     // Users collection - only the user can read/write their own profile
     match /users/{userId} {
       allow read, write: if isOwner(userId);
@@ -25,14 +31,35 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
     
-    // Jobs collection - nested under companies
+    // Jobs collection - user must own the parent company OR own the job directly
     match /companies/{companyId}/jobs/{jobId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if ownsCompany(companyId);
     }
     
-    // Candidates collection - nested under companies
+    // Jobs collection at root level (for backward compatibility)
+    match /jobs/{jobId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Candidates collection - user must own the parent company OR own the candidate directly
     match /companies/{companyId}/candidates/{candidateId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if ownsCompany(companyId);
+    }
+    
+    // Candidates collection at root level (for backward compatibility)
+    match /candidates/{candidateId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Interviews collection - linked to user
+    match /interviews/{interviewId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
     // Admin collection - restricted

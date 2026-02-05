@@ -1,17 +1,47 @@
 import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
 import pdfParse from 'pdf-parse';
+import { checkRateLimit, RATE_LIMITS } from '../../../lib/rate-limiter';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_TYPES = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain'
+];
 
 // Disable worker for pdf-parse if it tries to use one (it usually doesn't, but good practice for serverless)
 // Actually pdf-parse is a pure node wrapper, so it shouldn't need env config.
 
 export async function POST(req) {
     try {
+        const rateLimitResponse = checkRateLimit(req, RATE_LIMITS.parseFile);
+        if (rateLimitResponse) {
+            return rateLimitResponse;
+        }
+
         const formData = await req.formData();
         const file = formData.get('file');
 
         if (!file) {
             return NextResponse.json({ error: 'Nenhum arquivo enviado' }, { status: 400 });
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            return NextResponse.json({
+                error: `Arquivo muito grande. Máximo: ${MAX_FILE_SIZE / 1024 / 1024}MB`
+            }, { status: 400 });
+        }
+
+        const isValidType = ALLOWED_TYPES.includes(file.type) ||
+            file.name.endsWith('.docx') ||
+            file.name.endsWith('.pdf') ||
+            file.name.endsWith('.txt');
+
+        if (!isValidType) {
+            return NextResponse.json({
+                error: 'Formato não suportado. Use PDF, DOCX ou TXT.'
+            }, { status: 400 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
