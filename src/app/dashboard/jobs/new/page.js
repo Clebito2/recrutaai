@@ -118,7 +118,7 @@ export default function NewJob() {
           <div className="header-title">
             <Target className="title-icon" size={32} color="var(--action-primary)" />
             <div>
-              <h2>Arquiteto de Vagas <small>Modo 1</small></h2>
+              <h2>Arquiteto de Vagas</h2>
               <p>{step <= 4 ? "Defina os parâmetros estratégicos para o algoritmo." : "Anúncio gerado com sucesso."}</p>
             </div>
           </div>

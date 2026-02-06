@@ -114,7 +114,7 @@ export default function JobsPage() {
                 </div>
               </div>
 
-              <Link href={`/dashboard/jobs/${job.id}`} className="job-action">
+              <Link href={`/dashboard/jobs/${job.id}`} className="job-action view-details-link">
                 Ver Detalhes <ChevronRight size={16} />
               </Link>
             </GlassCard>

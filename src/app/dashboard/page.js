@@ -42,7 +42,7 @@ export default function DashboardHome() {
           <div className="hero-content">
             <span className="badge-new">Novo Ciclo</span>
             <h2>Inicie uma arquitetura de vaga estratégica</h2>
-            <p>Use o Modo 1 para desenhar perfis Hunter, Farmer, Técnico ou Liderança com precisão cirúrgica sem viés.</p>
+            <p>Desenhe perfis Hunter, Farmer, Técnico ou Liderança com precisão cirúrgica e sem viés.</p>
             <Link href="/dashboard/jobs/new" className="btn-indigo">
               <Plus size={18} />
               Criar Nova Vaga
@@ -57,7 +57,7 @@ export default function DashboardHome() {
         <div className="bento-column">
           <GlassCard className="bento-cell stat-cell">
             <div className="stat-icon-wrapper">
-              <Activity size={24} color="var(--action-secondary)" />
+              <Activity size={24} color="#F4A900" />
             </div>
             <div className="stat-data">
               <span className="stat-val">{subscription?.jobsCount || 0}</span>
@@ -68,7 +68,7 @@ export default function DashboardHome() {
 
           <GlassCard className="bento-cell stat-cell">
             <div className="stat-icon-wrapper">
-              <FileSearch size={24} color="var(--action-accent)" />
+              <FileSearch size={24} color="#F4A900" />
             </div>
             <div className="stat-data">
               <span className="stat-val">{subscription?.cvCount || 0}</span>
@@ -79,7 +79,7 @@ export default function DashboardHome() {
 
           <GlassCard className="bento-cell stat-cell">
             <div className="stat-icon-wrapper">
-              <Calendar size={24} color="#F59E0B" />
+              <Calendar size={24} color="#F4A900" />
             </div>
             <div className="stat-data">
               <span className="stat-val">{interviewCount}</span>
@@ -95,9 +95,9 @@ export default function DashboardHome() {
             <h3>Inteligência Artificial</h3>
             <span className="status-dot pulsing"></span>
           </div>
-          <p>O Modo 2 está aguardando inputs para análise STAR/SWOT.</p>
+          <p className="analysis-description">Sistema de análise STAR/SWOT processando dados em tempo real.</p>
           <div className="action-row">
-            <Link href="/dashboard/candidates" className="link-arrow">
+            <Link href="/dashboard/candidates" className="link-arrow brand-link">
               Ir para Análise <ChevronRight size={16} />
             </Link>
           </div>
@@ -147,7 +147,6 @@ export default function DashboardHome() {
           gap: 20px;
         }
 
-        /* Hero Cell */
         .hero-cell {
           grid-column: span 1;
           grid-row: span 2;
@@ -195,63 +194,13 @@ export default function DashboardHome() {
           opacity: 0.5;
         }
 
-        /* Stats Column */
         .bento-column {
           display: flex;
           flex-direction: column;
           gap: 20px;
         }
 
-        .stat-cell {
-          flex: 1;
-          padding: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center; /* Centering fix */
-          gap: 16px;
-          text-align: center; /* Centering fix */
-        }
-
-        .stat-icon-wrapper {
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.05);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .stat-data {
-          display: flex;
-          flex-direction: column;
-          align-items: center; /* Centering fix */
-        }
-
-        .stat-val {
-          font-size: 1.8rem;
-          font-weight: 800;
-          line-height: 1;
-        }
-
-        .stat-label {
-          font-size: 0.8rem;
-          opacity: 0.6;
-          margin-bottom: 4px;
-        }
-
-        .stat-desc {
-            font-size: 0.7rem;
-            opacity: 0.4;
-        }
-
-        /* Analysis Cell */
-        .analysis-cell {
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
+        /* Styling now moved to globals.css for CRITICAL override */
 
         .cell-header {
           display: flex;
@@ -272,28 +221,6 @@ export default function DashboardHome() {
           animation: pulse 2s infinite;
         }
 
-        .analysis-cell p {
-          font-size: 0.9rem;
-          opacity: 0.7;
-          margin-bottom: 20px;
-        }
-
-        .link-arrow {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          color: var(--action-accent);
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: gap 0.2s ease;
-        }
-
-        .link-arrow:hover {
-          gap: 8px;
-        }
-
-        /* Alerts Cell */
         .alerts-cell {
           grid-column: span 2;
           padding: 24px;

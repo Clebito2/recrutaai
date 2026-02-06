@@ -8,7 +8,7 @@ export default function Contact() {
   return (
     <div className="contact-page">
       <div className="container">
-        <Link href="/" className="back-link">
+        <Link href="/" className="back-link brand-link">
           <ArrowLeft size={20} /> Voltar para Home
         </Link>
 
@@ -22,7 +22,7 @@ export default function Contact() {
                 <div className="icon-box"><Mail size={20} /></div>
                 <div>
                   <h3>Email</h3>
-                  <p>suporte@recruteai.com</p>
+                  <p>cleberdonato@ecossistemalive.com.br</p>
                 </div>
               </div>
 
@@ -30,7 +30,7 @@ export default function Contact() {
                 <div className="icon-box"><Phone size={20} /></div>
                 <div>
                   <h3>Telefone</h3>
-                  <p>+55 (11) 99999-9999</p>
+                  <p>+55 61 99699-3134</p>
                 </div>
               </div>
 
@@ -38,7 +38,7 @@ export default function Contact() {
                 <div className="icon-box"><MapPin size={20} /></div>
                 <div>
                   <h3>Localização</h3>
-                  <p>São Paulo, SP - Brasil</p>
+                  <p>Goiânia-GO</p>
                 </div>
               </div>
             </div>
@@ -46,23 +46,33 @@ export default function Contact() {
 
           <GlassCard className="form-card">
             <h2>Envie uma mensagem</h2>
-            <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="contact-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const message = formData.get('message');
+                window.location.href = `mailto:cleberdonato@ecossistemalive.com.br?subject=Contato de ${name}&body=Nome: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0AMensagem:%0D%0A${message}`;
+              }}
+            >
               <div className="input-group">
                 <label>Nome</label>
-                <input type="text" placeholder="Seu nome" />
+                <input name="name" type="text" placeholder="Seu nome" required />
               </div>
 
               <div className="input-group">
                 <label>Email</label>
-                <input type="email" placeholder="seu@email.com" />
+                <input name="email" type="email" placeholder="seu@email.com" required />
               </div>
 
               <div className="input-group">
                 <label>Mensagem</label>
-                <textarea rows={4} placeholder="Como podemos ajudar?" />
+                <textarea name="message" rows={4} placeholder="Como podemos ajudar?" required />
               </div>
 
-              <button className="btn-indigo full-width">Enviar Mensagem</button>
+              <button type="submit" className="btn-indigo full-width">Enviar Mensagem</button>
             </form>
           </GlassCard>
         </div>
@@ -85,14 +95,16 @@ export default function Contact() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          color: var(--text-muted);
+          color: var(--action-primary);
           text-decoration: none;
           margin-bottom: 40px;
-          transition: color 0.2s;
+          transition: transform 0.2s;
+          font-weight: 600;
         }
 
         .back-link:hover {
-          color: var(--action-primary);
+          transform: translateX(-5px);
+          opacity: 0.8;
         }
 
         .content-grid {

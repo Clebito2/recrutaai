@@ -26,6 +26,11 @@ export default function CandidatesPage() {
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduleSuccess, setScheduleSuccess] = useState(false);
 
+  // Job matching states
+  const [jobs, setJobs] = useState([]);
+  const [selectedJobId, setSelectedJobId] = useState("");
+  const [loadingJobs, setLoadingJobs] = useState(false);
+
   const fileInputRef = useRef(null);
   const { user, userProfile } = useAuth();
   const { incrementUsage } = useSubscription();
@@ -36,6 +41,31 @@ export default function CandidatesPage() {
       fetchHistory();
     }
   }, [activeTab, user]);
+
+  // Fetch jobs for job selector
+  useEffect(() => {
+    const fetchJobs = async () => {
+      if (!user) return;
+      setLoadingJobs(true);
+      try {
+        const q = query(
+          collection(db, "jobs"),
+          where("userId", "==", user.uid)
+        );
+        const snapshot = await getDocs(q);
+        const jobsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setJobs(jobsData);
+      } catch (err) {
+        console.error("Error loading jobs:", err);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+    fetchJobs();
+  }, [user]);
 
   const fetchHistory = async () => {
     setLoadingHistory(true);
@@ -66,11 +96,27 @@ export default function CandidatesPage() {
         name: analysisData.nome || "Candidato",
         role: profileLevel === 'lideranca' ? 'Liderança' : 'Técnico',
         analysis: analysisData,
+        jobId: selectedJobId || null,
         createdAt: serverTimestamp()
       });
       console.log("Analysis auto-saved");
     } catch (e) {
       console.error("Failed to auto-save analysis:", e);
+    }
+  };
+
+  const handleDeleteCandidate = async (candidateId, candidateName) => {
+    if (!confirm(`Excluir análise de "${candidateName}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const { deleteDoc, doc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, "candidates", candidateId));
+      setHistory(history.filter(c => c.id !== candidateId));
+    } catch (error) {
+      console.error("Error deleting candidate:", error);
+      alert("Erro ao excluir candidato. Tente novamente.");
     }
   };
 
@@ -232,7 +278,7 @@ export default function CandidatesPage() {
       <div className="candidates-page animate-fade">
         <header className="page-header">
           <div className="header-info">
-            <h1>Analista de Perfil <small>Modo 2</small></h1>
+            <h1>Analista de Perfil</h1>
             <p>Analise candidatos com metodologia STAR e Matriz SWOT automatizada.</p>
           </div>
         </header>
@@ -295,6 +341,27 @@ export default function CandidatesPage() {
                   )}
                 </div>
 
+                {/* Job Selector */}
+                <div className="job-selector-section">
+                  <label htmlFor="job-select">Vincular à vaga (opcional)</label>
+                  <select
+                    id="job-select"
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(e.target.value)}
+                    disabled={loadingJobs}
+                  >
+                    <option value="">Análise geral (sem vaga específica)</option>
+                    {jobs.map(job => (
+                      <option key={job.id} value={job.id}>
+                        {job.title} - {job.workModel || 'Remoto'}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedJobId && (
+                    <small className="job-hint">✓ Análise incluirá ranking de aderência à vaga</small>
+                  )}
+                </div>
+
                 <button
                   className="btn-indigo full-width"
                   onClick={handleAnalyze}
@@ -352,6 +419,28 @@ export default function CandidatesPage() {
                   onChange={(e) => setTranscript(e.target.value)}
                   rows={8}
                 />
+
+                {/* Job Selector */}
+                <div className="job-selector-section">
+                  <label htmlFor="job-select-transcript">Vincular à vaga (opcional)</label>
+                  <select
+                    id="job-select-transcript"
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(e.target.value)}
+                    disabled={loadingJobs}
+                  >
+                    <option value="">Análise geral (sem vaga específica)</option>
+                    {jobs.map(job => (
+                      <option key={job.id} value={job.id}>
+                        {job.title} - {job.workModel || 'Remoto'}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedJobId && (
+                    <small className="job-hint">✓ Análise incluirá ranking de aderência à vaga</small>
+                  )}
+                </div>
+
                 <button
                   className="btn-indigo full-width"
                   onClick={handleAnalyze}
@@ -388,6 +477,16 @@ export default function CandidatesPage() {
                           <Calendar size={14} />
                           {item.createdAt.toLocaleDateString('pt-BR')}
                         </div>
+                        <button
+                          className="btn-delete-small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCandidate(item.id, item.name);
+                          }}
+                          title="Excluir análise"
+                        >
+                          <X size={16} />
+                        </button>
                         <ChevronRight size={16} opacity={0.5} />
                       </div>
                     ))}
@@ -1041,6 +1140,46 @@ export default function CandidatesPage() {
           @keyframes fadeInRight {
             from {opacity: 0; transform: translateX(20px); }
           to {opacity: 1; transform: translateX(0); }
+          }
+
+          /* Job Selector Section */
+          .job-selector-section {
+            margin: 20px 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--border-glass);
+          }
+
+          .job-selector-section label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+          }
+
+          .job-selector-section select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            padding: 12px;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+          }
+
+          .job-selector-section select:focus {
+            outline: none;
+            border-color: var(--action-primary);
+          }
+
+          .job-hint {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--action-secondary);
+            font-weight: 600;
           }
 
           @media (max-width: 768px) {
