@@ -163,6 +163,22 @@ Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para s
 #### 4. Backlog & Manutenção
 - **Backlog**: Criação de `product_backlog.md` para rastrear melhorias futuras (Tradução e Suporte).
 
+### Atualizações Recentes (v0.4.0 - Large Files & Context)
+
+#### 1. Upload de Arquivos Grandes (Hybrid Strategy)
+- **Firebase Storage**: Arquivos > 4.5MB (ex: áudios longos) são enviados diretamente para o Storage, ignorando o limite de 6MB do Netlify.
+- **Gemini File API**: O backend baixa o arquivo do Storage e reenvia para a API do Google, permitindo processar arquivos de até 2GB.
+- **Correção de Erro 400**: Tratamento robusto para erros de body size e validação de tipos.
+
+#### 2. Integração Transcrição + Currículo
+- **Contexto Cruzado**: Nova funcionalidade na aba "Transcrição" permite vincular a análise a um candidato existente.
+- **Validação de Discurso**: A IA cruza o resumo e scores do CV (Análise Anterior) com o conteúdo da entrevista para verificar consistência.
+- **UI**: Novo seletor de candidatos na aba de transcrição.
+
+#### 3. Core Fixes
+- **Styled-JSX**: Correção definitiva de tags aninhadas que quebravam o build.
+- **Firebase Init**: Correção de `ReferenceError: getApps` restaurando imports críticos.
+
 
 ---
 
