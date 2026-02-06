@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
-import pdfParse from 'pdf-parse';
 import { checkRateLimit, RATE_LIMITS } from '../../../lib/rate-limiter';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -10,8 +9,9 @@ const ALLOWED_TYPES = [
     'text/plain'
 ];
 
-// Disable worker for pdf-parse if it tries to use one (it usually doesn't, but good practice for serverless)
-// Actually pdf-parse is a pure node wrapper, so it shouldn't need env config.
+// Protocolo Elite V6.0 - "Nuclear Strategy"
+// For PDFs, we bypass local parsing completely and return the raw file data (Base64).
+// This allows the AI Service (Gemini) to process the file natively.
 
 export async function POST(req) {
     try {
