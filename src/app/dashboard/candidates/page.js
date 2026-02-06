@@ -16,6 +16,7 @@ export default function CandidatesPage() {
   const [transcript, setTranscript] = useState("");
   const [profileLevel, setProfileLevel] = useState("tecnico");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [loadingText, setLoadingText] = useState("Analisando com IA...");
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState("");
@@ -128,6 +129,28 @@ export default function CandidatesPage() {
     }
   };
 
+  // Animated loading text
+  useEffect(() => {
+    if (!isAnalyzing) return;
+
+    const messages = [
+      "Analisando com IA...",
+      "Processando currículo...",
+      "Aplicando metodologia STAR...",
+      "Gerando matriz SWOT...",
+      "Calculando scores...",
+      "Finalizando análise..."
+    ];
+
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % messages.length;
+      setLoadingText(messages[index]);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isAnalyzing]);
+
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     setError("");
@@ -188,6 +211,14 @@ export default function CandidatesPage() {
           jobId: selectedJobId || null // Pass selected job ID
         })
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const textBody = await response.text();
+        console.error("API returned non-JSON:", textBody.substring(0, 200));
+        throw new Error("Erro no servidor. Verifique os logs.");
+      }
 
       const data = await response.json();
 
@@ -369,7 +400,7 @@ export default function CandidatesPage() {
                   disabled={isAnalyzing || !file}
                 >
                   {isAnalyzing ? (
-                    <><Loader2 className="spin" size={20} /> Analisando com IA...</>
+                    <><Loader2 className="spin" size={20} /> {loadingText}</>
                   ) : (
                     <>Iniciar Análise DO CV <ChevronRight size={20} /></>
                   )}
@@ -448,7 +479,7 @@ export default function CandidatesPage() {
                   disabled={isAnalyzing || (!transcript.trim() && !file)}
                 >
                   {isAnalyzing ? (
-                    <><Loader2 className="spin" size={20} /> Analisando com IA...</>
+                    <><Loader2 className="spin" size={20} /> {loadingText}</>
                   ) : (
                     <>Iniciar Análise da Transcrição <ChevronRight size={20} /></>
                   )}

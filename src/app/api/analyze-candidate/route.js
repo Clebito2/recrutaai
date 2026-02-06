@@ -51,9 +51,15 @@ export async function POST(request) {
         });
 
     } catch (error) {
-        console.error("API Error:", error);
+        console.error("API Error (analyze-candidate):", error);
+        console.error("Error stack:", error.stack);
+
+        // Ensure we always return JSON
         return NextResponse.json(
-            { error: error.message || "Erro interno" },
+            {
+                error: error.message || "Erro ao processar análise",
+                details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            },
             { status: 500 }
         );
     }
