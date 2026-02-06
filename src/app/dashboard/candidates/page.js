@@ -607,7 +607,7 @@ export default function CandidatesPage() {
             text-align: center;
             opacity: 0.6;
           }
-        `}</style>
+
             </div>
           </>
         ) : (
@@ -624,173 +624,173 @@ export default function CandidatesPage() {
               </div>
               <div className={`recommendation ${analysisResult.recomendacao?.toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
                 {analysisResult.recomendacao}
+            </div>
+          </GlassCard>
+
+        <div className="scores-grid">
+          {analysisResult.scorecard && Object.entries(analysisResult.scorecard).map(([key, value]) => (
+            <GlassCard key={key} className="score-card">
+              <span className="score-label">{formatScoreLabel(key)}</span>
+              <div className="score-ring">
+                <span className="score-value">{value}</span>
+                <span className="score-max">/5</span>
               </div>
             </GlassCard>
+          ))}
+        </div>
 
-            <div className="scores-grid">
-              {analysisResult.scorecard && Object.entries(analysisResult.scorecard).map(([key, value]) => (
-                <GlassCard key={key} className="score-card">
-                  <span className="score-label">{formatScoreLabel(key)}</span>
-                  <div className="score-ring">
-                    <span className="score-value">{value}</span>
-                    <span className="score-max">/5</span>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
-
-            {analysisResult.temperamento && (
-              <GlassCard className="temperament-card">
-                <h3>Temperamento Identificado</h3>
-                <p className="temperament-value">{analysisResult.temperamento}</p>
-              </GlassCard>
-            )}
-
-            {analysisResult.adherence && (
-              <GlassCard className="adherence-card">
-                <h3>Aderência à Vaga</h3>
-                <div className="adherence-score">
-                  <div className="score-circle">
-                    <span className="score-number">{analysisResult.adherence.score}%</span>
-                  </div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{ width: `${analysisResult.adherence.score}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="skills-match">
-                  {analysisResult.adherence.matchedSkills?.length > 0 && (
-                    <div className="matched-skills">
-                      <h4><CheckCircle size={16} /> Habilidades Compatíveis</h4>
-                      <ul>
-                        {analysisResult.adherence.matchedSkills.map((skill, i) => (
-                          <li key={i}>{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {analysisResult.adherence.missingSkills?.length > 0 && (
-                    <div className="missing-skills">
-                      <h4><AlertCircle size={16} /> Gaps Identificados</h4>
-                      <ul>
-                        {analysisResult.adherence.missingSkills.map((skill, i) => (
-                          <li key={i}>{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {analysisResult.adherence.culturalFit && (
-                  <div className={`cultural-fit fit-${analysisResult.adherence.culturalFit}`}>
-                    <strong>Fit Cultural:</strong> {analysisResult.adherence.culturalFit}
-                  </div>
-                )}
-
-                {analysisResult.adherence.recommendation && (
-                  <p className="adherence-recommendation">{analysisResult.adherence.recommendation}</p>
-                )}
-              </GlassCard>
-            )}
-
-            {analysisResult.justificativa && (
-              <GlassCard className="justification-card">
-                <h3>Justificativa da Recomendação</h3>
-                <p>{analysisResult.justificativa}</p>
-              </GlassCard>
-            )}
-
-            <div className="result-actions">
-              <button onClick={() => setAnalysisResult(null)} className="btn-secondary">
-                <ArrowLeft size={16} /> Voltar
-              </button>
-              <button
-                className="btn-indigo"
-                onClick={() => setShowScheduleModal(true)}
-              >
-                <Calendar size={18} /> Agendar Entrevista
-              </button>
-              <button
-                className="btn-purple"
-                onClick={handleGenerateReport}
-                disabled={isGeneratingReport}
-              >
-                {isGeneratingReport ? (
-                  <><Loader2 className="spin" size={18} /> Gerando...</>
-                ) : (
-                  <>Gerar Relatório Elite (PDF)</>
-                )}
-              </button>
-            </div>
-          </div>
+        {analysisResult.temperamento && (
+          <GlassCard className="temperament-card">
+            <h3>Temperamento Identificado</h3>
+            <p className="temperament-value">{analysisResult.temperamento}</p>
+          </GlassCard>
         )}
 
-        {showScheduleModal && (
-          <div className="modal-overlay">
-            <GlassCard className="modal-content animate-fade">
-              <div className="modal-header">
-                <h3>Agendar Entrevista</h3>
-                <button onClick={() => setShowScheduleModal(false)} className="close-btn"><X size={20} /></button>
+        {analysisResult.adherence && (
+          <GlassCard className="adherence-card">
+            <h3>Aderência à Vaga</h3>
+            <div className="adherence-score">
+              <div className="score-circle">
+                <span className="score-number">{analysisResult.adherence.score}%</span>
               </div>
-              {scheduleSuccess ? (
-                <div className="success-state">
-                  <CheckCircle size={48} color="var(--success)" />
-                  <p>Entrevista agendada com sucesso!</p>
-                </div>
-              ) : (
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Candidato</label>
-                    <input type="text" value={analysisResult?.nome || "Candidato"} disabled className="input-glass" />
-                  </div>
-                  <div className="row-inputs">
-                    <div className="form-group">
-                      <label>Data</label>
-                      <input
-                        type="date"
-                        className="input-glass"
-                        value={scheduleData.date}
-                        onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Hora</label>
-                      <input
-                        type="time"
-                        className="input-glass"
-                        value={scheduleData.time}
-                        onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Notas / Pauta</label>
-                    <textarea
-                      className="input-glass"
-                      rows={3}
-                      placeholder="Ex: Validar fit cultural, teste técnico..."
-                      value={scheduleData.notes}
-                      onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })}
-                    />
-                  </div>
-                  <button
-                    className="btn-indigo full-width"
-                    onClick={handleScheduleInterview}
-                    disabled={isScheduling}
-                  >
-                    {isScheduling ? <Loader2 className="spin" size={18} /> : "Confirmar Agendamento"}
-                  </button>
+              <div className="score-bar">
+                <div
+                  className="score-fill"
+                  style={{ width: `${analysisResult.adherence.score}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="skills-match">
+              {analysisResult.adherence.matchedSkills?.length > 0 && (
+                <div className="matched-skills">
+                  <h4><CheckCircle size={16} /> Habilidades Compatíveis</h4>
+                  <ul>
+                    {analysisResult.adherence.matchedSkills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
-            </GlassCard>
-          </div>
+
+              {analysisResult.adherence.missingSkills?.length > 0 && (
+                <div className="missing-skills">
+                  <h4><AlertCircle size={16} /> Gaps Identificados</h4>
+                  <ul>
+                    {analysisResult.adherence.missingSkills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {analysisResult.adherence.culturalFit && (
+              <div className={`cultural-fit fit-${analysisResult.adherence.culturalFit}`}>
+                <strong>Fit Cultural:</strong> {analysisResult.adherence.culturalFit}
+              </div>
+            )}
+
+            {analysisResult.adherence.recommendation && (
+              <p className="adherence-recommendation">{analysisResult.adherence.recommendation}</p>
+            )}
+          </GlassCard>
         )}
 
-        <style jsx>{`
+        {analysisResult.justificativa && (
+          <GlassCard className="justification-card">
+            <h3>Justificativa da Recomendação</h3>
+            <p>{analysisResult.justificativa}</p>
+          </GlassCard>
+        )}
+
+        <div className="result-actions">
+          <button onClick={() => setAnalysisResult(null)} className="btn-secondary">
+            <ArrowLeft size={16} /> Voltar
+          </button>
+          <button
+            className="btn-indigo"
+            onClick={() => setShowScheduleModal(true)}
+          >
+            <Calendar size={18} /> Agendar Entrevista
+          </button>
+          <button
+            className="btn-purple"
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
+          >
+            {isGeneratingReport ? (
+              <><Loader2 className="spin" size={18} /> Gerando...</>
+            ) : (
+              <>Gerar Relatório Elite (PDF)</>
+            )}
+          </button>
+        </div>
+      </div>
+        )}
+
+      {showScheduleModal && (
+        <div className="modal-overlay">
+          <GlassCard className="modal-content animate-fade">
+            <div className="modal-header">
+              <h3>Agendar Entrevista</h3>
+              <button onClick={() => setShowScheduleModal(false)} className="close-btn"><X size={20} /></button>
+            </div>
+            {scheduleSuccess ? (
+              <div className="success-state">
+                <CheckCircle size={48} color="var(--success)" />
+                <p>Entrevista agendada com sucesso!</p>
+              </div>
+            ) : (
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Candidato</label>
+                  <input type="text" value={analysisResult?.nome || "Candidato"} disabled className="input-glass" />
+                </div>
+                <div className="row-inputs">
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input
+                      type="date"
+                      className="input-glass"
+                      value={scheduleData.date}
+                      onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Hora</label>
+                    <input
+                      type="time"
+                      className="input-glass"
+                      value={scheduleData.time}
+                      onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Notas / Pauta</label>
+                  <textarea
+                    className="input-glass"
+                    rows={3}
+                    placeholder="Ex: Validar fit cultural, teste técnico..."
+                    value={scheduleData.notes}
+                    onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })}
+                  />
+                </div>
+                <button
+                  className="btn-indigo full-width"
+                  onClick={handleScheduleInterview}
+                  disabled={isScheduling}
+                >
+                  {isScheduling ? <Loader2 className="spin" size={18} /> : "Confirmar Agendamento"}
+                </button>
+              </div>
+            )}
+          </GlassCard>
+        </div>
+      )}
+
+      <style jsx>{`
           .modal-overlay {
             position: fixed;
             top: 0;
@@ -890,9 +890,7 @@ export default function CandidatesPage() {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
           }
-        `}</style>
 
-        <style jsx>{`
           .candidates-page {
             max-width: 900px;
           margin: 0 auto;
@@ -1513,7 +1511,7 @@ export default function CandidatesPage() {
             }
           }
         `}</style>
-      </div>
+    </div>
     </SubscriptionGuard >
   );
 }
