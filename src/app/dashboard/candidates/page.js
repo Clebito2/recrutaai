@@ -173,7 +173,8 @@ export default function CandidatesPage() {
         if (!contentType || !contentType.includes("application/json")) {
           const textBody = await parseResponse.text();
           console.error("API Error Response (Not JSON):", textBody);
-          throw new Error(`Erro na leitura do arquivo (Status ${parseResponse.status}). Verifique o console.`);
+          // Show the actual server error message in the UI
+          throw new Error(`Erro (${parseResponse.status}): ${textBody.substring(0, 150)}...`);
         }
 
         const parseData = await parseResponse.json();
