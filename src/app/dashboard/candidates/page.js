@@ -529,85 +529,7 @@ export default function CandidatesPage() {
                 </div>
               )}
 
-              <style jsx>{`
-          .history-wrapper {
-            margin-top: 40px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border-glass);
-          }
-          
-          .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 24px;
-            font-size: 1.25rem;
-            opacity: 0.9;
-          }
-          
-          .history-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-          }
-          
-          .history-card-item {
-            background: var(--canvas-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-          }
-          
-          .history-card-item:hover {
-            transform: translateY(-4px);
-            border-color: var(--action-primary);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-          }
-          
-          .history-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-          }
-          
-          .history-info strong {
-            display: block;
-            font-size: 1.1rem;
-            margin-bottom: 4px;
-          }
-          
-          .role-badge {
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.1);
-            color: var(--text-muted);
-          }
-          
-          .history-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-          }
 
-          .empty-history-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            padding: 40px;
-            text-align: center;
-            opacity: 0.6;
-          }
-        `}</style>
 
             </div>
           </>
@@ -792,6 +714,86 @@ export default function CandidatesPage() {
         )}
 
         <style jsx>{`
+          /* History Styles */
+          .history-wrapper {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-glass);
+          }
+          
+          .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 1.25rem;
+            opacity: 0.9;
+          }
+          
+          .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+          }
+          
+          .history-card-item {
+            background: var(--canvas-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+          
+          .history-card-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--action-primary);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          }
+          
+          .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+          
+          .history-info strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+          }
+          
+          .role-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+          }
+          
+          .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+          }
+
+          .empty-history-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 40px;
+            text-align: center;
+            opacity: 0.6;
+          }
+
+          /* General Styles */
           .modal-overlay {
             position: fixed;
             top: 0;
