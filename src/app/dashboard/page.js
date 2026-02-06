@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
-import { Plus, Search, ChevronRight, Activity, Target, FileSearch, Calendar } from "lucide-react";
+import { Plus, TrendingUp, Users, Calendar, Briefcase, ArrowRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
 import { useSubscription } from "../../hooks/useSubscription";
 import { db } from "../../lib/firebase";
@@ -28,257 +28,428 @@ export default function DashboardHome() {
   }, [user]);
 
   return (
-    <div className="bento-dashboard animate-fade">
-      <header className="dashboard-header">
-        <h1 className="welcome-text">
-          Bem-vindo, <span className="narrative-text">{subscription?.name || "Líder"}</span>
-        </h1>
-        <p className="subtitle">Seu cockpit de recrutamento de alta performance está pronto.</p>
-      </header>
+    <div className="modern-dashboard">
+      {/* Header Section */}
+      <div className="dashboard-hero">
+        <div className="hero-content">
+          <h1>Olá, <span className="highlight">{subscription?.name || "Líder"}</span> 👋</h1>
+          <p>Seu centro de comando para recrutamento inteligente</p>
+        </div>
+        <div className="quick-actions">
+          <Link href="/dashboard/jobs/new" className="action-btn primary">
+            <Plus size={20} />
+            <span>Nova Vaga</span>
+          </Link>
+          <Link href="/dashboard/candidates" className="action-btn secondary">
+            <Users size={20} />
+            <span>Analisar CV</span>
+          </Link>
+        </div>
+      </div>
 
-      <div className="bento-grid">
-        {/* Main Action Block - Hero */}
-        <GlassCard className="bento-cell hero-cell">
-          <div className="hero-content">
-            <span className="badge-new">Novo Ciclo</span>
-            <h2>Inicie uma arquitetura de vaga estratégica</h2>
-            <p>Desenhe perfis Hunter, Farmer, Técnico ou Liderança com precisão cirúrgica e sem viés.</p>
-            <Link href="/dashboard/jobs/new" className="btn-indigo">
-              <Plus size={18} />
-              Criar Nova Vaga
-            </Link>
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon briefcase">
+            <Briefcase size={24} />
           </div>
-          <div className="hero-visual">
-            <Target size={120} color="var(--action-primary)" style={{ opacity: 0.2 }} />
+          <div className="stat-info">
+            <div className="stat-value">{subscription?.jobsCount || 0}</div>
+            <div className="stat-label">Vagas Ativas</div>
           </div>
-        </GlassCard>
-
-        {/* Quick Stats - Vertical Stack */}
-        <div className="bento-column">
-          <GlassCard className="bento-cell stat-cell">
-            <div className="stat-icon-wrapper">
-              <Activity size={24} color="#F4A900" />
-            </div>
-            <div className="stat-data">
-              <span className="stat-val">{subscription?.jobsCount || 0}</span>
-              <span className="stat-label">Vagas Ativas</span>
-              <span className="stat-desc">Oportunidades em aberto</span>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="bento-cell stat-cell">
-            <div className="stat-icon-wrapper">
-              <FileSearch size={24} color="#F4A900" />
-            </div>
-            <div className="stat-data">
-              <span className="stat-val">{subscription?.cvCount || 0}</span>
-              <span className="stat-label">Análises Realizadas</span>
-              <span className="stat-desc">Currículos processados</span>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="bento-cell stat-cell">
-            <div className="stat-icon-wrapper">
-              <Calendar size={24} color="#F4A900" />
-            </div>
-            <div className="stat-data">
-              <span className="stat-val">{interviewCount}</span>
-              <span className="stat-label">Entrevistas</span>
-              <span className="stat-desc">Agendamentos futuros</span>
-            </div>
-          </GlassCard>
+          <div className="stat-trend positive">
+            <TrendingUp size={16} />
+          </div>
         </div>
 
-        {/* Secondary Action - Analysis */}
-        <GlassCard className="bento-cell analysis-cell">
-          <div className="cell-header">
-            <h3>Inteligência Artificial</h3>
-            <span className="status-dot pulsing"></span>
+        <div className="stat-card">
+          <div className="stat-icon users">
+            <Users size={24} />
           </div>
-          <p className="analysis-description">Sistema de análise STAR/SWOT processando dados em tempo real.</p>
-          <div className="action-row">
-            <Link href="/dashboard/candidates" className="link-arrow brand-link">
-              Ir para Análise <ChevronRight size={16} />
-            </Link>
+          <div className="stat-info">
+            <div className="stat-value">{subscription?.cvCount || 0}</div>
+            <div className="stat-label">Análises Realizadas</div>
           </div>
+          <div className="stat-trend positive">
+            <TrendingUp size={16} />
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon calendar">
+            <Calendar size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{interviewCount}</div>
+            <div className="stat-label">Entrevistas Agendadas</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon target">
+            <Target size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{subscription?.daysRemaining || 0}</div>
+            <div className="stat-label">Dias Restantes (Trial)</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="content-grid">
+        {/* AI Analysis Card */}
+        <GlassCard className="feature-card ai-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <Zap size={28} />
+            </div>
+            <div className="status-badge active">
+              <span className="pulse-dot"></span>
+              Ativo
+            </div>
+          </div>
+          <h3>Análise com IA</h3>
+          <p>Sistema STAR/SWOT processando candidatos em tempo real com precisão cirúrgica.</p>
+          <Link href="/dashboard/candidates" className="card-action">
+            Iniciar Análise
+            <ArrowRight size={18} />
+          </Link>
         </GlassCard>
 
-        {/* Alerts / Notifications */}
-        <GlassCard className="bento-cell alerts-cell">
-          <h3>Alertas do Sistema</h3>
-          <div className="alert-list">
-            <div className="alert-item">
-              <div className="alert-dot info"></div>
-              <span>Ambiente seguro configurado.</span>
-            </div>
-            <div className="alert-item">
-              <div className="alert-dot warning"></div>
-              <span>Trial expira em {subscription?.daysRemaining} dias.</span>
+        {/* Job Architect Card */}
+        <GlassCard className="feature-card job-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <Target size={28} />
             </div>
           </div>
+          <h3>Arquiteto de Vagas</h3>
+          <p>Crie descrições de vagas otimizadas para perfis Hunter, Farmer, Técnico ou Liderança.</p>
+          <Link href="/dashboard/jobs/new" className="card-action">
+            Criar Vaga
+            <ArrowRight size={18} />
+          </Link>
+        </GlassCard>
+
+        {/* Pipeline Card */}
+        <GlassCard className="feature-card pipeline-card">
+          <div className="card-header">
+            <div className="card-icon">
+              <Briefcase size={28} />
+            </div>
+          </div>
+          <h3>Pipeline de Vagas</h3>
+          <p>Gerencie todas as suas posições abertas e acompanhe o progresso de cada processo.</p>
+          <Link href="/dashboard/jobs" className="card-action">
+            Ver Pipeline
+            <ArrowRight size={18} />
+          </Link>
         </GlassCard>
       </div>
 
       <style jsx>{`
-        .dashboard-header {
-          margin-bottom: 30px;
+        .modern-dashboard {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0;
         }
 
-        .welcome-text {
-          font-size: 2rem;
-          font-weight: 700;
-          margin-bottom: 8px;
-        }
-
-        .narrative-text {
-          color: #F59E0B;
-          font-style: italic;
-        }
-
-        .subtitle {
-          opacity: 0.6;
-          font-size: 1rem;
-        }
-
-        .bento-grid {
-          display: grid;
-          grid-template-columns: 2fr 1fr 1fr;
-          grid-template-rows: 240px 180px;
-          gap: 20px;
-        }
-
-        .hero-cell {
-          grid-column: span 1;
-          grid-row: span 2;
-          padding: 30px;
+        /* Hero Section */
+        .dashboard-hero {
+          background: linear-gradient(135deg, rgba(244, 169, 0, 0.1) 0%, rgba(193, 102, 107, 0.1) 100%);
+          border-radius: 20px;
+          padding: 40px;
+          margin-bottom: 32px;
           display: flex;
           justify-content: space-between;
           align-items: center;
+          border: 1px solid rgba(244, 169, 0, 0.2);
+        }
+
+        .hero-content h1 {
+          font-size: 2.5rem;
+          font-weight: 800;
+          margin-bottom: 8px;
+          color: #FFFFFF;
+        }
+
+        .hero-content .highlight {
+          color: var(--action-primary);
+        }
+
+        .hero-content p {
+          font-size: 1.1rem;
+          opacity: 0.7;
+          color: #FFFFFF;
+        }
+
+        .quick-actions {
+          display: flex;
+          gap: 16px;
+        }
+
+        .action-btn {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 28px;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 1rem;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          border: none;
+          cursor: pointer;
+        }
+
+        .action-btn.primary {
+          background: var(--action-primary);
+          color: #1A1614;
+          box-shadow: 0 4px 20px rgba(244, 169, 0, 0.3);
+        }
+
+        .action-btn.primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 30px rgba(244, 169, 0, 0.4);
+        }
+
+        .action-btn.secondary {
+          background: rgba(255, 255, 255, 0.1);
+          color: #FFFFFF;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+          margin-bottom: 32px;
+        }
+
+        .stat-card {
+          background: var(--canvas-card);
+          border: 1px solid var(--border-glass);
+          border-radius: 16px;
+          padding: 24px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
         }
 
-        .hero-content {
-          z-index: 2;
-          max-width: 60%;
+        .stat-card:hover {
+          border-color: var(--action-primary);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
-        .badge-new {
-          background: rgba(0, 240, 255, 0.1);
+        .stat-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .stat-icon.briefcase {
+          background: linear-gradient(135deg, rgba(244, 169, 0, 0.2), rgba(244, 169, 0, 0.1));
+          color: var(--action-primary);
+        }
+
+        .stat-icon.users {
+          background: linear-gradient(135deg, rgba(193, 102, 107, 0.2), rgba(193, 102, 107, 0.1));
           color: var(--action-secondary);
+        }
+
+        .stat-icon.calendar {
+          background: linear-gradient(135deg, rgba(212, 184, 150, 0.2), rgba(212, 184, 150, 0.1));
+          color: var(--action-accent);
+        }
+
+        .stat-icon.target {
+          background: linear-gradient(135deg, rgba(125, 155, 106, 0.2), rgba(125, 155, 106, 0.1));
+          color: var(--status-success);
+        }
+
+        .stat-info {
+          flex: 1;
+        }
+
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #FFFFFF;
+          line-height: 1;
+          margin-bottom: 4px;
+        }
+
+        .stat-label {
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.6);
+          font-weight: 500;
+        }
+
+        .stat-trend {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .stat-trend.positive {
+          background: rgba(125, 155, 106, 0.2);
+          color: var(--status-success);
+        }
+
+        /* Content Grid */
+        .content-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+
+        .feature-card {
+          padding: 32px;
+          border-radius: 20px;
+          display: flex;
+          flex-direction: column;
+          transition: all 0.3s ease;
+          min-height: 280px;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 20px;
+        }
+
+        .card-icon {
+          width: 64px;
+          height: 64px;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, rgba(244, 169, 0, 0.2), rgba(244, 169, 0, 0.05));
+          color: var(--action-primary);
+        }
+
+        .status-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           padding: 6px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
-          font-weight: 700;
+          font-weight: 600;
           text-transform: uppercase;
-          margin-bottom: 16px;
-          display: inline-block;
         }
 
-        .hero-content h2 {
-          font-size: 1.8rem;
-          line-height: 1.2;
-          margin-bottom: 16px;
+        .status-badge.active {
+          background: rgba(125, 155, 106, 0.2);
+          color: var(--status-success);
         }
 
-        .hero-content p {
-          opacity: 0.7;
-          margin-bottom: 24px;
-          font-size: 0.95rem;
-        }
-
-        .hero-visual {
-          position: absolute;
-          right: -20px;
-          bottom: -20px;
-          opacity: 0.5;
-        }
-
-        .bento-column {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        /* Styling now moved to globals.css for CRITICAL override */
-
-        .cell-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--action-secondary);
-          box-shadow: 0 0 10px var(--action-secondary);
-        }
-
-        .pulsing {
-          animation: pulse 2s infinite;
-        }
-
-        .alerts-cell {
-          grid-column: span 2;
-          padding: 24px;
-        }
-
-        .alerts-cell h3 {
-          font-size: 1rem;
-          opacity: 0.6;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          margin-bottom: 16px;
-        }
-
-        .alert-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .alert-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 0.9rem;
-        }
-
-        .alert-dot {
+        .pulse-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
+          background: var(--status-success);
+          animation: pulse 2s infinite;
         }
 
-        .alert-dot.info { background: var(--action-secondary); }
-        .alert-dot.warning { background: var(--status-danger); }
-
-        .animate-fade {
-          animation: fadeIn 0.6s ease-out forwards;
+        .feature-card h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          color: #FFFFFF;
         }
 
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+        .feature-card p {
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 24px;
+          flex: 1;
+        }
+
+        .card-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--action-primary);
+          font-weight: 600;
+          font-size: 0.95rem;
+          text-decoration: none;
+          transition: all 0.2s ease;
+        }
+
+        .card-action:hover {
+          gap: 12px;
+          color: #FFFFFF;
         }
 
         @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.4; }
-          100% { opacity: 1; }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
 
-        @media (max-width: 1024px) {
-          .bento-grid {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto;
+        /* Responsive */
+        @media (max-width: 1200px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
-          .hero-cell, .alerts-cell {
-            grid-column: span 1;
-            grid-row: auto;
+          .content-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-hero {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 24px;
+          }
+
+          .quick-actions {
+            width: 100%;
+            flex-direction: column;
+          }
+
+          .action-btn {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .content-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .hero-content h1 {
+            font-size: 2rem;
           }
         }
       `}</style>
