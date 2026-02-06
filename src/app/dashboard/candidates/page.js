@@ -427,10 +427,10 @@ export default function CandidatesPage() {
                       <span className="file-name">{file.name}</span>
                       <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
                       <button
-                        className="btn-text"
+                        className="btn-remove-file"
                         onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                        style={{ marginTop: '10px', fontSize: '0.8rem', opacity: 0.8 }}
                       >
+                        <X size={16} />
                         Remover arquivo
                       </button>
                     </>
@@ -1360,6 +1360,29 @@ export default function CandidatesPage() {
             border-radius: 6px;
             font-size: 0.9rem;
             line-height: 1.6;
+          }
+
+          /* Remove File Button */
+          .btn-remove-file {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: rgba(196, 92, 75, 0.1);
+            border: 1px solid rgba(196, 92, 75, 0.3);
+            border-radius: 8px;
+            color: var(--status-danger);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .btn-remove-file:hover {
+            background: rgba(196, 92, 75, 0.2);
+            border-color: var(--status-danger);
+            transform: translateY(-1px);
           }
 
           /* Job Selector Section */

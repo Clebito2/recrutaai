@@ -6,7 +6,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain'
+    'text/plain',
+    'audio/mp4',
+    'audio/x-m4a',
+    'audio/mpeg'
 ];
 
 // Protocolo Elite V6.0 - "Nuclear Strategy"
@@ -36,11 +39,13 @@ export async function POST(req) {
         const isValidType = ALLOWED_TYPES.includes(file.type) ||
             file.name.endsWith('.docx') ||
             file.name.endsWith('.pdf') ||
-            file.name.endsWith('.txt');
+            file.name.endsWith('.txt') ||
+            file.name.endsWith('.m4a') ||
+            file.name.endsWith('.mp3');
 
         if (!isValidType) {
             return NextResponse.json({
-                error: 'Formato não suportado. Use PDF, DOCX ou TXT.'
+                error: 'Formato não suportado. Use PDF, DOCX, TXT, M4A ou MP3.'
             }, { status: 400 });
         }
 
@@ -88,6 +93,26 @@ export async function POST(req) {
             responseData = {
                 type: 'text',
                 text: text
+            };
+        } else if (
+            file.type === 'audio/mp4' ||
+            file.type === 'audio/x-m4a' ||
+            file.type === 'audio/mpeg' ||
+            file.name.endsWith('.m4a') ||
+            file.name.endsWith('.mp3')
+        ) {
+            console.log('API: Arquivo de áudio detectado. Retornando Base64 para processamento via IA:', file.name);
+
+            const base64 = buffer.toString('base64');
+            const mimeType = file.type || (file.name.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg');
+
+            responseData = {
+                type: 'audio',
+                text: null,
+                inlineData: {
+                    mimeType: mimeType,
+                    data: base64
+                }
             };
         } else {
             // Fallback: try to read as text

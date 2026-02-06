@@ -121,29 +121,28 @@ p {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* Primary Button (Outlined variant by default now for "Entrar/Começar") */
+/* Primary Button (Orange/Gold) */
 .btn-indigo {
-    background: transparent;
-    color: white;
-    border: 1px solid var(--action-primary);
+    background: linear-gradient(135deg, var(--action-primary), #E8A838);
+    color: #1A1614;
+    border: none;
     padding: 14px 28px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
     transition: all var(--transition-fast);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 10px;
     text-decoration: none;
-    box-shadow: 0 0 10px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 4px 16px rgba(244, 169, 0, 0.25);
 }
 
 .btn-indigo:hover {
-    background: var(--action-primary);
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(244, 169, 0, 0.35);
+    background: linear-gradient(135deg, #FFC107, var(--action-primary));
 }
 
 .btn-indigo:disabled {
@@ -171,9 +170,9 @@ p {
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: white;
+    background: rgba(212, 184, 150, 0.1);
+    border-color: var(--action-accent);
+    color: var(--action-accent);
 }
 
 /* Text Utilities */

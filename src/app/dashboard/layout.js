@@ -48,14 +48,15 @@ export default function DashboardLayout({ children }) {
   }
 
   const navItems = [
-    { href: "/dashboard", label: "Início", section: "main" },
+    { href: "/dashboard", label: "Dashboard", section: "main" },
     { href: "/dashboard/jobs", label: "Vagas", section: "main" },
-    { href: "/dashboard/candidates", label: "Talentos", section: "main" },
-    { href: "/dashboard/settings", label: "Configurações", section: "config" },
+    { href: "/dashboard/candidates", label: "Candidatos", section: "main" },
+    { href: "/dashboard/interviews", label: "Entrevistas", section: "main" },
+    { href: "/dashboard/settings", label: "Configurações", section: "footer" }
   ];
 
   const mainNav = navItems.filter(item => item.section === "main");
-  const configNav = navItems.filter(item => item.section === "config");
+  const configNav = navItems.filter(item => item.section === "footer");
 
   return (
     <div className="dashboard-layout">
