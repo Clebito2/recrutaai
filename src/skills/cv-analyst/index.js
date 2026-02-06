@@ -4,7 +4,11 @@
  * Supports both Technical and Leadership profiles
  */
 
-import { callGemini, parseJsonResponse } from '../gemini-client';
+import { callGemini, callGeminiMultimodal, parseJsonResponse, uploadFileToGemini } from '../gemini-client';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import { pipeline } from 'stream/promises';
 
 /**
  * System prompt for Technical profile analysis
@@ -204,6 +208,54 @@ export async function analyzeCandidate(companyName, cvContent, options = {}) {
     }
 
     const systemPrompt = getSystemPrompt(profileLevel);
+
+    // Handle Large Files (URL)
+    if (cvContent?.type === 'url') {
+        let tempFilePath = null;
+        try {
+            console.log("Downloading large file from:", cvContent.url);
+            const response = await fetch(cvContent.url);
+            if (!response.ok) throw new Error(`Falha ao baixar arquivo: ${response.statusText}`);
+
+            const tempDir = os.tmpdir();
+            tempFilePath = path.join(tempDir, `analyze_${Date.now()}.tmp`);
+            const fileStream = fs.createWriteStream(tempFilePath);
+            await pipeline(response.body, fileStream);
+
+            console.log("Uploading to Gemini File API...");
+            const fileUri = await uploadFileToGemini(tempFilePath, cvContent.mimeType);
+
+            // Build text prompt without CV content (since it's in the file)
+            const textPrompt = buildBasePrompt(companyName, jobContext, profileLevel, jobData) +
+                `Analise o arquivo de áudio/PDF fornecido via File API.
+                
+                Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileLevel} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`;
+
+            const result = await callGeminiMultimodal({
+                systemPrompt,
+                textPrompt,
+                fileData: { fileUri, mimeType: cvContent.mimeType },
+                config: {
+                    temperature: 0.3,
+                    topK: 20,
+                    topP: 0.8,
+                    maxOutputTokens: 8192
+                }
+            });
+
+            return parseJsonResponse(result) || { raw: result };
+
+        } catch (filesError) {
+            console.error("Error processing large file:", filesError);
+            throw filesError;
+        } finally {
+            if (tempFilePath && fs.existsSync(tempFilePath)) {
+                fs.unlinkSync(tempFilePath);
+            }
+        }
+    }
+
+    // Handle Standard Content (Text or Inline Base64)
     const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData);
 
     const result = await callGemini({
@@ -226,4 +278,32 @@ export async function analyzeCandidate(companyName, cvContent, options = {}) {
 
     // Return raw text if parsing fails
     return { raw: result };
+}
+
+/**
+ * Helper to build the base prompt text (reused)
+ */
+function buildBasePrompt(companyName, jobContext, profileLevel, jobData) {
+    const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
+    let basePrompt = `
+Empresa: ${companyName}
+Perfil Buscado: ${profileName}
+`;
+
+    if (jobData) {
+        basePrompt += `
+## VAGA DE REFERÊNCIA
+Título: ${jobData.title}
+Modelo: ${jobData.workModel || 'Não especificado'}
+Arquétipo: ${jobData.archetype || 'Não especificado'}
+Requisitos: ${jobData.requirements || 'Não especificados'}
+
+IMPORTANTE: Avalie a aderência do candidato a esta vaga específica e preencha o campo "adherence" com score de 0-100.
+`;
+    } else if (jobContext) {
+        basePrompt += `
+Contexto da Vaga: ${jobContext}
+`;
+    }
+    return basePrompt;
 }

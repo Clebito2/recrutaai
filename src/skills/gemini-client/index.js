@@ -83,13 +83,17 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
     return generatedText;
 }
 
+import { GoogleAIFileManager } from "@google/generative-ai/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 /**
  * Call Gemini with multimodal content (text + file)
+ * Supports both Base64 (inlineData) and File API (fileData)
  * 
  * @param {object} options
  * @param {string} options.systemPrompt
  * @param {string} options.textPrompt
- * @param {object} options.fileData - { mimeType, data (base64) }
+ * @param {object} options.fileData - { mimeType, data (base64) } OR { mimeType, fileUri }
  * @param {object} options.config
  * @returns {Promise<string>}
  */
@@ -97,12 +101,23 @@ export async function callGeminiMultimodal({ systemPrompt, textPrompt, fileData,
     const userContent = [];
 
     if (fileData) {
-        userContent.push({
-            inlineData: {
-                mimeType: fileData.mimeType,
-                data: fileData.data
-            }
-        });
+        if (fileData.fileUri) {
+            // File API (Large files)
+            userContent.push({
+                fileData: {
+                    mimeType: fileData.mimeType,
+                    fileUri: fileData.fileUri
+                }
+            });
+        } else if (fileData.data) {
+            // Base64 (Small files)
+            userContent.push({
+                inlineData: {
+                    mimeType: fileData.mimeType,
+                    data: fileData.data
+                }
+            });
+        }
     }
 
     if (textPrompt) {
@@ -114,6 +129,33 @@ export async function callGeminiMultimodal({ systemPrompt, textPrompt, fileData,
         userContent,
         config
     });
+}
+
+/**
+ * Upload file to Gemini File API (for large files)
+ * 
+ * @param {string} filePath - Local path to file
+ * @param {string} mimeType - File MIME type
+ * @returns {Promise<string>} fileUri
+ */
+export async function uploadFileToGemini(filePath, mimeType) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY missing");
+
+    const fileManager = new GoogleAIFileManager(apiKey);
+
+    try {
+        const uploadResponse = await fileManager.uploadFile(filePath, {
+            mimeType: mimeType,
+            displayName: `Upload_${Date.now()}`,
+        });
+
+        console.log(`Uploaded file to Gemini: ${uploadResponse.file.uri}`);
+        return uploadResponse.file.uri;
+    } catch (error) {
+        console.error("Gemini File Upload Error:", error);
+        throw new Error("Falha no upload para Gemini File API: " + error.message);
+    }
 }
 
 /**

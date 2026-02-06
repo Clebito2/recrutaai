@@ -7,8 +7,9 @@ import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight,
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
-import { db } from "../../../lib/firebase";
+import { db, storage } from "../../../lib/firebase";
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function CandidatesPage() {
   const [activeTab, setActiveTab] = useState("upload");
@@ -160,34 +161,65 @@ export default function CandidatesPage() {
 
       // Handle File Upload (for both tabs)
       if (file && (activeTab === "upload" || activeTab === "transcript")) {
-        const formData = new FormData();
-        formData.append("file", file);
 
-        const parseResponse = await fetch("/api/parse-file", {
-          method: "POST",
-          body: formData,
-        });
+        // HYBRID UPLOAD STRATEGY:
+        // If file > 4.5MB, upload directly to Firebase Storage to bypass Netlify/Vercel payload limits (6MB).
+        // Otherwise, send via API proxy (faster for small files).
+        const MAX_PROXY_SIZE = 4.5 * 1024 * 1024; // 4.5MB
 
-        // Debug: Check if response is JSON
-        const contentType = parseResponse.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const textBody = await parseResponse.text();
-          console.error("API Error Response (Not JSON):", textBody);
-          // Show the actual server error message in the UI
-          throw new Error(`Erro (${parseResponse.status}): ${textBody.substring(0, 150)}...`);
-        }
+        if (file.size > MAX_PROXY_SIZE) {
+          console.log("Large file detected (>4.5MB). Using direct Storage upload...");
+          setLoadingText("Fazendo upload do arquivo...");
 
-        const parseData = await parseResponse.json();
+          // 1. Upload to Firebase Storage
+          const storageRef = ref(storage, `uploads/${user?.uid || 'guest'}/${Date.now()}_${file.name}`);
+          const uploadResult = await uploadBytes(storageRef, file);
+          const downloadURL = await getDownloadURL(uploadResult.ref);
 
-        if (!parseResponse.ok) {
-          throw new Error(parseData.error || "Erro ao ler arquivo");
-        }
+          console.log("Storage upload complete:", downloadURL);
 
-        // Handle both Text and Multimodal (PDF) responses
-        if (parseData.type === 'pdf' && parseData.inlineData) {
-          content = parseData; // Pass structure: { type: 'pdf', inlineData: {...} }
+          // 2. Set content as URL reference for the API
+          content = {
+            type: 'url',
+            url: downloadURL,
+            mimeType: file.type || 'application/octet-stream'
+          };
+
+          setLoadingText("Analisando com IA...");
+
         } else {
-          content = parseData.text; // Text string
+          // Standard Proxy Upload (Small files)
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const parseResponse = await fetch("/api/parse-file", {
+            method: "POST",
+            body: formData,
+          });
+
+          // Debug: Check if response is JSON
+          const contentType = parseResponse.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const textBody = await parseResponse.text();
+            console.error("API Error Response (Not JSON):", textBody);
+            // Show the actual server error message in the UI
+            throw new Error(`Erro (${parseResponse.status}): ${textBody.substring(0, 150)}...`);
+          }
+
+          const parseData = await parseResponse.json();
+
+          if (!parseResponse.ok) {
+            throw new Error(parseData.error || "Erro ao ler arquivo");
+          }
+
+          // Handle both Text and Multimodal (PDF) responses
+          if (parseData.type === 'pdf' && parseData.inlineData) {
+            content = parseData; // Pass structure: { type: 'pdf', inlineData: {...} }
+          } else if (parseData.type === 'audio' && parseData.inlineData) {
+            content = parseData; // Pass structure: { type: 'audio', inlineData: {...} }
+          } else {
+            content = parseData.text; // Text string
+          }
         }
 
         // Handle Text Paste (Transcript only)
