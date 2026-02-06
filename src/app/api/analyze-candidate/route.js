@@ -1,6 +1,8 @@
 import { analyzeCandidate } from "../../../services/aiService";
 import { NextResponse } from "next/server";
 import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
+import { db } from "../../../lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export async function POST(request) {
     try {
@@ -10,7 +12,7 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { companyName, cvContent, jobContext, profileLevel } = body;
+        const { companyName, cvContent, jobContext, profileLevel, jobId } = body;
 
         if (!cvContent) {
             return NextResponse.json(
@@ -19,12 +21,28 @@ export async function POST(request) {
             );
         }
 
-        // Pass profileLevel to get differentiated analysis (tecnico or lideranca)
+        // Fetch job data if jobId is provided
+        let jobData = null;
+        if (jobId) {
+            try {
+                const jobRef = doc(db, "jobs", jobId);
+                const jobSnap = await getDoc(jobRef);
+                if (jobSnap.exists()) {
+                    jobData = { id: jobSnap.id, ...jobSnap.data() };
+                }
+            } catch (err) {
+                console.error("Error fetching job:", err);
+                // Continue without job data if fetch fails
+            }
+        }
+
+        // Pass profileLevel and jobData to get differentiated analysis
         const analysis = await analyzeCandidate(
             companyName,
             cvContent,
             jobContext,
-            profileLevel || 'tecnico'
+            profileLevel || 'tecnico',
+            jobData
         );
 
         return NextResponse.json({

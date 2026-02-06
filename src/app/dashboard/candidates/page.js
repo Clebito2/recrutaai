@@ -183,8 +183,9 @@ export default function CandidatesPage() {
         body: JSON.stringify({
           companyName,
           cvContent: content,
-          jobContext: "", // Could be linked to a specific job
-          profileLevel: "tecnico" // Default to tecnico since we removed the selector
+          jobContext: "", // Legacy field, now using jobId
+          profileLevel: profileLevel, // Use the state value
+          jobId: selectedJobId || null // Pass selected job ID
         })
       });
 
@@ -529,6 +530,57 @@ export default function CandidatesPage() {
               <GlassCard className="temperament-card">
                 <h3>Temperamento Identificado</h3>
                 <p className="temperament-value">{analysisResult.temperamento}</p>
+              </GlassCard>
+            )}
+
+            {analysisResult.adherence && (
+              <GlassCard className="adherence-card">
+                <h3>Aderência à Vaga</h3>
+                <div className="adherence-score">
+                  <div className="score-circle">
+                    <span className="score-number">{analysisResult.adherence.score}%</span>
+                  </div>
+                  <div className="score-bar">
+                    <div
+                      className="score-fill"
+                      style={{ width: `${analysisResult.adherence.score}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="skills-match">
+                  {analysisResult.adherence.matchedSkills?.length > 0 && (
+                    <div className="matched-skills">
+                      <h4><CheckCircle size={16} /> Habilidades Compatíveis</h4>
+                      <ul>
+                        {analysisResult.adherence.matchedSkills.map((skill, i) => (
+                          <li key={i}>{skill}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysisResult.adherence.missingSkills?.length > 0 && (
+                    <div className="missing-skills">
+                      <h4><AlertCircle size={16} /> Gaps Identificados</h4>
+                      <ul>
+                        {analysisResult.adherence.missingSkills.map((skill, i) => (
+                          <li key={i}>{skill}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {analysisResult.adherence.culturalFit && (
+                  <div className={`cultural-fit fit-${analysisResult.adherence.culturalFit}`}>
+                    <strong>Fit Cultural:</strong> {analysisResult.adherence.culturalFit}
+                  </div>
+                )}
+
+                {analysisResult.adherence.recommendation && (
+                  <p className="adherence-recommendation">{analysisResult.adherence.recommendation}</p>
+                )}
               </GlassCard>
             )}
 
@@ -1140,6 +1192,143 @@ export default function CandidatesPage() {
           @keyframes fadeInRight {
             from {opacity: 0; transform: translateX(20px); }
           to {opacity: 1; transform: translateX(0); }
+          }
+
+          /* Adherence Card */
+          .adherence-card {
+            padding: 28px;
+          }
+
+          .adherence-score {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin: 20px 0;
+          }
+
+          .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(
+              var(--action-primary) 0deg,
+              var(--action-secondary) 180deg,
+              rgba(255,255,255,0.1) 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+          }
+
+          .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: var(--canvas-card);
+            border-radius: 50%;
+          }
+
+          .score-number {
+            position: relative;
+            z-index: 1;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--action-primary);
+          }
+
+          .score-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+          }
+
+          .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--action-secondary), var(--action-primary));
+            transition: width 0.8s ease;
+          }
+
+          .skills-match {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+          }
+
+          .matched-skills, .missing-skills {
+            padding: 16px;
+            border-radius: 8px;
+          }
+
+          .matched-skills {
+            background: rgba(125, 155, 106, 0.1);
+            border: 1px solid rgba(125, 155, 106, 0.3);
+          }
+
+          .missing-skills {
+            background: rgba(232, 168, 56, 0.1);
+            border: 1px solid rgba(232, 168, 56, 0.3);
+          }
+
+          .matched-skills h4, .missing-skills h4 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            opacity: 0.9;
+          }
+
+          .matched-skills ul, .missing-skills ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+          }
+
+          .matched-skills li, .missing-skills li {
+            padding: 6px 0;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+          }
+
+          .matched-skills li:last-child, .missing-skills li:last-child {
+            border-bottom: none;
+          }
+
+          .cultural-fit {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+          }
+
+          .cultural-fit.fit-alto {
+            background: rgba(125, 155, 106, 0.15);
+            color: #7D9B6A;
+          }
+
+          .cultural-fit.fit-médio {
+            background: rgba(232, 168, 56, 0.15);
+            color: #E8A838;
+          }
+
+          .cultural-fit.fit-baixo {
+            background: rgba(196, 92, 75, 0.15);
+            color: #C45C4B;
+          }
+
+          .adherence-recommendation {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            line-height: 1.6;
           }
 
           /* Job Selector Section */

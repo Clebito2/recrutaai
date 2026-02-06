@@ -42,9 +42,21 @@ OUTPUT OBRIGATÓRIO (JSON):
   "temperamento": "Tipo predominante e análise",
   "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
   "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
+  "adherence": {
+    "score": 0-100,
+    "matchedSkills": ["lista de habilidades que o candidato possui e a vaga requer"],
+    "missingSkills": ["lista de habilidades que a vaga requer mas o candidato não demonstra"],
+    "culturalFit": "alto|médio|baixo",
+    "recommendation": "Texto explicando o fit geral"
+  } | null,
   "recomendacao": "Aprovado/Reprovado/Aprofundar",
   "justificativa": "Razão detalhada da recomendação"
-}`;
+}
+
+NOTA: O campo "adherence" deve ser null se nenhuma vaga específica foi fornecida. Se uma vaga foi fornecida, calcule o score de aderência baseado em:
+- Match de hard skills (40%)
+- Experiência relevante (30%)
+- Fit cultural e motivacional (30%)`;
 
 /**
  * System prompt for Leadership profile analysis
@@ -83,9 +95,21 @@ OUTPUT OBRIGATÓRIO (JSON):
   "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
   "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
   "red_flags": ["Lista de alertas se houver centralização ou problemas"],
+  "adherence": {
+    "score": 0-100,
+    "matchedSkills": ["lista de competências de liderança que o candidato possui e a vaga requer"],
+    "missingSkills": ["lista de competências que a vaga requer mas o candidato não demonstra"],
+    "culturalFit": "alto|médio|baixo",
+    "recommendation": "Texto explicando o fit geral para a posição de liderança"
+  } | null,
   "recomendacao": "Aprovado/Reprovado/Aprofundar",
   "justificativa": "Razão detalhada da recomendação"
-}`;
+}
+
+NOTA: O campo "adherence" deve ser null se nenhuma vaga específica foi fornecida. Se uma vaga foi fornecida, calcule o score de aderência baseado em:
+- Match de competências de liderança (40%)
+- Experiência em contextos similares (30%)
+- Fit de temperamento e estilo de gestão (30%)`;
 
 /**
  * Get appropriate system prompt based on profile level
@@ -106,14 +130,32 @@ export function getSystemPrompt(profileLevel) {
  * @param {string} profileLevel
  * @returns {string|array}
  */
-export function buildUserPrompt(companyName, cvContent, jobContext, profileLevel) {
+export function buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData = null) {
     const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
 
-    const basePrompt = `
+    let basePrompt = `
 Empresa: ${companyName}
-Contexto da Vaga: ${jobContext || "Não especificado"}
 Perfil Buscado: ${profileName}
+`;
 
+    // Add job context if provided
+    if (jobData) {
+        basePrompt += `
+## VAGA DE REFERÊNCIA
+Título: ${jobData.title}
+Modelo: ${jobData.workModel || 'Não especificado'}
+Arquétipo: ${jobData.archetype || 'Não especificado'}
+Requisitos: ${jobData.requirements || 'Não especificados'}
+
+IMPORTANTE: Avalie a aderência do candidato a esta vaga específica e preencha o campo "adherence" com score de 0-100.
+`;
+    } else if (jobContext) {
+        basePrompt += `
+Contexto da Vaga: ${jobContext}
+`;
+    }
+
+    basePrompt += `
 `;
 
     // If string content (text), return as single prompt
@@ -155,14 +197,14 @@ Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profil
  * @returns {Promise<object>} Analysis result
  */
 export async function analyzeCandidate(companyName, cvContent, options = {}) {
-    const { jobContext = '', profileLevel = 'tecnico' } = options;
+    const { jobContext = '', profileLevel = 'tecnico', jobData = null } = options;
 
     if (!cvContent) {
         throw new Error("Conteúdo do CV não fornecido");
     }
 
     const systemPrompt = getSystemPrompt(profileLevel);
-    const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel);
+    const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData);
 
     const result = await callGemini({
         systemPrompt,

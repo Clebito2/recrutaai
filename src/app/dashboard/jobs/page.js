@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
-import { Plus, Briefcase, Calendar, MapPin, ChevronRight, Search, Filter } from "lucide-react";
+import { Plus, Briefcase, Calendar, MapPin, ChevronRight, Search, Filter, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -52,6 +52,21 @@ export default function JobsPage() {
   const filteredJobs = jobs.filter(job =>
     job.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteJob = async (jobId, jobTitle) => {
+    if (!confirm(`Excluir vaga "${jobTitle}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const { deleteDoc, doc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, "jobs", jobId));
+      setJobs(jobs.filter(j => j.id !== jobId));
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      alert("Erro ao excluir vaga. Tente novamente.");
+    }
+  };
 
   return (
     <div className="jobs-page animate-fade">
@@ -114,9 +129,21 @@ export default function JobsPage() {
                 </div>
               </div>
 
-              <Link href={`/dashboard/jobs/${job.id}`} className="job-action view-details-link">
-                Ver Detalhes <ChevronRight size={16} />
-              </Link>
+              <div className="job-actions">
+                <Link href={`/dashboard/jobs/${job.id}`} className="job-action view-details-link">
+                  Ver Detalhes <ChevronRight size={16} />
+                </Link>
+                <button
+                  className="btn-delete-small"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDeleteJob(job.id, job.title);
+                  }}
+                  title="Excluir vaga"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </GlassCard>
           ))}
         </div>
@@ -280,20 +307,27 @@ export default function JobsPage() {
           text-transform: uppercase;
         }
 
-        .job-action {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: var(--action-accent);
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 0.9rem;
-          margin-top: auto;
-        }
+          .job-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+          }
 
-        .job-action:hover {
-          color: white;
-        }
+          .job-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--action-accent);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex: 1;
+          }
+
+          .job-action:hover {
+            color: white;
+          }
 
         .empty-state {
           padding: 60px;
