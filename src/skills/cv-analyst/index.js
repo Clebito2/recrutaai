@@ -134,7 +134,7 @@ export function getSystemPrompt(profileLevel) {
  * @param {string} profileLevel
  * @returns {string|array}
  */
-export function buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData = null) {
+export function buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData = null, previousAnalysis = null) {
     const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
 
     let basePrompt = `
@@ -142,7 +142,6 @@ Empresa: ${companyName}
 Perfil Buscado: ${profileName}
 `;
 
-    // Add job context if provided
     if (jobData) {
         basePrompt += `
 ## VAGA DE REFERÊNCIA
@@ -156,6 +155,22 @@ IMPORTANTE: Avalie a aderência do candidato a esta vaga específica e preencha 
     } else if (jobContext) {
         basePrompt += `
 Contexto da Vaga: ${jobContext}
+`;
+    }
+
+    // Inject Previous Analysis Context (if available)
+    if (previousAnalysis) {
+        // Extract key insights to save tokens
+        const summary = previousAnalysis.resumo || "Não disponível";
+        const hardSkills = JSON.stringify(previousAnalysis.scorecard || {});
+
+        basePrompt += `
+## CONTEXTO DE ANÁLISE ANTERIOR (CURRÍCULO)
+O candidato já teve o CV analisado. Use isso para enriquecer a análise da transcrição.
+Resumo CV: ${summary}
+Scores CV: ${hardSkills}
+
+INSTRUÇÃO EXTRA: Compare o discurso na transcrição com o perfil técnico do CV. O candidato confirma o que prometeu?
 `;
     }
 
@@ -200,8 +215,23 @@ Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profil
  * @param {string} options.profileLevel - 'tecnico' or 'lideranca'
  * @returns {Promise<object>} Analysis result
  */
-export async function analyzeCandidate(companyName, cvContent, options = {}) {
-    const { jobContext = '', profileLevel = 'tecnico', jobData = null } = options;
+export async function analyzeCandidate(companyName, cvContent, ...args) {
+    // Handle both legacy (flattened) and new (options object) signatures
+    let options = {};
+    if (args.length > 1 || typeof args[0] === 'string') {
+        // Legacy: analyzeCandidate(name, content, jobContext, profileLevel, jobData, previousAnalysis)
+        options = {
+            jobContext: args[0],
+            profileLevel: args[1],
+            jobData: args[2],
+            previousAnalysis: args[3]
+        };
+    } else {
+        // New: analyzeCandidate(name, content, options)
+        options = args[0] || {};
+    }
+
+    const { jobContext = '', profileLevel = 'tecnico', jobData = null, previousAnalysis = null } = options;
 
     if (!cvContent) {
         throw new Error("Conteúdo do CV não fornecido");
@@ -226,7 +256,7 @@ export async function analyzeCandidate(companyName, cvContent, options = {}) {
             const fileUri = await uploadFileToGemini(tempFilePath, cvContent.mimeType);
 
             // Build text prompt without CV content (since it's in the file)
-            const textPrompt = buildBasePrompt(companyName, jobContext, profileLevel, jobData) +
+            const textPrompt = buildBasePrompt(companyName, jobContext, profileLevel, jobData, previousAnalysis) +
                 `Analise o arquivo de áudio/PDF fornecido via File API.
                 
                 Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileLevel} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`;
@@ -256,7 +286,7 @@ export async function analyzeCandidate(companyName, cvContent, options = {}) {
     }
 
     // Handle Standard Content (Text or Inline Base64)
-    const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData);
+    const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData, previousAnalysis);
 
     const result = await callGemini({
         systemPrompt,
@@ -283,7 +313,7 @@ export async function analyzeCandidate(companyName, cvContent, options = {}) {
 /**
  * Helper to build the base prompt text (reused)
  */
-function buildBasePrompt(companyName, jobContext, profileLevel, jobData) {
+function buildBasePrompt(companyName, jobContext, profileLevel, jobData, previousAnalysis = null) {
     const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
     let basePrompt = `
 Empresa: ${companyName}

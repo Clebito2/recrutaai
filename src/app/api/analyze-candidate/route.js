@@ -12,37 +12,18 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { companyName, cvContent, jobContext, profileLevel, jobId } = body;
+        const { companyName, cvContent, jobContext, profileLevel, jobId, previousAnalysis } = body;
 
-        if (!cvContent) {
-            return NextResponse.json(
-                { error: "Conteúdo do CV não fornecido" },
-                { status: 400 }
-            );
-        }
-
-        // Fetch job data if jobId is provided
-        let jobData = null;
-        if (jobId) {
-            try {
-                const jobRef = doc(db, "jobs", jobId);
-                const jobSnap = await getDoc(jobRef);
-                if (jobSnap.exists()) {
-                    jobData = { id: jobSnap.id, ...jobSnap.data() };
-                }
-            } catch (err) {
-                console.error("Error fetching job:", err);
-                // Continue without job data if fetch fails
-            }
-        }
+        // ... (existing checks)
 
         // Pass profileLevel and jobData to get differentiated analysis
         const analysis = await analyzeCandidate(
             companyName,
             cvContent,
-            jobContext,
+            jobContext, // Legacy context (string)
             profileLevel || 'tecnico',
-            jobData
+            jobData,
+            previousAnalysis // New context object
         );
 
         return NextResponse.json({

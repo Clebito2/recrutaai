@@ -28,6 +28,11 @@ export default function CandidatesPage() {
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduleSuccess, setScheduleSuccess] = useState(false);
 
+  const [scheduleSuccess, setScheduleSuccess] = useState(false);
+
+  // Transcript States
+  const [selectedCandidateId, setSelectedCandidateId] = useState("");
+
   // Job matching states
   const [jobs, setJobs] = useState([]);
   const [selectedJobId, setSelectedJobId] = useState("");
@@ -233,6 +238,16 @@ export default function CandidatesPage() {
 
       const companyName = userProfile?.companyName || "Empresa";
 
+      // Context from previous analysis (if linked)
+      let previousAnalysis = null;
+      if (activeTab === "transcript" && selectedCandidateId) {
+        const candidate = history.find(c => c.id === selectedCandidateId);
+        if (candidate?.analysis) {
+          previousAnalysis = candidate.analysis;
+          console.log("Linking to previous analysis:", candidate.name);
+        }
+      }
+
       const response = await fetch("/api/analyze-candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,7 +256,8 @@ export default function CandidatesPage() {
           cvContent: content,
           jobContext: "", // Legacy field, now using jobId
           profileLevel: profileLevel, // Use the state value
-          jobId: selectedJobId || null // Pass selected job ID
+          jobId: selectedJobId || null, // Pass selected job ID
+          previousAnalysis // Pass linked analysis context
         })
       });
 
@@ -479,6 +495,44 @@ export default function CandidatesPage() {
                     onChange={(e) => setTranscript(e.target.value)}
                     rows={8}
                   />
+
+                  {/* Candidate Link Selector */}
+                  <div className="candidate-selector-section" style={{ marginBottom: 16 }}>
+                    <label htmlFor="candidate-select">Vincular a candidato existente (Opcional)</label>
+                    <select
+                      id="candidate-select"
+                      value={selectedCandidateId}
+                      onChange={(e) => {
+                        setSelectedCandidateId(e.target.value);
+                        // Auto-select job if linked
+                        const candidate = history.find(c => c.id === e.target.value);
+                        if (candidate?.jobId) {
+                          setSelectedJobId(candidate.jobId);
+                        }
+                      }}
+                      disabled={loadingHistory}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-glass)',
+                        background: 'var(--canvas-card)',
+                        color: 'var(--text-primary)'
+                      }}
+                    >
+                      <option value="">Nova Análise (Sem vínculo)</option>
+                      {history.map(candidate => (
+                        <option key={candidate.id} value={candidate.id}>
+                          {candidate.name} - {new Date(candidate.createdAt).toLocaleDateString()}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedCandidateId && (
+                      <small style={{ display: 'block', marginTop: 8, color: 'var(--action-primary)' }}>
+                        ✓ A IA usará o contexto do currículo anterior
+                      </small>
+                    )}
+                  </div>
 
                   {/* Job Selector */}
                   <div className="job-selector-section">
