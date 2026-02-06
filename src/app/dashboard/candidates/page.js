@@ -28,8 +28,6 @@ export default function CandidatesPage() {
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduleSuccess, setScheduleSuccess] = useState(false);
 
-  const [scheduleSuccess, setScheduleSuccess] = useState(false);
-
   // Transcript States
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
 
@@ -95,20 +93,56 @@ export default function CandidatesPage() {
     }
   };
 
-  const saveAnalysisToHistory = async (analysisData) => {
+  const saveAnalysisToHistory = async (analysisData, analysisType = 'cv') => {
     try {
-      if (!user) return;
-      await addDoc(collection(db, "candidates"), {
+      if (!user) return null;
+
+      // If analyzing transcript for existing candidate, UPDATE the document
+      if (analysisType === 'transcript' && selectedCandidateId) {
+        const { doc, updateDoc, serverTimestamp: serverTs } = await import('firebase/firestore');
+        await updateDoc(doc(db, "candidates", selectedCandidateId), {
+          transcriptAnalysis: {
+            ...analysisData,
+            analyzedAt: serverTs(),
+            linkedToCv: true
+          },
+          updatedAt: serverTs()
+        });
+        console.log("Transcript analysis added to existing candidate");
+        return selectedCandidateId;
+      }
+
+      // Otherwise, CREATE new document
+      const docRef = await addDoc(collection(db, "candidates"), {
         userId: user.uid,
         name: analysisData.nome || "Candidato",
         role: profileLevel === 'lideranca' ? 'Liderança' : 'Técnico',
-        analysis: analysisData,
         jobId: selectedJobId || null,
-        createdAt: serverTimestamp()
+
+        // Store in appropriate field based on type
+        ...(analysisType === 'cv' ? {
+          cvAnalysis: {
+            ...analysisData,
+            analyzedAt: serverTimestamp()
+          },
+          transcriptAnalysis: null
+        } : {
+          cvAnalysis: null,
+          transcriptAnalysis: {
+            ...analysisData,
+            analyzedAt: serverTimestamp(),
+            linkedToCv: false
+          }
+        }),
+
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       });
-      console.log("Analysis auto-saved");
+      console.log(`${analysisType === 'cv' ? 'CV' : 'Transcript'} analysis saved as new candidate`);
+      return docRef.id;
     } catch (e) {
       console.error("Failed to auto-save analysis:", e);
+      return null;
     }
   };
 
@@ -277,8 +311,12 @@ export default function CandidatesPage() {
 
       setAnalysisResult(data.analysis);
 
-      // Auto-save
-      await saveAnalysisToHistory(data.analysis);
+      // Auto-save with type detection
+      const analysisType = activeTab === 'transcript' ? 'transcript' : 'cv';
+      await saveAnalysisToHistory(data.analysis, analysisType);
+
+      // Refresh history to show updated data
+      await fetchHistory();
 
       await incrementUsage("cv");
 
@@ -585,34 +623,83 @@ export default function CandidatesPage() {
                 </GlassCard>
               ) : (
                 <div className="history-grid">
-                  {history.map(item => (
-                    <div key={item.id} className="history-card-item" onClick={() => setAnalysisResult(item.analysis)}>
-                      <div className="history-card-header">
-                        <div className="history-avatar"><User size={20} /></div>
-                        <button
-                          className="btn-delete-small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCandidate(item.id, item.name);
-                          }}
-                          title="Excluir análise"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <div className="history-info">
-                        <strong>{item.name}</strong>
-                        <span className="role-badge">{item.role}</span>
-                      </div>
-                      <div className="history-footer">
-                        <div className="history-date">
-                          <Calendar size={14} />
-                          {item.createdAt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+                  {history.map(item => {
+                    // Support both old format (analysis) and new format (cvAnalysis/transcriptAnalysis)
+                    const hasCv = item.cvAnalysis || item.analysis;
+                    const hasTranscript = item.transcriptAnalysis;
+                    const displayAnalysis = item.cvAnalysis || item.transcriptAnalysis || item.analysis;
+
+                    return (
+                      <div key={item.id} className="history-card-item" onClick={() => setAnalysisResult(displayAnalysis)}>
+                        <div className="history-card-header">
+                          <div className="history-avatar"><User size={20} /></div>
+                          <button
+                            className="btn-delete-small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCandidate(item.id, item.name);
+                            }}
+                            title="Excluir análise"
+                          >
+                            <X size={16} />
+                          </button>
                         </div>
-                        <ChevronRight size={16} opacity={0.5} />
+                        <div className="history-info">
+                          <strong>{item.name}</strong>
+                          <span className="role-badge">{item.role}</span>
+                        </div>
+
+                        {/* Analysis Type Indicators */}
+                        <div className="analysis-indicators" style={{
+                          display: 'flex',
+                          gap: '6px',
+                          marginTop: '8px',
+                          marginBottom: '8px'
+                        }}>
+                          {hasCv && (
+                            <span className="analysis-badge cv-badge" style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              background: 'rgba(99, 102, 241, 0.15)',
+                              color: 'var(--action-primary)',
+                              border: '1px solid rgba(99, 102, 241, 0.3)'
+                            }}>
+                              <FileText size={12} /> CV
+                            </span>
+                          )}
+                          {hasTranscript && (
+                            <span className="analysis-badge transcript-badge" style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              background: 'rgba(168, 85, 247, 0.15)',
+                              color: '#a855f7',
+                              border: '1px solid rgba(168, 85, 247, 0.3)'
+                            }}>
+                              <Mic size={12} /> Transcrição
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="history-footer">
+                          <div className="history-date">
+                            <Calendar size={14} />
+                            {item.createdAt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+                          </div>
+                          <ChevronRight size={16} opacity={0.5} />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
