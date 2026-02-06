@@ -45,50 +45,70 @@ export async function POST(req) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        let text = '';
+        let responseData = {};
 
-        if (file.type === 'application/pdf') {
-            console.log('API: Iniciando análise de PDF (pdf-parse):', file.name);
-            try {
-                // pdf-parse library handles all the complexity of pdf.js internally in a node-friendly way
-                const data = await pdfParse(buffer);
-                text = data.text;
+        if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+            console.log('API: PDF detectado. Retornando Base64 para processamento nativo via IA:', file.name);
 
-                console.log('API: PDF pages:', data.numpages);
-                console.log('API: Extração concluída, caracteres:', text.length);
-            } catch (pdfError) {
-                console.error('API [PDF EXCEPTION]:', pdfError);
-                throw new Error(`Erro no PDF parser: ${pdfError.message}`);
-            }
+            // Convert buffer to Base64
+            const base64 = buffer.toString('base64');
+
+            // Return structured data for the frontend to pass to analyze-candidate
+            responseData = {
+                type: 'pdf',
+                text: null, // No text extracted locally
+                inlineData: {
+                    mimeType: 'application/pdf',
+                    data: base64
+                }
+            };
+
         } else if (
             file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
             file.name.endsWith('.docx')
         ) {
             try {
+                console.log('API: DOCX detectado. Extraindo texto com Mammoth...');
                 const result = await mammoth.extractRawText({ buffer });
-                text = result.value;
+                const text = result.value;
                 if (result.messages.length > 0) {
                     console.log('Mammoth messages:', result.messages);
                 }
+
+                responseData = {
+                    type: 'text',
+                    text: text
+                };
             } catch (docxError) {
                 console.error('DOCX parsing error:', docxError);
                 throw new Error(`Falha ao ler DOCX: ${docxError.message}`);
             }
-        } else if (file.type === 'text/plain') {
-            text = await file.text();
+        } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+            const text = await file.text();
+            responseData = {
+                type: 'text',
+                text: text
+            };
         } else {
+            // Fallback: try to read as text
             try {
-                text = buffer.toString('utf-8');
+                const text = buffer.toString('utf-8');
+                responseData = {
+                    type: 'text',
+                    text: text
+                };
             } catch (e) {
                 return NextResponse.json({ error: 'Formato de arquivo não suportado' }, { status: 400 });
             }
         }
 
-        if (!text || !text.trim()) {
-            return NextResponse.json({ error: 'Não foi possível extrair texto do arquivo (arquivo vazio ou ilegível)' }, { status: 400 });
+        const hasContent = responseData.text?.trim() || responseData.inlineData;
+
+        if (!hasContent) {
+            return NextResponse.json({ error: 'Não foi possível ler o conteúdo do arquivo.' }, { status: 400 });
         }
 
-        return NextResponse.json({ text });
+        return NextResponse.json(responseData);
     } catch (error) {
         console.error('CRITICAL Error parsing file:', error);
         console.error('Stack trace:', error.stack);
