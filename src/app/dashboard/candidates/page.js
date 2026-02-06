@@ -622,7 +622,7 @@ export default function CandidatesPage() {
                   <p>{analysisResult.resumo}</p>
                 </div>
               </div>
-              <div className={`recommendation ${analysisResult.recomendacao?.toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
+              <div className={`recommendation ${(analysisResult.recomendacao || '').toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
                 {analysisResult.recomendacao}
             </div>
           </GlassCard>
