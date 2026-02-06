@@ -13,60 +13,60 @@
  * @returns {string} HTML content
  */
 export function generateReport(analysis, options = {}) {
-    const { companyName = 'RecruteAI', theme = 'dark' } = options;
+  const { companyName = 'RecruteAI', theme = 'dark' } = options;
 
-    const {
-        nome,
-        resumo,
-        scorecard,
-        temperamento,
-        swot,
-        recomendacao,
-        justificativa
-    } = analysis;
+  const {
+    nome,
+    resumo,
+    scorecard,
+    temperamento,
+    swot,
+    recomendacao,
+    justificativa
+  } = analysis;
 
-    const overallScore = scorecard
-        ? (Object.values(scorecard).reduce((a, b) => a + b, 0) / Object.keys(scorecard).length).toFixed(1)
-        : "N/A";
+  const overallScore = scorecard
+    ? (Object.values(scorecard).reduce((a, b) => a + b, 0) / Object.keys(scorecard).length).toFixed(1)
+    : "N/A";
 
-    const getScoreColor = (score) => {
-        if (score >= 4) return "#00F0FF";
-        if (score >= 3) return "#8B5CF6";
-        return "#EF4444";
+  const getScoreColor = (score) => {
+    if (score >= 4) return "#00F0FF";
+    if (score >= 3) return "#8B5CF6";
+    return "#EF4444";
+  };
+
+  const getRecommendationClass = (rec) => {
+    if (!rec) return "review";
+    const lower = rec.toLowerCase();
+    if (lower.includes("aprov")) return "approved";
+    if (lower.includes("reprov") || lower.includes("rejeit")) return "rejected";
+    return "review";
+  };
+
+  const formatLabel = (key) => {
+    const labels = {
+      comportamental: "Comportamental",
+      tecnico: "Técnico",
+      comunicacao: "Comunicação",
+      alinhamento: "Alinhamento",
+      dominio_hardskills: "Hard Skills",
+      resolucao_problemas: "Resolução",
+      qualidade_entrega: "Qualidade",
+      profundidade_tecnica: "Profundidade",
+      tomada_decisao: "Decisão",
+      gestao_conflitos: "Conflitos",
+      mentoria_delegacao: "Mentoria",
+      visao_estrategica: "Estratégia"
     };
+    return labels[key] || key;
+  };
 
-    const getRecommendationClass = (rec) => {
-        if (!rec) return "review";
-        const lower = rec.toLowerCase();
-        if (lower.includes("aprov")) return "approved";
-        if (lower.includes("reprov") || lower.includes("rejeit")) return "rejected";
-        return "review";
-    };
+  const formatSwotArray = (arr) => {
+    if (Array.isArray(arr)) return arr.join(', ');
+    return arr || '—';
+  };
 
-    const formatLabel = (key) => {
-        const labels = {
-            comportamental: "Comportamental",
-            tecnico: "Técnico",
-            comunicacao: "Comunicação",
-            alinhamento: "Alinhamento",
-            dominio_hardskills: "Hard Skills",
-            resolucao_problemas: "Resolução",
-            qualidade_entrega: "Qualidade",
-            profundidade_tecnica: "Profundidade",
-            tomada_decisao: "Decisão",
-            gestao_conflitos: "Conflitos",
-            mentoria_delegacao: "Mentoria",
-            visao_estrategica: "Estratégia"
-        };
-        return labels[key] || key;
-    };
-
-    const formatSwotArray = (arr) => {
-        if (Array.isArray(arr)) return arr.join(', ');
-        return arr || '—';
-    };
-
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -329,7 +329,7 @@ export function generateReport(analysis, options = {}) {
 
     <footer class="footer">
       <span>Gerado por ${companyName} | Protocolo Elite V6.0</span>
-      <span>${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</span>
+      <span>${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" })}</span>
     </footer>
   </div>
 

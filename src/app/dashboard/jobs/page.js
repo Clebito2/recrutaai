@@ -375,5 +375,5 @@ function formatDate(date) {
   if (days === 0) return "Hoje";
   if (days === 1) return "Ontem";
   if (days < 7) return `${days} dias atrás`;
-  return date.toLocaleDateString("pt-BR");
+  return date.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }

@@ -476,7 +476,7 @@ export default function CandidatesPage() {
                         </div>
                         <div className="history-date">
                           <Calendar size={14} />
-                          {item.createdAt.toLocaleDateString('pt-BR')}
+                          {item.createdAt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
                         </div>
                         <button
                           className="btn-delete-small"
