@@ -66,6 +66,22 @@ export function generateReport(analysis, options = {}) {
     return arr || '—';
   };
 
+  /**
+   * Convert markdown syntax to HTML
+   * Handles: **bold**, *italic*, line breaks
+   */
+  const convertMarkdownToHtml = (text) => {
+    if (!text) return text;
+
+    return text
+      // Bold: **text** -> <strong>text</strong>
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // Italic: *text* -> <em>text</em>
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Line breaks: \n -> <br>
+      .replace(/\n/g, '<br>');
+  };
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -268,7 +284,7 @@ export function generateReport(analysis, options = {}) {
       <div class="avatar">${(nome || "C").charAt(0).toUpperCase()}</div>
       <div class="candidate-info">
         <h1 class="candidate-name">${nome || "Candidato"}</h1>
-        <p class="candidate-summary">${resumo || "Análise de perfil profissional realizada com metodologia STAR e Matriz SWOT."}</p>
+        <p class="candidate-summary">${convertMarkdownToHtml(resumo) || "Análise de perfil profissional realizada com metodologia STAR e Matriz SWOT."}</p>
         <div class="recommendation-badge ${getRecommendationClass(recomendacao)}">${recomendacao || "Em Análise"}</div>
       </div>
     </section>
@@ -292,7 +308,7 @@ export function generateReport(analysis, options = {}) {
     ${temperamento ? `
     <div class="card">
       <div class="card-title">Temperamento Identificado</div>
-      <div class="temperament-display">${temperamento}</div>
+      <div class="temperament-display">${convertMarkdownToHtml(temperamento)}</div>
     </div>
     ` : ''}
 
@@ -323,7 +339,7 @@ export function generateReport(analysis, options = {}) {
     ${justificativa ? `
     <div class="card">
       <div class="card-title">Justificativa da Recomendação</div>
-      <div class="justification">${justificativa}</div>
+      <div class="justification">${convertMarkdownToHtml(justificativa)}</div>
     </div>
     ` : ''}
 

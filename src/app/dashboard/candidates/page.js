@@ -36,12 +36,12 @@ export default function CandidatesPage() {
   const { user, userProfile } = useAuth();
   const { incrementUsage } = useSubscription();
 
-  // Loading history logic when tab is active
+  // Loading history logic
   useEffect(() => {
-    if (activeTab === 'history' && user) {
+    if (user) {
       fetchHistory();
     }
-  }, [activeTab, user]);
+  }, [user]);
 
   // Fetch jobs for job selector
   useEffect(() => {
@@ -330,12 +330,6 @@ export default function CandidatesPage() {
               >
                 <Mic size={18} /> Transcrição
               </button>
-              <button
-                className={`tab ${activeTab === 'history' ? 'active' : ''}`}
-                onClick={() => setActiveTab('history')}
-              >
-                <History size={18} /> Histórico
-              </button>
             </div>
 
             {error && (
@@ -487,228 +481,317 @@ export default function CandidatesPage() {
               </div>
             )}
 
-            {activeTab === "history" && (
-              <div className="history-section animate-fade">
-                {loadingHistory ? (
-                  <div className="loading-state"><Loader2 className="spin" /> Carregando histórico...</div>
-                ) : history.length === 0 ? (
-                  <div className="empty-history">
-                    <History size={48} opacity={0.2} />
-                    <p>Nenhuma análise salva ainda.</p>
-                  </div>
-                ) : (
-                  <div className="history-list">
-                    {history.map(item => (
-                      <div key={item.id} className="history-item" onClick={() => setAnalysisResult(item.analysis)}>
-                        <div className="history-avatar"><User size={20} /></div>
-                        <div className="history-info">
-                          <strong>{item.name}</strong>
-                          <span>{item.role}</span>
-                        </div>
-                        <div className="history-date">
-                          <Calendar size={14} />
-                          {item.createdAt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
-                        </div>
-                        <button
-                          className="btn-delete-small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCandidate(item.id, item.name);
-                          }}
-                          title="Excluir análise"
-                        >
-                          <X size={16} />
-                        </button>
-                        <ChevronRight size={16} opacity={0.5} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-          </GlassCard>
-        ) : (
-          <div className="result-section animate-fade-right">
-            <GlassCard className="result-header-card">
-              <div className="candidate-info">
-                <div className="avatar">
-                  <User size={32} />
-                </div>
-                <div>
-                  <h2 className="narrative-text">{analysisResult.nome || "Candidato"}</h2>
-                  <p>{analysisResult.resumo}</p>
-                </div>
-              </div>
-              <div className={`recommendation ${analysisResult.recomendacao?.toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
-                {analysisResult.recomendacao}
-              </div>
-            </GlassCard>
-
-            <div className="scores-grid">
-              {analysisResult.scorecard && Object.entries(analysisResult.scorecard).map(([key, value]) => (
-                <GlassCard key={key} className="score-card">
-                  <span className="score-label">{formatScoreLabel(key)}</span>
-                  <div className="score-ring">
-                    <span className="score-value">{value}</span>
-                    <span className="score-max">/5</span>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
-
-            {analysisResult.temperamento && (
-              <GlassCard className="temperament-card">
-                <h3>Temperamento Identificado</h3>
-                <p className="temperament-value">{analysisResult.temperamento}</p>
-              </GlassCard>
-            )}
-
-            {analysisResult.adherence && (
-              <GlassCard className="adherence-card">
-                <h3>Aderência à Vaga</h3>
-                <div className="adherence-score">
-                  <div className="score-circle">
-                    <span className="score-number">{analysisResult.adherence.score}%</span>
-                  </div>
-                  <div className="score-bar">
-                    <div
-                      className="score-fill"
-                      style={{ width: `${analysisResult.adherence.score}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="skills-match">
-                  {analysisResult.adherence.matchedSkills?.length > 0 && (
-                    <div className="matched-skills">
-                      <h4><CheckCircle size={16} /> Habilidades Compatíveis</h4>
-                      <ul>
-                        {analysisResult.adherence.matchedSkills.map((skill, i) => (
-                          <li key={i}>{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {analysisResult.adherence.missingSkills?.length > 0 && (
-                    <div className="missing-skills">
-                      <h4><AlertCircle size={16} /> Gaps Identificados</h4>
-                      <ul>
-                        {analysisResult.adherence.missingSkills.map((skill, i) => (
-                          <li key={i}>{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-
-                {analysisResult.adherence.culturalFit && (
-                  <div className={`cultural-fit fit-${analysisResult.adherence.culturalFit}`}>
-                    <strong>Fit Cultural:</strong> {analysisResult.adherence.culturalFit}
-                  </div>
-                )}
-
-                {analysisResult.adherence.recommendation && (
-                  <p className="adherence-recommendation">{analysisResult.adherence.recommendation}</p>
-                )}
-              </GlassCard>
-            )}
-
-            {analysisResult.justificativa && (
-              <GlassCard className="justification-card">
-                <h3>Justificativa da Recomendação</h3>
-                <p>{analysisResult.justificativa}</p>
-              </GlassCard>
-            )}
-
-            <div className="result-actions">
-              <button onClick={() => setAnalysisResult(null)} className="btn-secondary">
-                <ArrowLeft size={16} /> Voltar
-              </button>
-              <button
-                className="btn-indigo"
-                onClick={() => setShowScheduleModal(true)}
-              >
-                <Calendar size={18} /> Agendar Entrevista
-              </button>
-              <button
-                className="btn-purple"
-                onClick={handleGenerateReport}
-                disabled={isGeneratingReport}
-              >
-                {isGeneratingReport ? (
-                  <><Loader2 className="spin" size={18} /> Gerando...</>
-                ) : (
-                  <>Gerar Relatório Elite (PDF)</>
-                )}
-              </button>
-            </div>
           </div>
         )}
+      </GlassCard>
 
-        {showScheduleModal && (
-          <div className="modal-overlay">
-            <GlassCard className="modal-content animate-fade">
-              <div className="modal-header">
-                <h3>Agendar Entrevista</h3>
-                <button onClick={() => setShowScheduleModal(false)} className="close-btn"><X size={20} /></button>
-              </div>
-              {scheduleSuccess ? (
-                <div className="success-state">
-                  <CheckCircle size={48} color="var(--success)" />
-                  <p>Entrevista agendada com sucesso!</p>
-                </div>
-              ) : (
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Candidato</label>
-                    <input type="text" value={analysisResult?.nome || "Candidato"} disabled className="input-glass" />
-                  </div>
-                  <div className="row-inputs">
-                    <div className="form-group">
-                      <label>Data</label>
-                      <input
-                        type="date"
-                        className="input-glass"
-                        value={scheduleData.date}
-                        onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Hora</label>
-                      <input
-                        type="time"
-                        className="input-glass"
-                        value={scheduleData.time}
-                        onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Notas / Pauta</label>
-                    <textarea
-                      className="input-glass"
-                      rows={3}
-                      placeholder="Ex: Validar fit cultural, teste técnico..."
-                      value={scheduleData.notes}
-                      onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })}
-                    />
-                  </div>
+      {/* Separate History Section */}
+      <div className="history-wrapper animate-fade">
+        <h3 className="section-title">
+          <History size={20} /> Histórico de Análises
+        </h3>
+
+        {loadingHistory ? (
+          <div className="loading-state"><Loader2 className="spin" /> Carregando histórico...</div>
+        ) : history.length === 0 ? (
+          <GlassCard className="empty-history-card">
+            <History size={48} opacity={0.2} />
+            <p>Nenhuma análise salva ainda.</p>
+          </GlassCard>
+        ) : (
+          <div className="history-grid">
+            {history.map(item => (
+              <div key={item.id} className="history-card-item" onClick={() => setAnalysisResult(item.analysis)}>
+                <div className="history-card-header">
+                  <div className="history-avatar"><User size={20} /></div>
                   <button
-                    className="btn-indigo full-width"
-                    onClick={handleScheduleInterview}
-                    disabled={isScheduling}
+                    className="btn-delete-small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCandidate(item.id, item.name);
+                    }}
+                    title="Excluir análise"
                   >
-                    {isScheduling ? <Loader2 className="spin" size={18} /> : "Confirmar Agendamento"}
+                    <X size={16} />
                   </button>
                 </div>
-              )}
-            </GlassCard>
+                <div className="history-info">
+                  <strong>{item.name}</strong>
+                  <span className="role-badge">{item.role}</span>
+                </div>
+                <div className="history-footer">
+                  <div className="history-date">
+                    <Calendar size={14} />
+                    {item.createdAt.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+                  </div>
+                  <ChevronRight size={16} opacity={0.5} />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         <style jsx>{`
+          .history-wrapper {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-glass);
+          }
+          
+          .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 1.25rem;
+            opacity: 0.9;
+          }
+          
+          .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+          }
+          
+          .history-card-item {
+            background: var(--canvas-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+          
+          .history-card-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--action-primary);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          }
+          
+          .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+          
+          .history-info strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+          }
+          
+          .role-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+          }
+          
+          .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+          }
+
+          .empty-history-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 40px;
+            text-align: center;
+            opacity: 0.6;
+          }
+        `}</style>
+      </div>
+      ) : (
+      <div className="result-section animate-fade-right">
+        <GlassCard className="result-header-card">
+          <div className="candidate-info">
+            <div className="avatar">
+              <User size={32} />
+            </div>
+            <div>
+              <h2 className="narrative-text">{analysisResult.nome || "Candidato"}</h2>
+              <p>{analysisResult.resumo}</p>
+            </div>
+          </div>
+          <div className={`recommendation ${analysisResult.recomendacao?.toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
+            {analysisResult.recomendacao}
+          </div>
+        </GlassCard>
+
+        <div className="scores-grid">
+          {analysisResult.scorecard && Object.entries(analysisResult.scorecard).map(([key, value]) => (
+            <GlassCard key={key} className="score-card">
+              <span className="score-label">{formatScoreLabel(key)}</span>
+              <div className="score-ring">
+                <span className="score-value">{value}</span>
+                <span className="score-max">/5</span>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+
+        {analysisResult.temperamento && (
+          <GlassCard className="temperament-card">
+            <h3>Temperamento Identificado</h3>
+            <p className="temperament-value">{analysisResult.temperamento}</p>
+          </GlassCard>
+        )}
+
+        {analysisResult.adherence && (
+          <GlassCard className="adherence-card">
+            <h3>Aderência à Vaga</h3>
+            <div className="adherence-score">
+              <div className="score-circle">
+                <span className="score-number">{analysisResult.adherence.score}%</span>
+              </div>
+              <div className="score-bar">
+                <div
+                  className="score-fill"
+                  style={{ width: `${analysisResult.adherence.score}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="skills-match">
+              {analysisResult.adherence.matchedSkills?.length > 0 && (
+                <div className="matched-skills">
+                  <h4><CheckCircle size={16} /> Habilidades Compatíveis</h4>
+                  <ul>
+                    {analysisResult.adherence.matchedSkills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {analysisResult.adherence.missingSkills?.length > 0 && (
+                <div className="missing-skills">
+                  <h4><AlertCircle size={16} /> Gaps Identificados</h4>
+                  <ul>
+                    {analysisResult.adherence.missingSkills.map((skill, i) => (
+                      <li key={i}>{skill}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {analysisResult.adherence.culturalFit && (
+              <div className={`cultural-fit fit-${analysisResult.adherence.culturalFit}`}>
+                <strong>Fit Cultural:</strong> {analysisResult.adherence.culturalFit}
+              </div>
+            )}
+
+            {analysisResult.adherence.recommendation && (
+              <p className="adherence-recommendation">{analysisResult.adherence.recommendation}</p>
+            )}
+          </GlassCard>
+        )}
+
+        {analysisResult.justificativa && (
+          <GlassCard className="justification-card">
+            <h3>Justificativa da Recomendação</h3>
+            <p>{analysisResult.justificativa}</p>
+          </GlassCard>
+        )}
+
+        <div className="result-actions">
+          <button onClick={() => setAnalysisResult(null)} className="btn-secondary">
+            <ArrowLeft size={16} /> Voltar
+          </button>
+          <button
+            className="btn-indigo"
+            onClick={() => setShowScheduleModal(true)}
+          >
+            <Calendar size={18} /> Agendar Entrevista
+          </button>
+          <button
+            className="btn-purple"
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
+          >
+            {isGeneratingReport ? (
+              <><Loader2 className="spin" size={18} /> Gerando...</>
+            ) : (
+              <>Gerar Relatório Elite (PDF)</>
+            )}
+          </button>
+        </div>
+      </div>
+        )}
+
+      {showScheduleModal && (
+        <div className="modal-overlay">
+          <GlassCard className="modal-content animate-fade">
+            <div className="modal-header">
+              <h3>Agendar Entrevista</h3>
+              <button onClick={() => setShowScheduleModal(false)} className="close-btn"><X size={20} /></button>
+            </div>
+            {scheduleSuccess ? (
+              <div className="success-state">
+                <CheckCircle size={48} color="var(--success)" />
+                <p>Entrevista agendada com sucesso!</p>
+              </div>
+            ) : (
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Candidato</label>
+                  <input type="text" value={analysisResult?.nome || "Candidato"} disabled className="input-glass" />
+                </div>
+                <div className="row-inputs">
+                  <div className="form-group">
+                    <label>Data</label>
+                    <input
+                      type="date"
+                      className="input-glass"
+                      value={scheduleData.date}
+                      onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Hora</label>
+                    <input
+                      type="time"
+                      className="input-glass"
+                      value={scheduleData.time}
+                      onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Notas / Pauta</label>
+                  <textarea
+                    className="input-glass"
+                    rows={3}
+                    placeholder="Ex: Validar fit cultural, teste técnico..."
+                    value={scheduleData.notes}
+                    onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })}
+                  />
+                </div>
+                <button
+                  className="btn-indigo full-width"
+                  onClick={handleScheduleInterview}
+                  disabled={isScheduling}
+                >
+                  {isScheduling ? <Loader2 className="spin" size={18} /> : "Confirmar Agendamento"}
+                </button>
+              </div>
+            )}
+          </GlassCard>
+        </div>
+      )}
+
+      <style jsx>{`
           .modal-overlay {
             position: fixed;
             top: 0;
@@ -810,7 +893,7 @@ export default function CandidatesPage() {
           }
         `}</style>
 
-        <style jsx>{`
+      <style jsx>{`
           .candidates-page {
             max-width: 900px;
           margin: 0 auto;
@@ -1431,8 +1514,8 @@ export default function CandidatesPage() {
             }
           }
         `}</style>
-      </div>
-    </SubscriptionGuard>
+    </div>
+    </SubscriptionGuard >
   );
 }
 
