@@ -15,4 +15,4 @@
 export { generateJobAd } from '../skills/job-architect';
 export { analyzeCandidate } from '../skills/cv-analyst';
 export { generateReport, generateEliteReport } from '../skills/report-generator';
-export { callGemini, callGeminiMultimodal, parseJsonResponse, removeEmojis } from '../skills/gemini-client';
+export { callGemini, callGeminiMultimodal, streamGemini, callGeminiStructured, parseJsonResponse, removeEmojis } from '../skills/gemini-client';

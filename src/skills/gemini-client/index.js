@@ -3,7 +3,8 @@
  * Centralized client for all AI interactions
  */
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const DEFAULT_MODEL = "gemini-2.0-flash";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent`;
 
 /**
  * Default generation configuration
@@ -77,10 +78,77 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!generatedText) {
+        if (data.promptFeedback?.blockReason) {
+            throw new Error(`Busca bloqueada: ${data.promptFeedback.blockReason}`);
+        }
         throw new Error("Resposta vazia da IA");
     }
 
     return generatedText;
+}
+
+/**
+ * Call Gemini with Streaming support
+ * 
+ * @param {object} options
+ * @yields {string} Text chunks
+ */
+export async function* streamGemini({ systemPrompt, userContent, config = {} }) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY missing");
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+        model: DEFAULT_MODEL,
+        systemInstruction: systemPrompt
+    });
+
+    const generationConfig = {
+        ...DEFAULT_CONFIG,
+        ...config
+    };
+
+    const result = await model.generateContentStream({
+        contents: [{ role: 'user', parts: Array.isArray(userContent) ? userContent : [{ text: userContent }] }],
+        generationConfig
+    });
+
+    for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        if (chunkText) yield chunkText;
+    }
+}
+
+/**
+ * Call Gemini with Structured JSON Output (Schema)
+ * 
+ * @param {object} options
+ * @param {object} options.schema - JSON Schema for validation
+ */
+export async function callGeminiStructured({ systemPrompt, userContent, schema, config = {} }) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY missing");
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+        model: DEFAULT_MODEL,
+        systemInstruction: systemPrompt
+    });
+
+    const generationConfig = {
+        ...DEFAULT_CONFIG,
+        ...config,
+        responseMimeType: "application/json",
+        responseSchema: schema
+    };
+
+    const result = await model.generateContent({
+        contents: [{ role: 'user', parts: Array.isArray(userContent) ? userContent : [{ text: userContent }] }],
+        generationConfig
+    });
+
+    const response = await result.response;
+    return JSON.parse(response.text());
 }
 
 import { GoogleAIFileManager } from "@google/generative-ai/server";

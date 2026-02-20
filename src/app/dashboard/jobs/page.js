@@ -2,376 +2,163 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
-import { Plus, Briefcase, Calendar, MapPin, ChevronRight, Search, Filter, Trash2 } from "lucide-react";
+import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
+import { Plus, Search, MapPin, Clock, ArrowRight, User, Briefcase, Trash2, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "../../../context/AuthContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { useAuth } from "../../../context/AuthContext";
+import { useJobStore } from "../../../store/useJobStore";
+import PageHeader from "../../../components/common/PageHeader";
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
+  const { setActiveJob } = useJobStore();
 
   useEffect(() => {
     const fetchJobs = async () => {
       if (!user) return;
-
       try {
-        const jobsRef = collection(db, "jobs");
-
-        // Removed orderBy to avoid missing index error
         const q = query(
-          jobsRef,
+          collection(db, "jobs"),
           where("userId", "==", user.uid)
         );
-
-        const querySnapshot = await getDocs(q);
-        const jobsData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...data,
-            // Convert Firestore Timestamp to JS Date
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date()
-          };
-        }).sort((a, b) => b.createdAt - a.createdAt); // Client-side sort
-
-        setJobs(jobsData);
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date()
+        }));
+        setJobs(data.sort((a, b) => b.createdAt - a.createdAt));
       } catch (error) {
         console.error("Error fetching jobs:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchJobs();
   }, [user]);
 
-  const filteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDeleteJob = async (jobId, jobTitle) => {
-    if (!confirm(`Excluir vaga "${jobTitle}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+  const handleDelete = async (e, jobId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Excluir esta vaga permanentemente?")) return;
 
     try {
-      const { deleteDoc, doc } = await import('firebase/firestore');
       await deleteDoc(doc(db, "jobs", jobId));
       setJobs(jobs.filter(j => j.id !== jobId));
-    } catch (error) {
-      console.error("Error deleting job:", error);
-      alert("Erro ao excluir vaga. Tente novamente.");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir vaga");
     }
   };
 
-  return (
-    <div className="jobs-page animate-fade">
-      <header className="page-header">
-        <div className="header-info">
-          <h1>Pipeline de Vagas</h1>
-          <p>Gerencie suas posições abertas e acompanhe candidatos.</p>
-        </div>
-        <Link href="/dashboard/jobs/new" className="btn-indigo">
-          <Plus size={20} /> Nova Vaga
-        </Link>
-      </header>
+  const filteredJobs = jobs.filter(job =>
+    job.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-      <div className="jobs-toolbar">
-        <div className="search-box">
-          <Search size={18} className="search-icon" />
+  return (
+    <SubscriptionGuard type="jobs">
+      <div className="jobs-page animate-fade">
+        <PageHeader
+          title="Minhas Vagas"
+          subtitle="Gerencie suas oportunidades e analise candidatos vinculados."
+          action={
+            <Link href="/dashboard/jobs/new" className="btn-indigo">
+              <Plus size={20} /> Nova Vaga
+            </Link>
+          }
+        />
+
+        <div className="search-bar animate-fade">
+          <Search className="search-icon" size={20} />
           <input
             type="text"
-            placeholder="Buscar vagas..."
+            placeholder="Buscar por título da vaga..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className="btn-filter">
-          <Filter size={18} /> Filtros
-        </button>
-      </div>
 
-      {loading ? (
-        <div className="loading-state">Carregando vagas...</div>
-      ) : filteredJobs.length === 0 ? (
-        <GlassCard className="empty-state">
-          <Briefcase size={48} color="var(--action-primary)" />
-          <h3>Nenhuma vaga encontrada</h3>
-          <p>Crie sua primeira vaga usando o Arquiteto de Vagas com IA.</p>
-          <Link href="/dashboard/jobs/new" className="btn-indigo">
-            <Plus size={20} /> Criar Primeira Vaga
-          </Link>
-        </GlassCard>
-      ) : (
-        <div className="jobs-grid">
-          {filteredJobs.map((job) => (
-            <GlassCard key={job.id} className="job-card">
-              <div className="job-header">
-                <div className="job-badge">{job.type}</div>
-                <span className={`status-dot ${job.status}`} />
-              </div>
+        {isLoading ? (
+          <div className="loading-state"><Loader2 className="spin" size={32} /></div>
+        ) : filteredJobs.length === 0 ? (
+          <GlassCard className="empty-state">
+            <Briefcase size={48} opacity={0.2} />
+            <p>{searchTerm ? "Nenhuma vaga encontrada para sua busca." : "Nenhuma vaga criada ainda."}</p>
+            {!searchTerm && <Link href="/dashboard/jobs/new" className="btn-secondary">Criar minha primeira vaga</Link>}
+          </GlassCard>
+        ) : (
+          <div className="jobs-grid">
+            {filteredJobs.map((job) => (
+              <GlassCard key={job.id} className="job-card">
+                <Link href={`/dashboard/jobs/${job.id}`} onClick={() => setActiveJob(job)}>
+                  <div className="job-content">
+                    <div className="job-header">
+                      <div className="job-status-badge">Ativa</div>
+                      <button className="delete-btn" onClick={(e) => handleDelete(e, job.id)}><Trash2 size={16} /></button>
+                    </div>
 
-              <h3 className="job-title">{job.title}</h3>
+                    <h3 className="job-title">{job.title}</h3>
 
-              <div className="job-meta">
-                <span><MapPin size={14} /> {job.workModel}</span>
-                <span><Calendar size={14} /> {formatDate(job.createdAt)}</span>
-              </div>
+                    <div className="job-meta">
+                      <span><MapPin size={14} /> {job.workModel}</span>
+                      <span><Clock size={14} /> {formatDate(job.createdAt)}</span>
+                    </div>
 
-              <div className="job-stats">
-                <div className="stat">
-                  <span className="stat-value">{job.applicants || 0}</span>
-                  <span className="stat-label">Candidatos</span>
-                </div>
-              </div>
-
-              <div className="job-actions">
-                <Link href={`/dashboard/jobs/${job.id}`} className="job-action view-details-link">
-                  Ver Detalhes <ChevronRight size={16} />
+                    <div className="job-footer">
+                      <div className="candidate-count">
+                        <User size={16} /> 0 Candidatos
+                      </div>
+                      <div className="view-more">Ver Detalhes <ArrowRight size={16} /></div>
+                    </div>
+                  </div>
                 </Link>
-                <button
-                  className="btn-delete-small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDeleteJob(job.id, job.title);
-                  }}
-                  title="Excluir vaga"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
-      )}
+              </GlassCard>
+            ))}
+          </div>
+        )}
 
-      <style jsx>{`
-        .jobs-page {
-          max-width: 1200px;
-        }
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 40px;
-        }
-
-        .header-info h1 {
-          font-size: 2rem;
-          font-weight: 800;
-          margin-bottom: 8px;
-        }
-
-        .header-info p {
-          opacity: 0.6;
-        }
-
-        .jobs-toolbar {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 32px;
-        }
-
-        .search-box {
-          flex: 1;
-          position: relative;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: rgba(255, 255, 255, 0.3);
-        }
-
-        .search-box input {
-          width: 100%;
-          background: var(--canvas-card);
-          border: 1px solid var(--border-glass);
-          padding: 14px 16px 14px 48px;
-          border-radius: 10px;
-          color: white;
-          font-size: 1rem;
-        }
-
-        .search-box input:focus {
-          outline: none;
-          border-color: var(--action-primary);
-        }
-
-        .btn-filter {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: var(--canvas-card);
-          border: 1px solid var(--border-glass);
-          padding: 14px 20px;
-          border-radius: 10px;
-          color: rgba(255, 255, 255, 0.7);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .btn-filter:hover {
-          border-color: var(--action-primary);
-          color: white;
-        }
-
-        .jobs-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 24px;
-        }
-
-        .job-card {
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .job-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .job-badge {
-          background: rgba(79, 70, 229, 0.1);
-          color: var(--action-primary);
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--action-secondary);
-        }
-
-        .status-dot.active {
-          box-shadow: 0 0 8px var(--action-secondary);
-        }
-
-        .job-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          line-height: 1.3;
-        }
-
-        .job-meta {
-          display: flex;
-          gap: 16px;
-          font-size: 0.85rem;
-          opacity: 0.6;
-        }
-
-        .job-meta span {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .job-stats {
-          display: flex;
-          gap: 24px;
-          padding: 16px 0;
-          border-top: 1px solid var(--border-glass);
-          border-bottom: 1px solid var(--border-glass);
-        }
-
-        .stat {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .stat-value {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--action-secondary);
-        }
-
-        .stat-label {
-          font-size: 0.75rem;
-          opacity: 0.5;
-          text-transform: uppercase;
-        }
-
-          .job-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: auto;
-          }
-
-          .job-action {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--action-accent);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            flex: 1;
-          }
-
-          .job-action:hover {
-            color: white;
-          }
-
-        .empty-state {
-          padding: 60px;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .empty-state h3 {
-          font-size: 1.25rem;
-          margin-top: 8px;
-        }
-
-        .empty-state p {
-          opacity: 0.6;
-          margin-bottom: 16px;
-        }
-
-        .loading-state {
-          text-align: center;
-          padding: 60px;
-          opacity: 0.5;
-        }
-
-        .animate-fade {
-          animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
-    </div>
+        <style jsx>{`
+          .jobs-page { max-width: 1000px; margin: 0 auto; }
+          .search-bar { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+          .search-icon { color: rgba(255, 255, 255, 0.3); }
+          .search-bar input { background: transparent; border: none; color: white; width: 100%; font-size: 1rem; }
+          .search-bar input:focus { outline: none; }
+          .jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+          .job-card { padding: 0; overflow: hidden; height: 100%; }
+          .job-card :global(a) { text-decoration: none; color: inherit; }
+          .job-content { padding: 24px; display: flex; flex-direction: column; height: 100%; }
+          .job-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+          .job-status-badge { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: rgba(0, 240, 255, 0.1); color: var(--action-secondary); padding: 4px 10px; border-radius: 20px; }
+          .delete-btn { background: transparent; border: none; color: var(--status-danger); opacity: 0.5; cursor: pointer; }
+          .delete-btn:hover { opacity: 1; }
+          .job-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+          .job-meta { display: flex; gap: 16px; font-size: 0.85rem; opacity: 0.6; margin-bottom: 24px; }
+          .job-meta span { display: flex; align-items: center; gap: 6px; }
+          .job-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+          .candidate-count { font-size: 0.85rem; opacity: 0.7; display: flex; align-items: center; gap: 6px; }
+          .view-more { color: var(--action-primary); font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: gap 0.2s; }
+          .job-card:hover .view-more { gap: 8px; }
+          .loading-state { display: flex; justify-content: center; padding: 60px; }
+          .empty-state { padding: 60px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+          .spin { animation: spin 1s linear infinite; }
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        `}</style>
+      </div>
+    </SubscriptionGuard>
   );
 }
 
 function formatDate(date) {
+  if (!date) return "";
   const now = new Date();
   const diff = now - date;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
   if (days === 0) return "Hoje";
   if (days === 1) return "Ontem";
   if (days < 7) return `${days} dias atrás`;

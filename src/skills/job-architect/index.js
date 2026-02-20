@@ -27,9 +27,14 @@ ESTRUTURA OBRIGATÓRIA:
 
 ADAPTAÇÃO POR NÍVEL DE ATUAÇÃO:
 - LIDERANÇA: Verbos como Disseminar, Treinar, Auditar, Planejar, Reportar, Gerir.
-- TÉCNICO: Verbos como Executar, Analisar, Solucionar, Operar, Implementar.
+- TÉCNICO: Verbos como Executar, Analisar, Solucionar, Operar, Implementar.`;
 
-Use linguagem que ressoe com o perfil identificado.`;
+/**
+ * Get system prompt for job generation
+ */
+export function getSystemPrompt() {
+    return SYSTEM_PROMPT;
+}
 
 /**
  * Profile type descriptions
@@ -71,7 +76,7 @@ DIAGNÓSTICO DA VAGA:
 - Modelo de Trabalho: ${data.workModel}
 - Faixa Salarial: ${data.salary || 'A combinar'}
 
-REQUISITOS OBRIGATÓRIOS (eliminatórios):
+REQUISITOS OBRIGATÓRIOS(eliminatórios):
 ${data.mustHaves || 'Não especificados'}
 
 DIFERENCIAIS DESEJÁVEIS:

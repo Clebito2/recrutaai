@@ -3,27 +3,45 @@ import { NextResponse } from "next/server";
 import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
 import { db } from "../../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { analysisRequestSchema } from "../../../lib/validation";
 
 export async function POST(request) {
     try {
         const rateLimitResponse = checkRateLimit(request, RATE_LIMITS.analyzeCandidate);
-        if (rateLimitResponse) {
-            return rateLimitResponse;
-        }
+        if (rateLimitResponse) return rateLimitResponse;
 
         const body = await request.json();
-        const { companyName, cvContent, jobContext, profileLevel, jobId, previousAnalysis } = body;
 
-        // ... (existing checks)
+        // Validation with Zod
+        const validation = analysisRequestSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: "Dados inválidos", details: validation.error.format() },
+                { status: 400 }
+            );
+        }
+
+        const { companyName, cvContent, jobContext, profileLevel, jobId, previousAnalysis } = validation.data;
+
+        // Fetch jobData if jobId is provided
+        let jobData = null;
+        if (jobId) {
+            const jobDoc = await getDoc(doc(db, "jobs", jobId));
+            if (jobDoc.exists()) {
+                jobData = jobDoc.data();
+            }
+        }
 
         // Pass profileLevel and jobData to get differentiated analysis
         const analysis = await analyzeCandidate(
             companyName,
             cvContent,
-            jobContext, // Legacy context (string)
-            profileLevel || 'tecnico',
-            jobData,
-            previousAnalysis // New context object
+            {
+                jobContext,
+                profileLevel: profileLevel || 'tecnico',
+                jobData,
+                previousAnalysis
+            }
         );
 
         return NextResponse.json({
@@ -33,9 +51,7 @@ export async function POST(request) {
 
     } catch (error) {
         console.error("API Error (analyze-candidate):", error);
-        console.error("Error stack:", error.stack);
 
-        // Ensure we always return JSON
         return NextResponse.json(
             {
                 error: error.message || "Erro ao processar análise",

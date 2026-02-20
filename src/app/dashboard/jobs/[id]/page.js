@@ -3,138 +3,103 @@
 import { useState, useEffect } from "react";
 import GlassCard from "../../../../components/common/GlassCard";
 import SubscriptionGuard from "../../../../components/common/SubscriptionGuard";
-import { ArrowLeft, Copy, Check, MapPin, Calendar, Briefcase, Share2 } from "lucide-react";
-import Link from "next/link";
+import PageHeader from "../../../../components/common/PageHeader";
+import MetaList from "../../../../components/common/MetaList";
+import MetaItem from "../../../../components/common/MetaItem";
+import { Copy, Check, MapPin, Calendar, Briefcase } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
 
 export default function JobDetails() {
-    const { id } = useParams();
-    const { user } = useAuth();
-    const router = useRouter();
+  const { id } = useParams();
+  const { user } = useAuth();
+  const router = useRouter();
 
-    const [job, setJob] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [copied, setCopied] = useState(false);
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
-    useEffect(() => {
-        const fetchJob = async () => {
-            if (!user || !id) return;
+  useEffect(() => {
+    const fetchJob = async () => {
+      if (!user || !id) return;
 
-            try {
-                const docRef = doc(db, "jobs", id);
-                const docSnap = await getDoc(docRef);
+      try {
+        const docRef = doc(db, "jobs", id);
+        const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    setJob({ id: docSnap.id, ...docSnap.data() });
-                } else {
-                    console.log("No such job!");
-                    router.push("/dashboard/jobs");
-                }
-            } catch (error) {
-                console.error("Error getting job:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchJob();
-    }, [user, id, router]);
-
-    const handleCopy = async () => {
-        if (!job?.jobDescription) return;
-        await navigator.clipboard.writeText(job.jobDescription);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (docSnap.exists()) {
+          setJob({ id: docSnap.id, ...docSnap.data() });
+        } else {
+          console.log("No such job!");
+          router.push("/dashboard/jobs");
+        }
+      } catch (error) {
+        console.error("Error getting job:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (loading) return <div className="loading">Carregando dados da vaga...</div>;
-    if (!job) return null;
+    fetchJob();
+  }, [user, id, router]);
 
-    return (
-        <SubscriptionGuard type="job">
-            <div className="job-details-container animate-fade">
-                <header className="page-header">
-                    <Link href="/dashboard/jobs" className="back-link">
-                        <ArrowLeft size={16} /> Voltar para Vagas
-                    </Link>
-                    <div className="header-actions">
-                        <h1>{job.title}</h1>
-                        <button onClick={handleCopy} className="btn-secondary">
-                            {copied ? <Check size={18} /> : <Copy size={18} />}
-                            {copied ? "Copiado" : "Copiar Texto"}
-                        </button>
-                    </div>
-                </header>
+  const handleCopy = async () => {
+    if (!job?.jobDescription) return;
+    await navigator.clipboard.writeText(job.jobDescription);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-                <div className="job-grid">
-                    <div className="main-content">
-                        <GlassCard className="content-card">
-                            <pre className="job-text">{job.jobDescription}</pre>
-                        </GlassCard>
-                    </div>
+  if (loading) return <div className="loading">Carregando dados da vaga...</div>;
+  if (!job) return null;
 
-                    <div className="sidebar">
-                        <GlassCard className="meta-card">
-                            <h3>Detalhes Estruturais</h3>
-                            <div className="meta-list">
-                                <div className="meta-item">
-                                    <Briefcase size={16} />
-                                    <div>
-                                        <label>Perfil</label>
-                                        <span>{job.type || "Não definido"}</span>
-                                    </div>
-                                </div>
-                                <div className="meta-item">
-                                    <MapPin size={16} />
-                                    <div>
-                                        <label>Modelo</label>
-                                        <span>{job.jobData?.workModel || job.workModel || "N/A"}</span>
-                                    </div>
-                                </div>
-                                <div className="meta-item">
-                                    <Calendar size={16} />
-                                    <div>
-                                        <label>Criado em</label>
-                                        <span>{job.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "Hoje"}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </GlassCard>
-                    </div>
-                </div>
+  const actions = (
+    <button onClick={handleCopy} className="btn-secondary">
+      {copied ? <Check size={18} /> : <Copy size={18} />}
+      {copied ? "Copiado" : "Copiar Texto"}
+    </button>
+  );
 
-                <style jsx>{`
+  return (
+    <SubscriptionGuard type="job">
+      <div className="job-details-container animate-fade">
+        <PageHeader
+          title={job.title}
+          backPath="/dashboard/jobs"
+          backLabel="Voltar para Vagas"
+          actions={actions}
+        />
+
+        <div className="job-grid">
+          <div className="main-content">
+            <GlassCard className="content-card">
+              <pre className="job-text">{job.jobDescription}</pre>
+            </GlassCard>
+          </div>
+
+          <div className="sidebar">
+            <GlassCard className="meta-card">
+              <MetaList title="Detalhes Estruturais">
+                <MetaItem icon={<Briefcase size={16} />} label="Perfil">
+                  {job.type || "Não definido"}
+                </MetaItem>
+                <MetaItem icon={<MapPin size={16} />} label="Modelo">
+                  {job.jobData?.workModel || job.workModel || "N/A"}
+                </MetaItem>
+                <MetaItem icon={<Calendar size={16} />} label="Criado em">
+                  {job.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "Hoje"}
+                </MetaItem>
+              </MetaList>
+            </GlassCard>
+          </div>
+        </div>
+
+        <style jsx>{`
           .job-details-container {
             max-width: 1200px;
             margin: 0 auto;
-          }
-
-          .page-header {
-            margin-bottom: 30px;
-          }
-
-          .back-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-          }
-
-          .header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-
-          .header-actions h1 {
-            font-size: 2rem;
-            font-weight: 800;
           }
 
           .job-grid {
@@ -158,37 +123,6 @@ export default function JobDetails() {
 
           .meta-card {
             padding: 24px;
-          }
-
-          .meta-card h3 {
-            font-size: 1rem;
-            text-transform: uppercase;
-            opacity: 0.5;
-            margin-bottom: 20px;
-          }
-
-          .meta-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-          }
-
-          .meta-item {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
-          }
-
-          .meta-item label {
-            display: block;
-            font-size: 0.75rem;
-            opacity: 0.5;
-            text-transform: uppercase;
-          }
-
-          .meta-item span {
-            font-weight: 600;
-            text-transform: capitalize;
           }
 
           .btn-secondary {
@@ -220,7 +154,7 @@ export default function JobDetails() {
             }
           }
         `}</style>
-            </div>
-        </SubscriptionGuard>
-    );
+      </div>
+    </SubscriptionGuard>
+  );
 }

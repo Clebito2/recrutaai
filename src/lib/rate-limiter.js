@@ -6,15 +6,15 @@
 // Map structure: { identifier: { count: number, resetAt: timestamp } }
 const rateLimitMap = new Map();
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
+// Manual cleanup function instead of setInterval
+export function cleanupRateLimits() {
     const now = Date.now();
     for (const [key, entry] of rateLimitMap.entries()) {
         if (now > entry.resetAt) {
             rateLimitMap.delete(key);
         }
     }
-}, 5 * 60 * 1000);
+}
 
 /**
  * Check and apply rate limit for an identifier

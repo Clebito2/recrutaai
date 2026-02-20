@@ -1,225 +1,52 @@
-/**
- * CV Analyst Skill - Mode 2
- * Analyzes candidates using STAR methodology and SWOT matrix
- * Supports both Technical and Leadership profiles
- */
+﻿import { callGeminiStructured, uploadFileToGemini } from "../gemini-client";
 
-import { callGemini, callGeminiMultimodal, parseJsonResponse, uploadFileToGemini } from '../gemini-client';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
-import { pipeline } from 'stream/promises';
-
-/**
- * System prompt for Technical profile analysis
- */
-const PROMPT_TECNICO = `Você é um Analista de Perfil Senior do Protocolo Elite V6.0 - MODO PERFIL TÉCNICO.
-
-METODOLOGIA STAR para TÉCNICOS:
-- Na análise do "R" (Resultado), busque:
-  * Qual foi o ganho de eficiência técnica (ex: redução de tempo de execução em X%)?
-  * Houve economia de recursos ou mitigação de erros graves?
-  * Métricas quantificáveis de entrega individual
-
-COMPETÊNCIAS ESPECÍFICAS PARA PERFIL TÉCNICO (Peso 30%):
-1. Domínio de Hard Skills: Proficiência nas ferramentas e métodos específicos
-2. Resolução de Problemas: Velocidade e precisão técnica no diagnóstico
-3. Qualidade de Entrega: Atenção aos detalhes e conformidade técnica
-4. Profundidade Técnica: Domínio especializado na área
-
-TEMPERAMENTOS TÉCNICOS:
-- Melancólico: O "Ouro" da execução técnica; precisão absoluta
-- Fleumático: Excelente para suporte e manutenção de sistemas estáveis
-
-OUTPUT OBRIGATÓRIO (JSON):
-{
-  "nome": "Nome do Candidato",
-  "resumo": "Síntese de 2-3 linhas",
-  "perfilNivel": "Técnico",
-  "scorecard": {
-    "dominio_hardskills": 1-5,
-    "resolucao_problemas": 1-5,
-    "qualidade_entrega": 1-5,
-    "profundidade_tecnica": 1-5
-  },
-  "nota_geral": 1-5,
-  "temperamento": "Tipo predominante e análise",
-  "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
-  "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
-  "adherence": {
-    "score": 0-100,
-    "matchedSkills": ["lista de habilidades que o candidato possui e a vaga requer"],
-    "missingSkills": ["lista de habilidades que a vaga requer mas o candidato não demonstra"],
-    "culturalFit": "alto|médio|baixo",
-    "recommendation": "Texto explicando o fit geral"
-  } | null,
-  "recomendacao": "Aprovado/Reprovado/Aprofundar",
-  "justificativa": "Razão detalhada da recomendação"
-}
-
-NOTA: O campo "adherence" deve ser null se nenhuma vaga específica foi fornecida. Se uma vaga foi fornecida, calcule o score de aderência baseado em:
-- Match de hard skills (40%)
-- Experiência relevante (30%)
-- Fit cultural e motivacional (30%)`;
-
-/**
- * System prompt for Leadership profile analysis
- */
-const PROMPT_LIDERANCA = `Você é um Analista de Perfil Senior do Protocolo Elite V6.0 - MODO PERFIL LIDERANÇA.
-
-METODOLOGIA STAR para LÍDERES:
-- Na análise do "R" (Resultado), busque RESULTADOS DE EQUIPE:
-  * O resultado foi uma melhoria no processo ou no faturamento do setor?
-  * Houve diminuição de Turnover ou aumento de produtividade do time?
-  * RED FLAG: Se o líder fala apenas "Eu fiz" sem mencionar equipe = centralização
-
-COMPETÊNCIAS ESPECÍFICAS PARA PERFIL LIDERANÇA (Peso 30%):
-1. Tomada de Decisão: Capacidade de decidir sob pressão e assumir riscos
-2. Gestão de Conflitos: Habilidade em mediar crises e manter o clima organizacional
-3. Mentoria/Delegar: Capacidade de desenvolver o time e não centralizar tarefas
-4. Visão Estratégica: Alinhamento com objetivos macro da organização
-
-TEMPERAMENTOS DE LIDERANÇA:
-- Colérico: Excelente para turnarounds (empresas em crise), mas risco de clima pesado
-- Sanguíneo: Excelente para engajamento e cultura, mas risco de falta de processos
-
-OUTPUT OBRIGATÓRIO (JSON):
-{
-  "nome": "Nome do Candidato",
-  "resumo": "Síntese de 2-3 linhas",
-  "perfilNivel": "Liderança",
-  "scorecard": {
-    "tomada_decisao": 1-5,
-    "gestao_conflitos": 1-5,
-    "mentoria_delegacao": 1-5,
-    "visao_estrategica": 1-5
-  },
-  "nota_geral": 1-5,
-  "temperamento": "Tipo predominante e análise",
-  "star_analysis": [{"situacao":"...","tarefa":"...","acao":"...","resultado":"..."}],
-  "swot": {"forcas":[],"fraquezas":[],"oportunidades":[],"ameacas":[]},
-  "red_flags": ["Lista de alertas se houver centralização ou problemas"],
-  "adherence": {
-    "score": 0-100,
-    "matchedSkills": ["lista de competências de liderança que o candidato possui e a vaga requer"],
-    "missingSkills": ["lista de competências que a vaga requer mas o candidato não demonstra"],
-    "culturalFit": "alto|médio|baixo",
-    "recommendation": "Texto explicando o fit geral para a posição de liderança"
-  } | null,
-  "recomendacao": "Aprovado/Reprovado/Aprofundar",
-  "justificativa": "Razão detalhada da recomendação"
-}
-
-NOTA: O campo "adherence" deve ser null se nenhuma vaga específica foi fornecida. Se uma vaga foi fornecida, calcule o score de aderência baseado em:
-- Match de competências de liderança (40%)
-- Experiência em contextos similares (30%)
-- Fit de temperamento e estilo de gestão (30%)`;
-
-/**
- * Get appropriate system prompt based on profile level
- * 
- * @param {'tecnico' | 'lideranca'} profileLevel
- * @returns {string}
- */
-export function getSystemPrompt(profileLevel) {
-    return profileLevel === 'lideranca' ? PROMPT_LIDERANCA : PROMPT_TECNICO;
-}
-
-/**
- * Build user prompt for candidate analysis
- * 
- * @param {string} companyName
- * @param {string|object} cvContent - Text or { inlineData: {...} }
- * @param {string} jobContext
- * @param {string} profileLevel
- * @returns {string|array}
- */
-export function buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData = null, previousAnalysis = null) {
-    const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
-
-    let basePrompt = `
-Empresa: ${companyName}
-Perfil Buscado: ${profileName}
-`;
-
-    if (jobData) {
-        basePrompt += `
-## VAGA DE REFERÊNCIA
-Título: ${jobData.title}
-Modelo: ${jobData.workModel || 'Não especificado'}
-Arquétipo: ${jobData.archetype || 'Não especificado'}
-Requisitos: ${jobData.requirements || 'Não especificados'}
-
-IMPORTANTE: Avalie a aderência do candidato a esta vaga específica e preencha o campo "adherence" com score de 0-100.
-`;
-    } else if (jobContext) {
-        basePrompt += `
-Contexto da Vaga: ${jobContext}
-`;
-    }
-
-    // Inject Previous Analysis Context (if available)
-    if (previousAnalysis) {
-        // Extract key insights to save tokens
-        const summary = previousAnalysis.resumo || "Não disponível";
-        const hardSkills = JSON.stringify(previousAnalysis.scorecard || {});
-
-        basePrompt += `
-## CONTEXTO DE ANÁLISE ANTERIOR (CURRÍCULO)
-O candidato já teve o CV analisado. Use isso para enriquecer a análise da transcrição.
-Resumo CV: ${summary}
-Scores CV: ${hardSkills}
-
-INSTRUÇÃO EXTRA: Compare o discurso na transcrição com o perfil técnico do CV. O candidato confirma o que prometeu?
-`;
-    }
-
-    basePrompt += `
-`;
-
-    // If string content (text), return as single prompt
-    if (typeof cvContent === 'string') {
-        return basePrompt + `CURRÍCULO/TRANSCRIÇÃO DO CANDIDATO:
-${cvContent}
-
-Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileName} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`;
-    }
-
-    // If object with inlineData (PDF), return parts array for multimodal
-    if (cvContent && cvContent.inlineData) {
-        return [
-            {
-                inlineData: {
-                    mimeType: cvContent.inlineData.mimeType,
-                    data: cvContent.inlineData.data
-                }
+const SCHEMA_TECNICO = {
+    type: "object",
+    properties: {
+        nome: { type: "string" },
+        resumo: { type: "string" },
+        scorecard: {
+            type: "object",
+            properties: {
+                dominio_hardskills: { type: "number" },
+                resolucao_problemas: { type: "number" },
+                qualidade_entrega: { type: "number" },
+                profundidade_tecnica: { type: "number" }
             },
-            {
-                text: basePrompt + `Analise o currículo em anexo (PDF).
+            required: ["dominio_hardskills", "resolucao_problemas", "qualidade_entrega", "profundidade_tecnica"]
+        },
+        recomendacao: { type: "string" },
+        justificativa: { type: "string" },
+        temperamento: { type: "string" }
+    },
+    required: ["nome", "resumo", "scorecard", "recomendacao", "justificativa", "temperamento"]
+};
 
-Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileName} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`
-            }
-        ];
-    }
+const SCHEMA_LIDERANCA = {
+    type: "object",
+    properties: {
+        nome: { type: "string" },
+        resumo: { type: "string" },
+        scorecard: {
+            type: "object",
+            properties: {
+                tomada_decisao: { type: "number" },
+                gestao_conflitos: { type: "number" },
+                mentoria_delegacao: { type: "number" },
+                visao_estrategica: { type: "number" }
+            },
+            required: ["tomada_decisao", "gestao_conflitos", "mentoria_delegacao", "visao_estrategica"]
+        },
+        recomendacao: { type: "string" },
+        justificativa: { type: "string" },
+        temperamento: { type: "string" }
+    },
+    required: ["nome", "resumo", "scorecard", "recomendacao", "justificativa", "temperamento"]
+};
 
-    throw new Error("Formato de CV inválido");
-}
-
-/**
- * Analyze a candidate profile
- * 
- * @param {string} companyName
- * @param {string|object} cvContent
- * @param {object} options
- * @param {string} options.jobContext
- * @param {string} options.profileLevel - 'tecnico' or 'lideranca'
- * @returns {Promise<object>} Analysis result
- */
 export async function analyzeCandidate(companyName, cvContent, ...args) {
-    // Handle both legacy (flattened) and new (options object) signatures
     let options = {};
-    if (args.length > 1 || typeof args[0] === 'string') {
-        // Legacy: analyzeCandidate(name, content, jobContext, profileLevel, jobData, previousAnalysis)
+    if (args.length > 1 || typeof args[0] === "string") {
         options = {
             jobContext: args[0],
             profileLevel: args[1],
@@ -227,113 +54,72 @@ export async function analyzeCandidate(companyName, cvContent, ...args) {
             previousAnalysis: args[3]
         };
     } else {
-        // New: analyzeCandidate(name, content, options)
         options = args[0] || {};
     }
 
-    const { jobContext = '', profileLevel = 'tecnico', jobData = null, previousAnalysis = null } = options;
-
-    if (!cvContent) {
-        throw new Error("Conteúdo do CV não fornecido");
-    }
+    const { profileLevel = "tecnico" } = options;
+    if (!cvContent) throw new Error("Conteúdo do CV não fornecido");
 
     const systemPrompt = getSystemPrompt(profileLevel);
+    const schema = profileLevel === "lideranca" ? SCHEMA_LIDERANCA : SCHEMA_TECNICO;
 
-    // Handle Large Files (URL)
-    if (cvContent?.type === 'url') {
-        let tempFilePath = null;
-        try {
-            console.log("Downloading large file from:", cvContent.url);
-            const response = await fetch(cvContent.url);
-            if (!response.ok) throw new Error(`Falha ao baixar arquivo: ${response.statusText}`);
-
-            const tempDir = os.tmpdir();
-            tempFilePath = path.join(tempDir, `analyze_${Date.now()}.tmp`);
-            const fileStream = fs.createWriteStream(tempFilePath);
-            await pipeline(response.body, fileStream);
-
-            console.log("Uploading to Gemini File API...");
-            const fileUri = await uploadFileToGemini(tempFilePath, cvContent.mimeType);
-
-            // Build text prompt without CV content (since it's in the file)
-            const textPrompt = buildBasePrompt(companyName, jobContext, profileLevel, jobData, previousAnalysis) +
-                `Analise o arquivo de áudio/PDF fornecido via File API.
-                
-                Analise este candidato seguindo a metodologia STAR adaptada para perfil ${profileLevel} e SWOT. Retorne APENAS o JSON estruturado conforme especificado.`;
-
-            const result = await callGeminiMultimodal({
-                systemPrompt,
-                textPrompt,
-                fileData: { fileUri, mimeType: cvContent.mimeType },
-                config: {
-                    temperature: 0.3,
-                    topK: 20,
-                    topP: 0.8,
-                    maxOutputTokens: 8192
-                }
-            });
-
-            return parseJsonResponse(result) || { raw: result };
-
-        } catch (filesError) {
-            console.error("Error processing large file:", filesError);
-            throw filesError;
-        } finally {
-            if (tempFilePath && fs.existsSync(tempFilePath)) {
-                fs.unlinkSync(tempFilePath);
-            }
-        }
+    let userContent;
+    if (cvContent?.type === "url") {
+        userContent = [
+            { fileData: { fileUri: cvContent.url, mimeType: cvContent.mimeType } },
+            { text: buildUserPrompt(companyName, "Arquivo anexo via File API", options) }
+        ];
+    } else if (cvContent?.inlineData) {
+        userContent = [
+            { inlineData: cvContent.inlineData },
+            { text: buildUserPrompt(companyName, "Conteúdo do CV anexado", options) }
+        ];
+    } else {
+        userContent = buildUserPrompt(companyName, cvContent, options);
     }
 
-    // Handle Standard Content (Text or Inline Base64)
-    const userContent = buildUserPrompt(companyName, cvContent, jobContext, profileLevel, jobData, previousAnalysis);
-
-    const result = await callGemini({
+    return await callGeminiStructured({
         systemPrompt,
         userContent,
+        schema,
         config: {
-            temperature: 0.3,
-            topK: 20,
-            topP: 0.8,
+            temperature: 0.2,
             maxOutputTokens: 8192
         }
     });
-
-    // Try to parse JSON from response
-    const parsed = parseJsonResponse(result);
-
-    if (parsed) {
-        return parsed;
-    }
-
-    // Return raw text if parsing fails
-    return { raw: result };
 }
 
-/**
- * Helper to build the base prompt text (reused)
- */
-function buildBasePrompt(companyName, jobContext, profileLevel, jobData, previousAnalysis = null) {
-    const profileName = profileLevel === 'lideranca' ? 'Liderança/Gestão' : 'Técnico/Especialista';
-    let basePrompt = `
-Empresa: ${companyName}
-Perfil Buscado: ${profileName}
-`;
+export function buildUserPrompt(companyName, cvContent, options = {}) {
+    const { jobContext = "", profileLevel = "tecnico", jobData = null, previousAnalysis = null } = options;
+    const baseContext = buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis);
+    
+    return `${baseContext}\n\n## CONTEÚDO DO CV/ENTREVISTA PARA ANÁLISE:\n${typeof cvContent === "string" ? cvContent : "Ver anexo multimodal"}`;
+}
+
+function buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis) {
+    const profileName = profileLevel === "lideranca" ? "Liderança/Gestão" : "Técnico/Especialista";
+    let context = `Empresa: ${companyName}\nPerfil Buscado: ${profileName}\n`;
 
     if (jobData) {
-        basePrompt += `
-## VAGA DE REFERÊNCIA
-Título: ${jobData.title}
-Modelo: ${jobData.workModel || 'Não especificado'}
-Arquétipo: ${jobData.archetype || 'Não especificado'}
-Requisitos: ${jobData.requirements || 'Não especificados'}
-
-IMPORTANTE: Avalie a aderência do candidato a esta vaga específica e preencha o campo "adherence" com score de 0-100.
-`;
+        context += `\n## VAGA DE REFERÊNCIA\nTítulo: ${jobData.title}\nModelo: ${jobData.workModel || "Não especificado"}\nRequisitos: ${jobData.requirements || "Não especificados"}\n\nIMPORTANTE: Avalie a aderência do candidato a esta vaga e calcule o score de 0-100 no campo correct adherence.\n`;
     } else if (jobContext) {
-        basePrompt += `
-Contexto da Vaga: ${jobContext}
-`;
+        context += `\nContexto da Vaga: ${jobContext}\n`;
     }
-    return basePrompt;
+
+    if (previousAnalysis) {
+        context += `\n## ANÁLISE PRÉVIA DISPONÍVEL\nO candidato já teve seu currículo analisado anteriormente. Use as informações abaixo como contexto adicional, mas foque a nova análise nos novos dados fornecidos (ex: transcrição de entrevista).\n\nAnálise Anterior: ${JSON.stringify(previousAnalysis)}\n`;
+    }
+
+    return context;
+}
+
+function getSystemPrompt(profileLevel) {
+    const basePrompt = `Você é um Recrutador Tech Especialista (Nível Staff) utilizando o Protocolo Elite V6.0 da Recruit-AI.
+    Sua missão é realizar uma análise profunda, crítica e imparcial.\n\n`;
+    
+    if (profileLevel === "lideranca") {
+        return basePrompt + `FOCO: Liderança, Visão Estratégica e Gestão. Analise capacidade de tomada de decisão, mentoria e resolução de conflitos.`;
+    }
+    
+    return basePrompt + `FOCO: Competência Técnica, Qualidade de Entrega e Hard Skills. Analise profundidade tecnológica e resolução de problemas complexos.`;
 }

@@ -49,51 +49,35 @@ export default function DashboardHome() {
 
       {/* Stats Grid */}
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon briefcase">
-            <Briefcase size={24} />
-          </div>
-          <div className="stat-info">
-            <div className="stat-value">{subscription?.jobsCount || 0}</div>
-            <div className="stat-label">Vagas Ativas</div>
-          </div>
-          <div className="stat-trend positive">
-            <TrendingUp size={16} />
-          </div>
-        </div>
+        <StatCard
+          variant="briefcase"
+          icon={<Briefcase size={24} />}
+          value={subscription?.jobsCount || 0}
+          label="Vagas Ativas"
+          trend={0}
+        />
 
-        <div className="stat-card">
-          <div className="stat-icon users">
-            <Users size={24} />
-          </div>
-          <div className="stat-info">
-            <div className="stat-value">{subscription?.cvCount || 0}</div>
-            <div className="stat-label">Análises Realizadas</div>
-          </div>
-          <div className="stat-trend positive">
-            <TrendingUp size={16} />
-          </div>
-        </div>
+        <StatCard
+          variant="users"
+          icon={<Users size={24} />}
+          value={subscription?.cvCount || 0}
+          label="Análises Realizadas"
+          trend={0}
+        />
 
-        <div className="stat-card">
-          <div className="stat-icon calendar">
-            <Calendar size={24} />
-          </div>
-          <div className="stat-info">
-            <div className="stat-value">{interviewCount}</div>
-            <div className="stat-label">Entrevistas Agendadas</div>
-          </div>
-        </div>
+        <StatCard
+          variant="calendar"
+          icon={<Calendar size={24} />}
+          value={interviewCount}
+          label="Entrevistas Agendadas"
+        />
 
-        <div className="stat-card">
-          <div className="stat-icon target">
-            <Target size={24} />
-          </div>
-          <div className="stat-info">
-            <div className="stat-value">{subscription?.daysRemaining || 0}</div>
-            <div className="stat-label">Dias Restantes (Trial)</div>
-          </div>
-        </div>
+        <StatCard
+          variant="target"
+          icon={<Target size={24} />}
+          value={subscription?.daysRemaining || 0}
+          label="Dias Restantes (Trial)"
+        />
       </div>
 
       {/* Main Content Grid */}
@@ -231,87 +215,6 @@ export default function DashboardHome() {
           grid-template-columns: repeat(4, 1fr);
           gap: 20px;
           margin-bottom: 32px;
-        }
-
-        .stat-card {
-          background: var(--canvas-card);
-          border: 1px solid var(--border-glass);
-          border-radius: 16px;
-          padding: 24px;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .stat-card:hover {
-          border-color: var(--action-primary);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-icon {
-          width: 56px;
-          height: 56px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .stat-icon.briefcase {
-          background: linear-gradient(135deg, rgba(244, 169, 0, 0.2), rgba(244, 169, 0, 0.1));
-          color: var(--action-primary);
-        }
-
-        .stat-icon.users {
-          background: linear-gradient(135deg, rgba(193, 102, 107, 0.2), rgba(193, 102, 107, 0.1));
-          color: var(--action-secondary);
-        }
-
-        .stat-icon.calendar {
-          background: linear-gradient(135deg, rgba(212, 184, 150, 0.2), rgba(212, 184, 150, 0.1));
-          color: var(--action-accent);
-        }
-
-        .stat-icon.target {
-          background: linear-gradient(135deg, rgba(125, 155, 106, 0.2), rgba(125, 155, 106, 0.1));
-          color: var(--status-success);
-        }
-
-        .stat-info {
-          flex: 1;
-        }
-
-        .stat-value {
-          font-size: 2rem;
-          font-weight: 800;
-          color: #FFFFFF;
-          line-height: 1;
-          margin-bottom: 4px;
-        }
-
-        .stat-label {
-          font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.6);
-          font-weight: 500;
-        }
-
-        .stat-trend {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .stat-trend.positive {
-          background: rgba(125, 155, 106, 0.2);
-          color: var(--status-success);
         }
 
         /* Content Grid */
