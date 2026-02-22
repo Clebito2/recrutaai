@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import GlassCard from "../../../components/common/GlassCard";
-import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
+import GlassCard from "@/components/common/GlassCard";
+import SubscriptionGuard from "@/components/common/SubscriptionGuard";
 import { Briefcase, Target, Brain, ListChecks, DollarSign, MapPin, Zap, ChevronRight, Loader2, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
-import { db } from "../../../lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useAuth } from "../../../context/AuthContext";
-import PageHeader from "../../../components/common/PageHeader";
+import { useAuth } from "@/context/AuthContext";
+import PageHeader from "@/components/common/PageHeader";
 
 export default function NewJobPage() {
   const [step, setStep] = useState(1);

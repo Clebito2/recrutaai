@@ -1,8 +1,8 @@
-import { streamGemini } from "../../../services/aiService";
-import { getSystemPrompt, buildUserPrompt } from "../../../skills/job-architect";
+import { streamGemini } from "@/services/aiService";
+import { getSystemPrompt, buildUserPrompt } from "@/skills/job-architect";
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
-import { jobDiagnosticSchema } from "../../../lib/validation";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
+import { jobDiagnosticSchema } from "@/lib/validation";
 
 export async function POST(request) {
     try {

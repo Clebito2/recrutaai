@@ -1,6 +1,6 @@
-import { generateEliteReport } from "../../../services/reportGenerator";
+import { generateEliteReport } from "@/services/reportGenerator";
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function POST(request) {
     try {

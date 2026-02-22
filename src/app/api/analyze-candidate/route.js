@@ -1,9 +1,9 @@
-import { analyzeCandidate } from "../../../services/aiService";
+import { analyzeCandidate } from "@/services/aiService";
 import { NextResponse } from "next/server";
-import { checkRateLimit, RATE_LIMITS } from "../../../lib/rate-limiter";
-import { db } from "../../../lib/firebase";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
+import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { analysisRequestSchema } from "../../../lib/validation";
+import { analysisRequestSchema } from "@/lib/validation";
 
 export async function POST(request) {
     try {
