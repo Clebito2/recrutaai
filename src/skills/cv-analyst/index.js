@@ -1,5 +1,5 @@
-﻿import { callGeminiStructured } from "../gemini-client";
-import { SCHEMA_TECNICO, SCHEMA_LIDERANCA } from "./schemas";
+﻿import { callGeminiStructured } from "../gemini-client/index.js";
+import { SCHEMA_TECNICO, SCHEMA_LIDERANCA } from "./schemas.js";
 
 /**
  * Perform candidate analysis using Protocolo Elite V6.0
@@ -60,26 +60,28 @@ function getSystemPrompt(profileLevel, options = {}) {
     const profileName = profileLevel === "lideranca" ? "LIDERANÇA E GESTÃO" : "TÉCNICO / ESPECIALISTA";
 
     let prompt = `VOCÊ É UM RECRUTADOR TECH ELITE (NÍVEL STAFF) - PROTOCOLO V6.0.
-Sua missão é realizar uma análise cirúrgica, imparcial e extremamente crítica de currículos ou transcrições.
+Sua missão é realizar uma análise cirúrgica, imparcial e extremamente crítica.
 
-### DIRETRIZES DE OURO:
-1. NÃO SEJA CONDIVENTE: Identifique lacunas reais. Se o candidato não souber X, diga claramente.
-2. MÉTODO STAR: Extraia evidências reais de Situação, Tarefa, Ação e Resultado.
-3. SWOT ANALÍTICO: Identifique Forças, Fraquezas, Oportunidades e Ameaças.
-4. SCORECARD: Avalie de 1 a 5 com base em evidências, não em promessas.
+### CRITICAL THINKING FRAMEWORK:
+1. **DIFERENCIAÇÃO DE FONTE**:
+   - SE for CURRÍCULO: Procure por inconsistências em datas, tecnologias que não 'batem' e senioridade inflada.
+   - SE for ENTREVISTA: Analise a 'vibe', objetividade vs. prolixidade (enrolação), e a profundidade de cada exemplo dado. Identifique contradições com o que foi alegado no CV.
+2. **MÉTODO STAR RIGOROSO**: Se o candidato diz que 'melhorou o processo', mas não diz 'X para Y % em Z meses', o score de resultado deve ser baixo.
+3. **SWOT SEM COMPLACÊNCIA**: Identifique fraquezas reais que podem custar caro para a empresa.
+4. **INTEGRIDADE DE DADOS**: O campo 'consistencia_dados' avalia se o discurso é coerente ou se há 'venda' excessiva.
 
 PERFIL ALVO: ${profileName}
 `;
 
     if (profileLevel === "lideranca") {
-        prompt += `\nFOCO ADICIONAL: Avalie capacidade de tomada de decisão sob pressão, gestão de conflitos, mentoria de times e visão estratégica de negócio.`;
+        prompt += `\nFOCO ADICIONAL: Avalie capacidade de tomada de decisão, gestão de conflitos, mentoria de times e visão estratégica. Em entrevistas, procure por humildade vs. arrogância.`;
     } else {
-        prompt += `\nFOCO ADICIONAL: Avalie profundidade arquitetural, domínio de hardskills, qualidade de código/entrega e capacidade de resolução de problemas complexos.`;
+        prompt += `\nFOCO ADICIONAL: Avalie profundidade técnica real, domínio de hardskills, qualidade de entrega e capacidade de resolver problemas complexos.`;
     }
 
     if (isAdherenceCheck) {
         prompt += `\n\n### VERIFICAÇÃO DE ADERÊNCIA:
-Compare o candidato estritamente com os requisitos da vaga fornecidos. Calcule o score de 0 a 100 com base no match real de habilidades e cultura.`;
+Compare o candidato estritamente com os requisitos da vaga. Calcule o score de 0 a 100 com base no match real.`;
     }
 
     return prompt;
@@ -87,17 +89,19 @@ Compare o candidato estritamente com os requisitos da vaga fornecidos. Calcule o
 
 export function buildUserPrompt(companyName, cvContent, options = {}) {
     const { jobContext = "", profileLevel = "tecnico", jobData = null, previousAnalysis = null } = options;
-    const baseContext = buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis);
+    const isInterview = typeof cvContent === "string" && (cvContent.includes("Entrevistador") || cvContent.includes("Candidato") || cvContent.length > 5000);
 
-    return `${baseContext}\n\n## CONTEÚDO PARA ANÁLISE:\n${typeof cvContent === "string" ? cvContent : "Conteúdo multimodal anexado"}`;
+    const baseContext = buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis, isInterview);
+
+    return `${baseContext}\n\n## CONTEÚDO PARA ANÁLISE (${isInterview ? "TRANSCRIÇÃO DE ENTREVISTA" : "CURRÍCULO/PERFIL"}):\n${typeof cvContent === "string" ? cvContent : "Conteúdo multimodal anexado"}`;
 }
 
-function buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis) {
+function buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis, isInterview) {
     const profileName = profileLevel === "lideranca" ? "Liderança/Gestão" : "Técnico/Especialista";
-    let context = `EMPRESA: ${companyName}\nPERFIL SOLICITADO: ${profileName}\n`;
+    let context = `EMPRESA: ${companyName}\nPERFIL SOLICITADO: ${profileName}\nMODO: ${isInterview ? "ANÁLISE DE ENTREVISTA (FOCO EM COMPORTAMENTO E CONSISTÊNCIA)" : "ANÁLISE DE CURRÍCULO (FOCO EM COMPETÊNCIAS E TRAJETÓRIA)"}\n`;
 
     if (jobData) {
-        context += `\n### VAGA DE REFERÊNCIA (CALCULAR ADERÊNCIA)
+        context += `\n### VAGA DE REFERÊNCIA
 Título: ${jobData.title}
 Requisitos: ${jobData.requirements || "Não informados"}
 Responsabilidades: ${jobData.responsibilities || "Não informadas"}
@@ -107,8 +111,8 @@ Responsabilidades: ${jobData.responsibilities || "Não informadas"}
     }
 
     if (previousAnalysis) {
-        context += `\n### HISTÓRICO DO CANDIDATO (CONTEXTO)
-Houve uma análise prévia. Use-a apenas para comparar evolução ou evitar repetições, mas Priorize os novos dados fornecidos.
+        context += `\n### HISTÓRICO DO CANDIDATO
+Use o histórico para validar a consistência do discurso atual.
 Histórico: ${JSON.stringify(previousAnalysis)}
 `;
     }
