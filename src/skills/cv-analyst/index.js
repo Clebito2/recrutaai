@@ -1,49 +1,14 @@
-﻿import { callGeminiStructured, uploadFileToGemini } from "../gemini-client";
+﻿import { callGeminiStructured } from "../gemini-client";
+import { SCHEMA_TECNICO, SCHEMA_LIDERANCA } from "./schemas";
 
-const SCHEMA_TECNICO = {
-    type: "object",
-    properties: {
-        nome: { type: "string" },
-        resumo: { type: "string" },
-        scorecard: {
-            type: "object",
-            properties: {
-                dominio_hardskills: { type: "number" },
-                resolucao_problemas: { type: "number" },
-                qualidade_entrega: { type: "number" },
-                profundidade_tecnica: { type: "number" }
-            },
-            required: ["dominio_hardskills", "resolucao_problemas", "qualidade_entrega", "profundidade_tecnica"]
-        },
-        recomendacao: { type: "string" },
-        justificativa: { type: "string" },
-        temperamento: { type: "string" }
-    },
-    required: ["nome", "resumo", "scorecard", "recomendacao", "justificativa", "temperamento"]
-};
-
-const SCHEMA_LIDERANCA = {
-    type: "object",
-    properties: {
-        nome: { type: "string" },
-        resumo: { type: "string" },
-        scorecard: {
-            type: "object",
-            properties: {
-                tomada_decisao: { type: "number" },
-                gestao_conflitos: { type: "number" },
-                mentoria_delegacao: { type: "number" },
-                visao_estrategica: { type: "number" }
-            },
-            required: ["tomada_decisao", "gestao_conflitos", "mentoria_delegacao", "visao_estrategica"]
-        },
-        recomendacao: { type: "string" },
-        justificativa: { type: "string" },
-        temperamento: { type: "string" }
-    },
-    required: ["nome", "resumo", "scorecard", "recomendacao", "justificativa", "temperamento"]
-};
-
+/**
+ * Perform candidate analysis using Protocolo Elite V6.0
+ * Supports text, PDF (multimodal) and Audio (multimodal)
+ * 
+ * @param {string} companyName 
+ * @param {object|string} cvContent - Text string OR { inlineData: { mimeType, data } }
+ * @param {object} options - { jobContext, profileLevel, jobData, previousAnalysis }
+ */
 export async function analyzeCandidate(companyName, cvContent, ...args) {
     let options = {};
     if (args.length > 1 || typeof args[0] === "string") {
@@ -58,21 +23,22 @@ export async function analyzeCandidate(companyName, cvContent, ...args) {
     }
 
     const { profileLevel = "tecnico" } = options;
-    if (!cvContent) throw new Error("Conteúdo do CV não fornecido");
+    if (!cvContent) throw new Error("Conteúdo para análise não fornecido");
 
-    const systemPrompt = getSystemPrompt(profileLevel);
+    const systemPrompt = getSystemPrompt(profileLevel, options);
     const schema = profileLevel === "lideranca" ? SCHEMA_LIDERANCA : SCHEMA_TECNICO;
 
     let userContent;
-    if (cvContent?.type === "url") {
-        userContent = [
-            { fileData: { fileUri: cvContent.url, mimeType: cvContent.mimeType } },
-            { text: buildUserPrompt(companyName, "Arquivo anexo via File API", options) }
-        ];
-    } else if (cvContent?.inlineData) {
+    if (cvContent?.inlineData) {
+        // Optimized multimodal structure: File FIRST, then textual instructions
         userContent = [
             { inlineData: cvContent.inlineData },
-            { text: buildUserPrompt(companyName, "Conteúdo do CV anexado", options) }
+            { text: buildUserPrompt(companyName, "ANALISE O ARQUIVO ANEXO ACIMA", options) }
+        ];
+    } else if (cvContent?.type === "url") {
+        userContent = [
+            { fileData: { fileUri: cvContent.url, mimeType: cvContent.mimeType } },
+            { text: buildUserPrompt(companyName, "ANALISE O ARQUIVO REMOTO", options) }
         ];
     } else {
         userContent = buildUserPrompt(companyName, cvContent, options);
@@ -83,43 +49,70 @@ export async function analyzeCandidate(companyName, cvContent, ...args) {
         userContent,
         schema,
         config: {
-            temperature: 0.2,
+            temperature: 0.1, // Lower temperature for more objective analysis
             maxOutputTokens: 8192
         }
     });
 }
 
+function getSystemPrompt(profileLevel, options = {}) {
+    const isAdherenceCheck = !!options.jobData;
+    const profileName = profileLevel === "lideranca" ? "LIDERANÇA E GESTÃO" : "TÉCNICO / ESPECIALISTA";
+
+    let prompt = `VOCÊ É UM RECRUTADOR TECH ELITE (NÍVEL STAFF) - PROTOCOLO V6.0.
+Sua missão é realizar uma análise cirúrgica, imparcial e extremamente crítica de currículos ou transcrições.
+
+### DIRETRIZES DE OURO:
+1. NÃO SEJA CONDIVENTE: Identifique lacunas reais. Se o candidato não souber X, diga claramente.
+2. MÉTODO STAR: Extraia evidências reais de Situação, Tarefa, Ação e Resultado.
+3. SWOT ANALÍTICO: Identifique Forças, Fraquezas, Oportunidades e Ameaças.
+4. SCORECARD: Avalie de 1 a 5 com base em evidências, não em promessas.
+
+PERFIL ALVO: ${profileName}
+`;
+
+    if (profileLevel === "lideranca") {
+        prompt += `\nFOCO ADICIONAL: Avalie capacidade de tomada de decisão sob pressão, gestão de conflitos, mentoria de times e visão estratégica de negócio.`;
+    } else {
+        prompt += `\nFOCO ADICIONAL: Avalie profundidade arquitetural, domínio de hardskills, qualidade de código/entrega e capacidade de resolução de problemas complexos.`;
+    }
+
+    if (isAdherenceCheck) {
+        prompt += `\n\n### VERIFICAÇÃO DE ADERÊNCIA:
+Compare o candidato estritamente com os requisitos da vaga fornecidos. Calcule o score de 0 a 100 com base no match real de habilidades e cultura.`;
+    }
+
+    return prompt;
+}
+
 export function buildUserPrompt(companyName, cvContent, options = {}) {
     const { jobContext = "", profileLevel = "tecnico", jobData = null, previousAnalysis = null } = options;
     const baseContext = buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis);
-    
-    return `${baseContext}\n\n## CONTEÚDO DO CV/ENTREVISTA PARA ANÁLISE:\n${typeof cvContent === "string" ? cvContent : "Ver anexo multimodal"}`;
+
+    return `${baseContext}\n\n## CONTEÚDO PARA ANÁLISE:\n${typeof cvContent === "string" ? cvContent : "Conteúdo multimodal anexado"}`;
 }
 
 function buildBaseContext(companyName, jobContext, profileLevel, jobData, previousAnalysis) {
     const profileName = profileLevel === "lideranca" ? "Liderança/Gestão" : "Técnico/Especialista";
-    let context = `Empresa: ${companyName}\nPerfil Buscado: ${profileName}\n`;
+    let context = `EMPRESA: ${companyName}\nPERFIL SOLICITADO: ${profileName}\n`;
 
     if (jobData) {
-        context += `\n## VAGA DE REFERÊNCIA\nTítulo: ${jobData.title}\nModelo: ${jobData.workModel || "Não especificado"}\nRequisitos: ${jobData.requirements || "Não especificados"}\n\nIMPORTANTE: Avalie a aderência do candidato a esta vaga e calcule o score de 0-100 no campo correct adherence.\n`;
+        context += `\n### VAGA DE REFERÊNCIA (CALCULAR ADERÊNCIA)
+Título: ${jobData.title}
+Requisitos: ${jobData.requirements || "Não informados"}
+Responsabilidades: ${jobData.responsibilities || "Não informadas"}
+`;
     } else if (jobContext) {
-        context += `\nContexto da Vaga: ${jobContext}\n`;
+        context += `\nCONTEXTO ADICIONAL: ${jobContext}\n`;
     }
 
     if (previousAnalysis) {
-        context += `\n## ANÁLISE PRÉVIA DISPONÍVEL\nO candidato já teve seu currículo analisado anteriormente. Use as informações abaixo como contexto adicional, mas foque a nova análise nos novos dados fornecidos (ex: transcrição de entrevista).\n\nAnálise Anterior: ${JSON.stringify(previousAnalysis)}\n`;
+        context += `\n### HISTÓRICO DO CANDIDATO (CONTEXTO)
+Houve uma análise prévia. Use-a apenas para comparar evolução ou evitar repetições, mas Priorize os novos dados fornecidos.
+Histórico: ${JSON.stringify(previousAnalysis)}
+`;
     }
 
     return context;
 }
 
-function getSystemPrompt(profileLevel) {
-    const basePrompt = `Você é um Recrutador Tech Especialista (Nível Staff) utilizando o Protocolo Elite V6.0 da Recruit-AI.
-    Sua missão é realizar uma análise profunda, crítica e imparcial.\n\n`;
-    
-    if (profileLevel === "lideranca") {
-        return basePrompt + `FOCO: Liderança, Visão Estratégica e Gestão. Analise capacidade de tomada de decisão, mentoria e resolução de conflitos.`;
-    }
-    
-    return basePrompt + `FOCO: Competência Técnica, Qualidade de Entrega e Hard Skills. Analise profundidade tecnológica e resolução de problemas complexos.`;
-}

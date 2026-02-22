@@ -8,9 +8,10 @@ const metaSchemaAttributes = {
     resumo: { type: "string", description: "Resumo de 2-3 linhas da análise" },
     perfilNivel: { type: "string", enum: ["Técnico", "Liderança"] },
     nota_geral: { type: "number", description: "Score de 1 a 5", minimum: 1, maximum: 5 },
-    temperamento: { type: "string", description: "Tipo predominante e breve análise" },
+    temperamento: { type: "string", description: "Tipo predominante e breve análise (ex: Colérico, Fleumático, etc)" },
     star_analysis: {
         type: "array",
+        description: "Análise baseada no método STAR (Situação, Tarefa, Ação, Resultado)",
         items: {
             type: "object",
             properties: {
@@ -24,6 +25,7 @@ const metaSchemaAttributes = {
     },
     swot: {
         type: "object",
+        description: "Análise SWOT do candidato",
         properties: {
             forcas: { type: "array", items: { type: "string" } },
             fraquezas: { type: "array", items: { type: "string" } },
@@ -34,6 +36,7 @@ const metaSchemaAttributes = {
     },
     adherence: {
         type: "object",
+        description: "Aderência à vaga (se jobData fornecido)",
         nullable: true,
         properties: {
             score: { type: "number", minimum: 0, maximum: 100 },
@@ -45,7 +48,7 @@ const metaSchemaAttributes = {
         required: ["score", "matchedSkills", "missingSkills", "culturalFit", "recommendation"]
     },
     recomendacao: { type: "string", enum: ["Aprovado", "Reprovado", "Aprofundar"] },
-    justificativa: { type: "string", description: "Explicação detalhada da recomendação" }
+    justificativa: { type: "string", description: "Explicação técnica detalhada da recomendação" }
 };
 
 export const SCHEMA_TECNICO = {
@@ -80,7 +83,7 @@ export const SCHEMA_LIDERANCA = {
             },
             required: ["tomada_decisao", "gestao_conflitos", "mentoria_delegacao", "visao_estrategica"]
         },
-        red_flags: { type: "array", items: { type: "string" } }
+        red_flags: { type: "array", items: { type: "string" }, description: "Sinais de alerta identificados" }
     },
     required: ["nome", "resumo", "perfilNivel", "scorecard", "nota_geral", "temperamento", "star_analysis", "swot", "recomendacao", "justificativa"]
 };

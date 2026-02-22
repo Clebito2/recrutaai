@@ -697,6 +697,62 @@ export default function CandidatesPage() {
               </GlassCard>
             )}
 
+            {/* SWOT Matrix */}
+            {analysisResult.swot && (
+              <div className="swot-section">
+                <h3 className="section-title">Matriz SWOT</h3>
+                <div className="swot-grid">
+                  <GlassCard className="swot-item strengths" noHover>
+                    <h4>FORÇAS</h4>
+                    <ul>{analysisResult.swot.forcas?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                  </GlassCard>
+                  <GlassCard className="swot-item weaknesses" noHover>
+                    <h4>FRAQUEZAS</h4>
+                    <ul>{analysisResult.swot.fraquezas?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                  </GlassCard>
+                  <GlassCard className="swot-item opportunities" noHover>
+                    <h4>OPORTUNIDADES</h4>
+                    <ul>{analysisResult.swot.oportunidades?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                  </GlassCard>
+                  <GlassCard className="swot-item threats" noHover>
+                    <h4>AMEAÇAS</h4>
+                    <ul>{analysisResult.swot.ameacas?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                  </GlassCard>
+                </div>
+              </div>
+            )}
+
+            {/* STAR Analysis */}
+            {analysisResult.star_analysis?.length > 0 && (
+              <div className="star-section">
+                <h3 className="section-title">Método STAR (Evidências)</h3>
+                <div className="star-list">
+                  {analysisResult.star_analysis.map((star, i) => (
+                    <GlassCard key={i} className="star-item">
+                      <div className="star-grid">
+                        <div className="star-part"><strong>S</strong><span>{star.situacao}</span></div>
+                        <div className="star-part"><strong>T</strong><span>{star.tarefa}</span></div>
+                        <div className="star-part"><strong>A</strong><span>{star.acao}</span></div>
+                        <div className="star-part"><strong>R</strong><span>{star.resultado}</span></div>
+                      </div>
+                    </GlassCard>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Red Flags (Leadership Profile) */}
+            {analysisResult.red_flags?.length > 0 && (
+              <GlassCard className="red-flags-card">
+                <h3><AlertCircle size={18} /> Red Flags / Pontos de Atenção</h3>
+                <ul>
+                  {analysisResult.red_flags.map((flag, i) => (
+                    <li key={i}>{flag}</li>
+                  ))}
+                </ul>
+              </GlassCard>
+            )}
+
             <div className="result-actions">
               <button onClick={() => setAnalysisResult(null)} className="btn-secondary"><ArrowLeft size={16} /> Voltar</button>
               <button className="btn-indigo" onClick={() => setShowScheduleModal(true)}><Calendar size={18} /> Agendar</button>
@@ -723,6 +779,11 @@ export default function CandidatesPage() {
                   <label>Hora</label>
                   <input type="time" className="input-glass" value={scheduleData.time} onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })} />
                 </div>
+                <div className="form-group">
+                  <label>Local/Link</label>
+                  <input type="text" className="input-glass" placeholder="Ex: Google Meet ou Escritório" value={scheduleData.location} onChange={(e) => setScheduleData({ ...scheduleData, location: e.target.value })} />
+                </div>
+                <textarea className="input-glass" placeholder="Observações..." value={scheduleData.notes} onChange={(e) => setScheduleData({ ...scheduleData, notes: e.target.value })} />
                 <button className="btn-indigo full-width" onClick={handleScheduleInterview} disabled={isScheduling}>
                   {isScheduling ? "Agendando..." : "Confirmar"}
                 </button>
@@ -753,6 +814,35 @@ export default function CandidatesPage() {
           .btn-indigo { background: var(--action-primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; items-center: center; gap: 8px; }
           .btn-indigo:disabled { opacity: 0.5; cursor: not-allowed; }
           .full-width { width: 100%; justify-content: center; }
+          .section-title { font-weight: 800; font-size: 1.2rem; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
+          
+          .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+          .swot-item h4 { font-size: 0.85rem; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.05em; }
+          .swot-item ul { list-style: none; padding: 0; }
+          .swot-item li { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+          .swot-item li:last-child { border: none; }
+          
+          .strengths h4 { color: #10b981; }
+          .weaknesses h4 { color: #ef4444; }
+          .opportunities h4 { color: #3b82f6; }
+          .threats h4 { color: #f59e0b; }
+          
+          .star-list { display: flex; flex-direction: column; gap: 16px; }
+          .star-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px; }
+          .star-part { display: flex; flex-direction: column; gap: 4px; }
+          .star-part strong { font-size: 1.2rem; color: var(--action-primary); opacity: 0.8; }
+          .star-part span { font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.4; }
+          
+          .red-flags-card { margin-top: 32px; border-color: rgba(239, 68, 68, 0.3) !important; background: rgba(239, 68, 68, 0.05) !important; padding: 24px; }
+          .red-flags-card h3 { color: #ef4444; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+          .red-flags-card ul { list-style: none; padding: 0; }
+          .red-flags-card li { color: #fca5a5; font-size: 0.9rem; margin-bottom: 8px; padding-left: 20px; position: relative; }
+          .red-flags-card li::before { content: "•"; position: absolute; left: 0; color: #ef4444; font-weight: bold; }
+
+          @media (max-width: 768px) {
+            .swot-grid, .scores-grid { grid-template-columns: 1fr; }
+            .star-grid { grid-template-columns: 1fr; }
+          }
         `}</style>
       </div>
     </SubscriptionGuard>

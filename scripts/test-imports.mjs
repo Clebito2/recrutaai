@@ -2,20 +2,16 @@
 console.log("Node Version:", process.version);
 
 async function testImports() {
-    try {
-        await import('pdfjs-dist/legacy/build/pdf.mjs');
-        console.log("SUCCESS: Imported legacy/build/pdf.mjs");
-    } catch (e) {
-        console.log("FAIL: legacy/build/pdf.mjs");
-        console.log(e.message);
-    }
+    console.log("--- Testing PDF.js Imports (Node Compatibility) ---");
 
     try {
-        await import('pdfjs-dist/build/pdf.mjs');
-        console.log("SUCCESS: Imported build/pdf.mjs");
+        console.log("Trying legacy/build/pdf.mjs...");
+        const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+        console.log("SUCCESS: Imported legacy/build/pdf.mjs");
+        console.log("Version:", pdfjs.version);
     } catch (e) {
-        console.log("FAIL: build/pdf.mjs");
-        console.log(e.message);
+        console.log("FAIL: legacy/build/pdf.mjs");
+        console.error("Error Message:", e.message);
     }
 }
 

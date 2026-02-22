@@ -12,3 +12,9 @@
 ## Qualidade & Testes
 - [ ] **Testes Automatizados**: Criar testes unitários para o parser de arquivos (`api/parse-file`).
 - [ ] **Validação de Formatos**: Refinar a validação de arquivos corrompidos ou PDFs encriptados.
+
+## Melhoria Contínua & Manutenção
+- [ ] **Melhorar prompt de análise**: Refinar o prompt para a análise de currículos e entrevistas.
+- [ ] **Testar a jornada inteira do usuário**: Validar todo o fluxo desde o cadastro no site até a contratação, corrigindo erros e inserindo instruções de utilização.
+- [ ] **Atualizar AIOS-core**: Manter o aios-core atualizado no projeto.
+- [ ] **Pesquisar e Ativar Modo Yolo/Turbo**: Habilitar execução contínua com autonomia sem pausas constantes para permissão (antigravity/aios-core).

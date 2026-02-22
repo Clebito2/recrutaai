@@ -65,13 +65,22 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
     });
 
     if (!response.ok) {
-        const error = await response.json();
+        let errorMessage = "Erro na API Gemini";
+        try {
+            const error = await response.json();
+            errorMessage = error.error?.message || error.message || errorMessage;
 
-        if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
-            throw new Error("Chave de API inválida ou rejeitada pelo Google");
+            if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
+                errorMessage = "Chave de API inválida ou rejeitada pelo Google";
+            } else if (response.status === 429) {
+                errorMessage = "Limite de cota excedido no Gemini. Aguarde um momento.";
+            }
+        } catch (e) {
+            // Fallback if JSON parsing fails
+            errorMessage = `Erro ${response.status}: ${response.statusText}`;
         }
 
-        throw new Error(error.error?.message || "Erro na API Gemini");
+        throw new Error(errorMessage);
     }
 
     const data = await response.json();

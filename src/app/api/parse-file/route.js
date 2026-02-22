@@ -2,26 +2,26 @@ import { NextResponse } from 'next/server';
 import mammoth from 'mammoth';
 import { checkRateLimit, RATE_LIMITS } from '../../../lib/rate-limiter';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // Increased for Gemini multimodal
 const ALLOWED_TYPES = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain',
     'audio/mp4',
     'audio/x-m4a',
-    'audio/mpeg'
+    'audio/mpeg',
+    'audio/wav'
 ];
 
-// Protocolo Elite V6.0 - "Nuclear Strategy"
-// For PDFs, we bypass local parsing completely and return the raw file data (Base64).
-// This allows the AI Service (Gemini) to process the file natively.
-
+/**
+ * Protocolo Elite V6.0 - "Nuclear Strategy"
+ * We bypass local parsing for complex formats (PDF, Audio).
+ * This allows Gemini 2.0 to process files natively with maximum fidelity.
+ */
 export async function POST(req) {
     try {
         const rateLimitResponse = checkRateLimit(req, RATE_LIMITS.parseFile);
-        if (rateLimitResponse) {
-            return rateLimitResponse;
-        }
+        if (rateLimitResponse) return rateLimitResponse;
 
         const formData = await req.formData();
         const file = formData.get('file');
@@ -36,110 +36,58 @@ export async function POST(req) {
             }, { status: 400 });
         }
 
-        const isValidType = ALLOWED_TYPES.includes(file.type) ||
-            file.name.endsWith('.docx') ||
-            file.name.endsWith('.pdf') ||
-            file.name.endsWith('.txt') ||
-            file.name.endsWith('.m4a') ||
-            file.name.endsWith('.mp3');
-
-        if (!isValidType) {
-            return NextResponse.json({
-                error: 'Formato não suportado. Use PDF, DOCX, TXT, M4A ou MP3.'
-            }, { status: 400 });
-        }
-
         const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = file.name.toLowerCase();
         let responseData = {};
 
-        if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-            console.log('API: PDF detectado. Retornando Base64 para processamento nativo via IA:', file.name);
-
-            // Convert buffer to Base64
-            const base64 = buffer.toString('base64');
-
-            // Return structured data for the frontend to pass to analyze-candidate
+        // 1. NATIVE AI PROCESSING (PDF & Audio)
+        if (file.type === 'application/pdf' || filename.endsWith('.pdf')) {
             responseData = {
                 type: 'pdf',
-                text: null, // No text extracted locally
                 inlineData: {
                     mimeType: 'application/pdf',
-                    data: base64
+                    data: buffer.toString('base64')
                 }
             };
-
         } else if (
-            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-            file.name.endsWith('.docx')
+            file.type.startsWith('audio/') ||
+            filename.endsWith('.m4a') ||
+            filename.endsWith('.mp3') ||
+            filename.endsWith('.wav')
         ) {
-            try {
-                console.log('API: DOCX detectado. Extraindo texto com Mammoth...');
-                const result = await mammoth.extractRawText({ buffer });
-                const text = result.value;
-                if (result.messages.length > 0) {
-                    console.log('Mammoth messages:', result.messages);
-                }
-
-                responseData = {
-                    type: 'text',
-                    text: text
-                };
-            } catch (docxError) {
-                console.error('DOCX parsing error:', docxError);
-                throw new Error(`Falha ao ler DOCX: ${docxError.message}`);
-            }
-        } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-            const text = await file.text();
-            responseData = {
-                type: 'text',
-                text: text
-            };
-        } else if (
-            file.type === 'audio/mp4' ||
-            file.type === 'audio/x-m4a' ||
-            file.type === 'audio/mpeg' ||
-            file.name.endsWith('.m4a') ||
-            file.name.endsWith('.mp3')
-        ) {
-            console.log('API: Arquivo de áudio detectado. Retornando Base64 para processamento via IA:', file.name);
-
-            const base64 = buffer.toString('base64');
-            const mimeType = file.type || (file.name.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg');
-
+            const mimeType = file.type || (filename.endsWith('.m4a') ? 'audio/mp4' : 'audio/mpeg');
             responseData = {
                 type: 'audio',
-                text: null,
                 inlineData: {
                     mimeType: mimeType,
-                    data: base64
+                    data: buffer.toString('base64')
                 }
             };
-        } else {
-            // Fallback: try to read as text
-            try {
-                const text = buffer.toString('utf-8');
-                responseData = {
-                    type: 'text',
-                    text: text
-                };
-            } catch (e) {
-                return NextResponse.json({ error: 'Formato de arquivo não suportado' }, { status: 400 });
-            }
         }
-
-        const hasContent = responseData.text?.trim() || responseData.inlineData;
-
-        if (!hasContent) {
-            return NextResponse.json({ error: 'Não foi possível ler o conteúdo do arquivo.' }, { status: 400 });
+        // 2. LOCAL EXTRACTION (DOCX & TXT)
+        else if (
+            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            filename.endsWith('.docx')
+        ) {
+            const result = await mammoth.extractRawText({ buffer });
+            responseData = {
+                type: 'text',
+                text: result.value
+            };
+        } else if (file.type === 'text/plain' || filename.endsWith('.txt')) {
+            responseData = {
+                type: 'text',
+                text: buffer.toString('utf-8')
+            };
+        } else {
+            return NextResponse.json({ error: 'Formato de arquivo não suportado' }, { status: 400 });
         }
 
         return NextResponse.json(responseData);
     } catch (error) {
-        console.error('CRITICAL Error parsing file:', error);
-        console.error('Stack trace:', error.stack);
+        console.error('API Error parsing file:', error);
         return NextResponse.json({
-            error: 'Erro ao processar arquivo: ' + error.message,
-            details: error.stack
+            error: 'Erro ao processar arquivo: ' + error.message
         }, { status: 500 });
     }
 }
