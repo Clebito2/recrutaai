@@ -24,7 +24,7 @@ export default function Terms() {
 
             <section>
               <h2>2. Descrição do Serviço</h2>
-              <p>O RecruteAI é uma ferramenta de auxílio ao recrutamento e seleção baseada em inteligência artificial. O serviço é fornecido "como está" e destina-se a apoiar, não substituir, o julgamento humano.</p>
+              <p>O RecruteAI é uma ferramenta de auxílio ao recrutamento e seleção baseada em inteligência artificial. O serviço é fornecido &quot;como está&quot; e destina-se a apoiar, não substituir, o julgamento humano.</p>
             </section>
 
             <section>

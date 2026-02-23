@@ -50,11 +50,11 @@ export default function Home() {
         <div className="contrast-grid">
           <GlassCard className="contrast-card old">
             <span className="contrast-label">O Velho R&S</span>
-            <p>"Tabelas intermináveis, decisões baseadas em palpites e processos que consomem semanas."</p>
+            <p>&quot;Tabelas intermináveis, decisões baseadas em palpites e processos que consomem semanas.&quot;</p>
           </GlassCard>
           <GlassCard className="contrast-card new">
             <span className="contrast-label">A Nova Era</span>
-            <p>"Interface inteligente, dados acionáveis e uma IA que atua como seu Co-Piloto de Talentos."</p>
+            <p>&quot;Interface inteligente, dados acionáveis e uma IA que atua como seu Co-Piloto de Talentos.&quot;</p>
           </GlassCard>
         </div>
       </section>
@@ -108,8 +108,8 @@ export default function Home() {
       <section className="trust-section">
         <GlassCard className="trust-card">
           <p className="trust-text">
-            "Para empresas que não buscam apenas preencher vagas, mas construir legados.
-            O sistema de curadoria escolhido por líderes que valorizam o tempo e o talento humano."
+            &quot;Para empresas que não buscam apenas preencher vagas, mas construir legados.
+            O sistema de curadoria escolhido por líderes que valorizam o tempo e o talento humano.&quot;
           </p>
         </GlassCard>
       </section>

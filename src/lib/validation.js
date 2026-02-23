@@ -22,3 +22,5 @@ export const analysisRequestSchema = z.object({
     jobData: z.any().optional(),
     previousAnalysis: z.any().optional(),
 });
+
+export const jobDiagnosticSchema = z.any();

@@ -53,47 +53,70 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
         ...config
     };
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            contents: [{ parts }],
-            generationConfig
-        })
-    });
+    const modelsToTry = [DEFAULT_MODEL, "gemini-1.5-flash"];
+    let lastError = null;
 
-    if (!response.ok) {
-        let errorMessage = "Erro na API Gemini";
+    for (const modelName of modelsToTry) {
         try {
-            const error = await response.json();
-            errorMessage = error.error?.message || error.message || errorMessage;
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    contents: [{ parts }],
+                    generationConfig
+                })
+            });
 
-            if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
-                errorMessage = "Chave de API inválida ou rejeitada pelo Google";
-            } else if (response.status === 429) {
-                errorMessage = "Limite de cota excedido no Gemini. Aguarde um momento.";
+            if (!response.ok) {
+                let errorMessage = "Erro na API Gemini";
+                try {
+                    const error = await response.json();
+                    errorMessage = error.error?.message || error.message || errorMessage;
+
+                    if (response.status === 400 && error.error?.status === 'INVALID_ARGUMENT') {
+                        errorMessage = "Chave de API inválida ou rejeitada pelo Google";
+                    } else if (response.status === 429) {
+                        errorMessage = "Limite de cota excedido no Gemini. Aguarde um momento.";
+                    }
+                } catch (e) {
+                    errorMessage = `Erro ${response.status}: ${response.statusText}`;
+                }
+
+                if (response.status === 429 || errorMessage.includes('Too Many') || errorMessage.includes('Quota')) {
+                    console.warn(`[YOLO] Rate limit atingido no modelo ${modelName}. Tentando fallback...`);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    continue;
+                }
+
+                if (errorMessage.includes("403") || errorMessage.includes("leaked")) {
+                    throw new Error("Chave vazada ou revogada.");
+                }
+
+                console.error(`Falha no modelo ${modelName}:`, errorMessage);
+                throw new Error(errorMessage);
             }
-        } catch (e) {
-            // Fallback if JSON parsing fails
-            errorMessage = `Erro ${response.status}: ${response.statusText}`;
-        }
 
-        throw new Error(errorMessage);
+            const data = await response.json();
+            const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!generatedText) {
+                if (data.promptFeedback?.blockReason) {
+                    throw new Error(`Busca bloqueada: ${data.promptFeedback.blockReason}`);
+                }
+                throw new Error("Resposta vazia da IA");
+            }
+
+            return generatedText;
+
+        } catch (error) {
+            lastError = error;
+            if (error.message?.includes("Chave vazada")) throw error;
+        }
     }
 
-    const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!generatedText) {
-        if (data.promptFeedback?.blockReason) {
-            throw new Error(`Busca bloqueada: ${data.promptFeedback.blockReason}`);
-        }
-        throw new Error("Resposta vazia da IA");
-    }
-
-    return generatedText;
+    throw new Error("Todos os modelos de IA falharam (Limites de API excedidos). Aguarde 1 minuto e tente novamente.");
 }
 
 /**
@@ -130,6 +153,7 @@ export async function* streamGemini({ systemPrompt, userContent, config = {} }) 
 
 /**
  * Call Gemini with Structured JSON Output (Schema)
+ * Implementa retry e fallback para lidar evasivamente com Rate Limits.
  * 
  * @param {object} options
  * @param {object} options.schema - JSON Schema for validation
@@ -139,10 +163,6 @@ export async function callGeminiStructured({ systemPrompt, userContent, schema, 
     if (!apiKey) throw new Error("GEMINI_API_KEY missing");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-        model: DEFAULT_MODEL,
-        systemInstruction: systemPrompt
-    });
 
     const generationConfig = {
         ...DEFAULT_CONFIG,
@@ -151,13 +171,40 @@ export async function callGeminiStructured({ systemPrompt, userContent, schema, 
         responseSchema: schema
     };
 
-    const result = await model.generateContent({
-        contents: [{ role: 'user', parts: Array.isArray(userContent) ? userContent : [{ text: userContent }] }],
-        generationConfig
-    });
+    const modelsToTry = [DEFAULT_MODEL, "gemini-1.5-flash"];
+    let lastError = null;
 
-    const response = await result.response;
-    return JSON.parse(response.text());
+    for (const modelName of modelsToTry) {
+        try {
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                systemInstruction: systemPrompt
+            });
+
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: Array.isArray(userContent) ? userContent : [{ text: userContent }] }],
+                generationConfig
+            });
+
+            const response = await result.response;
+            return JSON.parse(response.text());
+        } catch (error) {
+            lastError = error;
+            if (error.message?.includes("403") || error.message?.includes("leaked")) {
+                throw new Error("Sua chave do Gemini (GEMINI_API_KEY) foi revogada pelo Google por ter sido vazada. Crie uma nova chave no Google AI Studio e atualize o .env.local.");
+            }
+            if (error.status === 429 || error.message?.includes("429") || error.message?.includes("Too Many Requests")) {
+                console.warn(`[YOLO] Rate limit atingido no modelo ${modelName}. Tentando fallback...`);
+                // Espera 2 segundos antes de tentar o próximo
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                continue; // Tenta o proximo modelo
+            }
+            // Se for outro erro, lançamos normalmente se não tiver fallback
+            console.error(`Erro no modelo ${modelName}:`, error.message);
+        }
+    }
+
+    throw new Error("Todos os modelos de IA falharam (Limites de API excedidos). Aguarde 1 minuto e tente novamente.");
 }
 
 import { GoogleAIFileManager } from "@google/generative-ai/server";

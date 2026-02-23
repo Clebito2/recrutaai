@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
+import StatCard from "../../components/common/StatCard";
 import { Plus, TrendingUp, Users, Calendar, Briefcase, ArrowRight, Zap, Target } from "lucide-react";
 import Link from "next/link";
 import { useSubscription } from "../../hooks/useSubscription";
