@@ -1,7 +1,7 @@
 import { analyzeCandidate } from "../src/skills/cv-analyst/index.js";
 
 // Manually setting API key for testing purposes in this environment
-process.env.GEMINI_API_KEY = "AIzaSyDP0eSNvLcrY_hoLbFnhlbqWogzy4kA4kQ"
+process.env.GEMINI_API_KEY = "REMOVED_FOR_SECURITY"
 
 async function runTest() {
     console.log("🚀 Iniciando Teste de Prompts Melhorados (Elite V6.0)...");
