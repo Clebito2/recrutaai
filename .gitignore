@@ -62,3 +62,6 @@ Thumbs.db
 .claude/settings.local.json
 .aios/install-log.txt
 STATUS_PROGRESSO_DEPLOY.md
+
+# Local Netlify folder
+.netlify

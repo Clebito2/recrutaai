@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
 import UploadProgress from "../../../components/common/UploadProgress";
 import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
-import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft, Zap } from "lucide-react";
+import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft, Zap, Users, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
