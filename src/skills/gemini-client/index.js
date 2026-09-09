@@ -5,7 +5,7 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const DEFAULT_MODEL = "gemini-2.0-flash";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent`;
 
 /**
@@ -55,7 +55,7 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
         ...config
     };
 
-    const modelsToTry = [DEFAULT_MODEL, "gemini-1.5-flash"];
+    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.5-flash", "gemini-3-flash-preview"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {
