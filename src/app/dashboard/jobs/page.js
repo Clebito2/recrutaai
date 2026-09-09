@@ -99,14 +99,21 @@ export default function JobsPage() {
                 <Link href={`/dashboard/jobs/${job.id}`} onClick={() => setActiveJob(job)}>
                   <div className="job-content">
                     <div className="job-header">
-                      <div className="job-status-badge">Ativa</div>
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <div className="job-status-badge">Ativa</div>
+                        {job.family && (
+                          <span style={{ fontSize: "0.75rem", background: "rgba(255,255,255,0.08)", padding: "2px 8px", borderRadius: "12px", textTransform: "capitalize", color: "#94a3b8" }}>
+                            {job.family}
+                          </span>
+                        )}
+                      </div>
                       <button className="delete-btn" onClick={(e) => handleDelete(e, job.id)}><Trash2 size={16} /></button>
                     </div>
 
                     <h3 className="job-title">{job.title}</h3>
 
                     <div className="job-meta">
-                      <span><MapPin size={14} /> {job.workModel}</span>
+                      <span><MapPin size={14} /> {job.workModel || "Presencial"}</span>
                       <span><Clock size={14} /> {formatDate(job.createdAt)}</span>
                     </div>
 

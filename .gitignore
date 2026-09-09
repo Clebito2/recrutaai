@@ -61,3 +61,4 @@ Thumbs.db
 .aios-core/local/
 .claude/settings.local.json
 .aios/install-log.txt
+STATUS_PROGRESSO_DEPLOY.md

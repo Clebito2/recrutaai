@@ -6,11 +6,12 @@ import SubscriptionGuard from "../../../../components/common/SubscriptionGuard";
 import PageHeader from "../../../../components/common/PageHeader";
 import MetaList from "../../../../components/common/MetaList";
 import MetaItem from "../../../../components/common/MetaItem";
-import { Copy, Check, MapPin, Calendar, Briefcase } from "lucide-react";
+import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
+import { JOB_FAMILIES, FAMILY_DEFAULT_WEIGHTS } from "../../../../lib/validation";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function JobDetails() {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState("ad"); // "ad" | "guide"
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -46,20 +48,32 @@ export default function JobDetails() {
   }, [user, id, router]);
 
   const handleCopy = async () => {
-    if (!job?.jobDescription) return;
-    await navigator.clipboard.writeText(job.jobDescription);
+    const textToCopy = activeTab === "guide" ? (job?.interviewGuide || "") : (job?.jobDescription || "");
+    if (!textToCopy) return;
+    await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (loading) return <div className="loading">Carregando dados da vaga...</div>;
+  if (loading) return <div className="loading">Carregando inteligência da vaga...</div>;
   if (!job) return null;
 
+  const familyLabel = JOB_FAMILIES.find(f => f.id === job.family)?.label || job.family || "Padrão Live";
+  const weights = job.customWeights || FAMILY_DEFAULT_WEIGHTS[job.family] || FAMILY_DEFAULT_WEIGHTS.comercial;
+
   const actions = (
-    <button onClick={handleCopy} className="btn-secondary">
-      {copied ? <Check size={18} /> : <Copy size={18} />}
-      {copied ? "Copiado" : "Copiar Texto"}
-    </button>
+    <div style={{ display: "flex", gap: "10px" }}>
+      <button onClick={handleCopy} className="btn-secondary">
+        {copied ? <Check size={18} /> : <Copy size={18} />}
+        {copied ? "Copiado" : activeTab === "guide" ? "Copiar Roteiro" : "Copiar Anúncio"}
+      </button>
+      <button 
+        onClick={() => router.push(`/dashboard/candidates?jobId=${job.id}`)}
+        className="btn-indigo"
+      >
+        Analisar Candidatos
+      </button>
+    </div>
   );
 
   return (
@@ -72,26 +86,86 @@ export default function JobDetails() {
           actions={actions}
         />
 
+        {/* Tab Switcher */}
+        <div className="tab-container">
+          <button 
+            className={`tab-btn ${activeTab === 'ad' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ad')}
+          >
+            <FileText size={16} /> Anúncio Oficial
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'guide' ? 'active' : ''}`}
+            onClick={() => setActiveTab('guide')}
+          >
+            <MessageSquareQuote size={16} /> Roteiro Socrático de Entrevista
+          </button>
+        </div>
+
         <div className="job-grid">
           <div className="main-content">
             <GlassCard className="content-card">
-              <pre className="job-text">{job.jobDescription}</pre>
+              {activeTab === "ad" ? (
+                <pre className="job-text">{job.jobDescription || "Nenhuma descrição de anúncio salva para esta vaga."}</pre>
+              ) : (
+                <pre className="job-text guide-text">{job.interviewGuide || "Nenhum roteiro de entrevista estruturado foi gerado para esta vaga. Você pode gerar através do Arquiteto de Vagas."}</pre>
+              )}
             </GlassCard>
           </div>
 
           <div className="sidebar">
             <GlassCard className="meta-card">
-              <MetaList title="Detalhes Estruturais">
-                <MetaItem icon={<Briefcase size={16} />} label="Perfil">
-                  {job.type || "Não definido"}
+              <MetaList title="Arquitetura de Vaga (Live)">
+                <MetaItem icon={<Briefcase size={16} />} label="Família Funcional">
+                  {familyLabel}
                 </MetaItem>
-                <MetaItem icon={<MapPin size={16} />} label="Modelo">
-                  {job.jobData?.workModel || job.workModel || "N/A"}
+                {job.archetype && (
+                  <MetaItem icon={<Award size={16} />} label="Arquétipo">
+                    {job.archetype}
+                  </MetaItem>
+                )}
+                <MetaItem icon={<MapPin size={16} />} label="Modelo de Trabalho">
+                  {job.workModel || job.jobData?.workModel || "Não especificado"}
                 </MetaItem>
+                {job.salary && (
+                  <MetaItem icon={<Sliders size={16} />} label="Faixa Salarial / OTE">
+                    {job.salary}
+                  </MetaItem>
+                )}
                 <MetaItem icon={<Calendar size={16} />} label="Criado em">
                   {job.createdAt?.toDate?.().toLocaleDateString("pt-BR") || "Hoje"}
                 </MetaItem>
               </MetaList>
+
+              <div className="weights-section">
+                <h4>Pesos de Scorecard da Vaga</h4>
+                <div className="weights-grid">
+                  <div className="weight-item">
+                    <span>Comportamental:</span>
+                    <strong>{weights.comportamental}%</strong>
+                  </div>
+                  <div className="weight-item">
+                    <span>Técnica:</span>
+                    <strong>{weights.tecnica}%</strong>
+                  </div>
+                  <div className="weight-item">
+                    <span>Prática:</span>
+                    <strong>{weights.pratica}%</strong>
+                  </div>
+                  <div className="weight-item">
+                    <span>Alinhamento:</span>
+                    <strong>{weights.alinhamento}%</strong>
+                  </div>
+                </div>
+              </div>
+
+              {job.repositoryUrl && (
+                <div className="repo-section">
+                  <a href={job.repositoryUrl} target="_blank" rel="noopener noreferrer" className="repo-link">
+                    <ExternalLink size={14} /> Acessar Repositório Drive/ATS
+                  </a>
+                </div>
+              )}
             </GlassCard>
           </div>
         </div>
@@ -100,6 +174,34 @@ export default function JobDetails() {
           .job-details-container {
             max-width: 1200px;
             margin: 0 auto;
+          }
+
+          .tab-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+          }
+
+          .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+          }
+
+          .tab-btn.active {
+            background: rgba(0, 232, 0, 0.15);
+            border-color: #00e800;
+            color: #00e800;
+            font-weight: 600;
           }
 
           .job-grid {
@@ -121,25 +223,102 @@ export default function JobDetails() {
             font-size: 1rem;
           }
 
+          .guide-text {
+            color: #e2e8f0;
+            background: rgba(6, 25, 42, 0.4);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid #00e800;
+          }
+
           .meta-card {
             padding: 24px;
+          }
+
+          .weights-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .weights-section h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #00e800;
+            margin-bottom: 12px;
+          }
+
+          .weights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+          }
+
+          .weight-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 10px;
+            border-radius: 6px;
+          }
+
+          .weight-item strong {
+            color: #fff;
+          }
+
+          .repo-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .repo-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00e800;
+            font-size: 0.85rem;
+            text-decoration: none;
+          }
+
+          .repo-link:hover {
+            text-decoration: underline;
           }
 
           .btn-secondary {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-glass);
             color: white;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
             transition: all 0.2s;
+            font-size: 0.9rem;
           }
 
           .btn-secondary:hover {
             background: rgba(255, 255, 255, 0.1);
+          }
+
+          .btn-indigo {
+            background: #00e800;
+            color: #06192a;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+          }
+
+          .btn-indigo:hover {
+            opacity: 0.9;
           }
 
           .loading {

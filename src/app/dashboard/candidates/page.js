@@ -25,6 +25,9 @@ export default function CandidatesPage() {
   const [file, setFile] = useState(null);
   const [transcript, setTranscript] = useState("");
   const [profileLevel, setProfileLevel] = useState("tecnico");
+  const [selectedFamily, setSelectedFamily] = useState("comercial");
+  const [selectedJobId, setSelectedJobId] = useState("");
+  const [jobs, setJobs] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -42,6 +45,39 @@ export default function CandidatesPage() {
   const fileInputRef = useRef(null);
   const { user, userProfile } = useAuth();
   const { incrementUsage } = useSubscription();
+
+  // Carrega vagas do usuário e sincroniza com a URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const jId = params.get("jobId");
+      if (jId) setSelectedJobId(jId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUserJobs = async () => {
+      try {
+        const q = query(collection(db, "jobs"), where("userId", "==", user.uid));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setJobs(data);
+      } catch (err) {
+        console.error("Error loading user jobs:", err);
+      }
+    };
+    fetchUserJobs();
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedJobId && jobs.length > 0) {
+      const found = jobs.find(j => j.id === selectedJobId);
+      if (found?.family) {
+        setSelectedFamily(found.family);
+      }
+    }
+  }, [selectedJobId, jobs]);
 
   // Carrega histórico quando aba fica ativa
   useEffect(() => {
@@ -74,10 +110,13 @@ export default function CandidatesPage() {
   const saveAnalysisToHistory = async (analysisData) => {
     try {
       if (!user) return;
+      const selectedJob = jobs.find(j => j.id === selectedJobId);
       await addDoc(collection(db, "candidates"), {
         userId: user.uid,
+        jobId: selectedJobId || null,
         name: analysisData.nome || "Candidato",
-        role: profileLevel === 'lideranca' ? 'Liderança' : 'Técnico',
+        role: analysisData.vaga_titulo || selectedJob?.title || selectedFamily,
+        jobFamily: selectedFamily,
         analysis: analysisData,
         createdAt: serverTimestamp()
       });
@@ -85,6 +124,7 @@ export default function CandidatesPage() {
       console.error("Failed to auto-save analysis:", e);
     }
   };
+
 
   // --- FASE 1.2: Validação de arquivo no cliente ---
   const handleFileChange = (e) => {
@@ -197,7 +237,9 @@ export default function CandidatesPage() {
           companyName,
           cvContent: content,
           jobContext: '',
-          profileLevel,  // ✅ FASE 1.1: usa a variável de estado (não hardcoded)
+          jobId: selectedJobId || undefined,
+          jobFamily: selectedFamily,
+          profileLevel: selectedFamily === 'lideranca' ? 'lideranca' : 'tecnico'
         })
       });
 
@@ -292,34 +334,91 @@ export default function CandidatesPage() {
               </button>
             </div>
 
-            {/* Seletor de nível de perfil — ativo em upload e transcrição */}
+            {/* Seletor de Vaga Vinculada e Família de Vaga */}
             {activeTab !== 'history' && (
-              <div className="profile-selector">
-                <span className="selector-label">Perfil:</span>
-                <div className="selector-buttons">
-                  <button
-                    className={`selector-btn ${profileLevel === 'tecnico' ? 'active' : ''}`}
-                    onClick={() => setProfileLevel('tecnico')}
+              <div className="job-family-selectors" style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="selector-group">
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#e2e8f0' }}>
+                    Vaga de Referência (Aplica Gate Check Eliminatório):
+                  </label>
+                  <select
+                    value={selectedJobId}
+                    onChange={(e) => {
+                      const jId = e.target.value;
+                      setSelectedJobId(jId);
+                      const foundJob = jobs.find(j => j.id === jId);
+                      if (foundJob?.family) {
+                        setSelectedFamily(foundJob.family);
+                        setProfileLevel(foundJob.family === 'lideranca' ? 'lideranca' : 'tecnico');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: 'rgba(10, 36, 61, 0.5)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      color: 'white'
+                    }}
                   >
-                    Técnico
-                  </button>
-                  <button
-                    className={`selector-btn ${profileLevel === 'lideranca' ? 'active' : ''}`}
-                    onClick={() => setProfileLevel('lideranca')}
-                  >
-                    Liderança
-                  </button>
+                    <option value="">-- Sem vaga vinculada (Triagem Avulsa por Família) --</option>
+                    {jobs.map(j => (
+                      <option key={j.id} value={j.id}>
+                        {j.title} ({j.family || 'Geral'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="selector-group">
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#e2e8f0' }}>
+                    Família de Vaga Padrão Live (Determina pesos e critérios):
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                    {[
+                      { id: 'comercial', label: 'Comercial' },
+                      { id: 'atendimento', label: 'Atendimento/CS' },
+                      { id: 'operacoes', label: 'Operações' },
+                      { id: 'tecnico', label: 'Técnico' },
+                      { id: 'lideranca', label: 'Liderança' },
+                      { id: 'outro', label: 'Outro' },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedFamily(f.id);
+                          setProfileLevel(f.id === 'lideranca' ? 'lideranca' : 'tecnico');
+                        }}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: selectedFamily === f.id ? '1px solid #00e800' : '1px solid rgba(255,255,255,0.1)',
+                          background: selectedFamily === f.id ? 'rgba(0, 232, 0, 0.15)' : 'rgba(0,0,0,0.2)',
+                          color: selectedFamily === f.id ? '#00e800' : '#94a3b8',
+                          fontWeight: '600',
+                          fontSize: '0.82rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Sugestão automática de nível */}
                 {levelSuggestion && (
-                  <div className="level-suggestion">
+                  <div className="level-suggestion" style={{ marginTop: '8px' }}>
                     <Zap size={12} />
                     {levelSuggestion.message}
                     {levelSuggestion.suggested !== profileLevel && (
                       <button
                         className="suggestion-apply"
-                        onClick={() => setProfileLevel(levelSuggestion.suggested)}
+                        onClick={() => {
+                          setProfileLevel(levelSuggestion.suggested);
+                          if (levelSuggestion.suggested === 'lideranca') setSelectedFamily('lideranca');
+                        }}
                       >
                         Aplicar
                       </button>
@@ -453,7 +552,7 @@ export default function CandidatesPage() {
               </div>
             )}
 
-            {/* ── ABA: Histórico ── */}
+            {/* ── ABA: Histórico & Comparador ── */}
             {activeTab === 'history' && (
               <div className="history-section animate-fade">
                 {loadingHistory ? (
@@ -464,21 +563,87 @@ export default function CandidatesPage() {
                     <p>Nenhuma análise salva ainda.</p>
                   </div>
                 ) : (
-                  <div className="history-list">
-                    {history.map(item => (
-                      <div key={item.id} className="history-item" onClick={() => setAnalysisResult(item.analysis)}>
-                        <div className="history-avatar"><User size={20} /></div>
-                        <div className="history-info">
-                          <strong>{item.name}</strong>
-                          <span>{item.role}</span>
+                  <div className="history-container">
+                    {/* Tabela Comparativa Multi-Candidatos (Seção 3.6 do Padrão Live) */}
+                    {history.length > 1 && (
+                      <div className="comparison-box" style={{ marginBottom: '32px', background: 'rgba(6, 25, 42, 0.6)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <h3 style={{ fontSize: '1.05rem', color: '#00e800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Users size={18} /> Comparador de Candidatos (Matriz de Decisão)
+                        </h3>
+                        <div style={{ overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.12)', textAlign: 'left', color: '#8b949e' }}>
+                                <th style={{ padding: '8px' }}>Candidato</th>
+                                <th style={{ padding: '8px' }}>Vaga / Perfil</th>
+                                <th style={{ padding: '8px' }}>Gate Check</th>
+                                <th style={{ padding: '8px' }}>Score Final</th>
+                                <th style={{ padding: '8px' }}>Principal Força</th>
+                                <th style={{ padding: '8px' }}>Principal Risco</th>
+                                <th style={{ padding: '8px' }}>Recomendação</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {history.map(item => {
+                                const ana = item.analysis || {};
+                                const isGateReprov = (ana.gate_check?.status || "").toUpperCase().includes("REPROV");
+                                return (
+                                  <tr 
+                                    key={item.id} 
+                                    onClick={() => setAnalysisResult(ana)}
+                                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', transition: 'background 0.2s' }}
+                                    className="comparison-row"
+                                  >
+                                    <td style={{ padding: '10px 8px', fontWeight: '700', color: '#ffffff' }}>{item.name}</td>
+                                    <td style={{ padding: '10px 8px', color: '#94a3b8' }}>{item.role}</td>
+                                    <td style={{ padding: '10px 8px' }}>
+                                      <span style={{ 
+                                        padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
+                                        background: isGateReprov ? 'rgba(255, 59, 59, 0.2)' : 'rgba(0, 232, 0, 0.15)',
+                                        color: isGateReprov ? '#ff6b6b' : '#00e800'
+                                      }}>
+                                        {ana.gate_check?.status || "OK"}
+                                      </span>
+                                    </td>
+                                    <td style={{ padding: '10px 8px', fontWeight: '800', color: '#00e800' }}>
+                                      {ana.scorecard?.score_final_100 ? `${ana.scorecard.score_final_100}/100` : (ana.nota_geral ? `${ana.nota_geral}/5` : '—')}
+                                    </td>
+                                    <td style={{ padding: '10px 8px', color: '#cbd5e1' }}>
+                                      {ana.swot?.forcas?.[0] || '—'}
+                                    </td>
+                                    <td style={{ padding: '10px 8px', color: '#fca5a5' }}>
+                                      {ana.swot?.ameacas?.[0] || ana.swot?.fraquezas?.[0] || '—'}
+                                    </td>
+                                    <td style={{ padding: '10px 8px' }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: (ana.recomendacao || "").toUpperCase().includes("NÃO") ? '#ff6b6b' : '#00e800' }}>
+                                        {ana.recomendacao || "AVALIADO"}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
-                        <div className="history-date">
-                          <Calendar size={14} />
-                          {item.createdAt.toLocaleDateString('pt-BR')}
-                        </div>
-                        <ChevronRight size={16} opacity={0.5} />
                       </div>
-                    ))}
+                    )}
+
+                    <div className="history-list">
+                      {history.map(item => (
+                        <div key={item.id} className="history-item" onClick={() => setAnalysisResult(item.analysis)}>
+                          <div className="history-avatar"><User size={20} /></div>
+                          <div className="history-info">
+                            <strong>{item.name}</strong>
+                            <span>{item.role}</span>
+                          </div>
+                          <div className="history-date">
+                            <Calendar size={14} />
+                            {item.createdAt.toLocaleDateString('pt-BR')}
+                          </div>
+                          <ChevronRight size={16} opacity={0.5} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -486,50 +651,199 @@ export default function CandidatesPage() {
 
           </GlassCard>
         ) : (
-          /* ── RESULTADO DA ANÁLISE ── */
-          <div className="result-section animate-fade-right">
+          /* ── RESULTADO DA ANÁLISE (PADRÃO LIVE CONSULTORIA) ── */
+          <div className="result-section animate-fade-right" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* Alerta de Gate Reprovado */}
+            {analysisResult.gate_check?.status === "REPROVADO" && (
+              <div style={{ background: 'rgba(255, 59, 59, 0.15)', border: '1px solid #ff3b3b', padding: '16px 20px', borderRadius: '12px', color: '#ff6b6b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '1rem', marginBottom: '4px' }}>
+                  <ShieldAlert size={20} /> REPROVADO NO GATE CHECK ELIMINATÓRIO
+                </div>
+                <div style={{ fontSize: '0.9rem', color: '#fecaca' }}>
+                  {analysisResult.gate_check.motivo}
+                </div>
+              </div>
+            )}
+
+            {/* Cabeçalho do Candidato */}
             <GlassCard className="result-header-card">
               <div className="candidate-info">
                 <div className="avatar">
                   <User size={32} />
                 </div>
                 <div>
-                  <h2 className="narrative-text">{analysisResult.nome || 'Candidato'}</h2>
-                  <p>{analysisResult.resumo}</p>
+                  <h2 className="narrative-text" style={{ fontSize: '1.6rem', fontWeight: '800', color: '#ffffff' }}>
+                    {analysisResult.nome || 'Candidato'}
+                  </h2>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
+                    Vaga: {analysisResult.vaga_titulo || 'Avaliação Direta'} • Família: {analysisResult.familia_vaga || selectedFamily}
+                  </p>
                 </div>
               </div>
-              <div className={`recommendation ${analysisResult.recomendacao?.toLowerCase().includes('aprov') ? 'approved' : 'review'}`}>
-                {analysisResult.recomendacao}
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{
+                  padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700',
+                  background: analysisResult.gate_check?.status === 'REPROVADO' ? 'rgba(255, 59, 59, 0.2)' : 'rgba(0, 232, 0, 0.15)',
+                  color: analysisResult.gate_check?.status === 'REPROVADO' ? '#ff6b6b' : '#00e800',
+                  border: `1px solid ${analysisResult.gate_check?.status === 'REPROVADO' ? '#ff3b3b' : '#00e800'}`
+                }}>
+                  Gate: {analysisResult.gate_check?.status || 'OK'}
+                </div>
+                <div className={`recommendation ${(analysisResult.recomendacao || '').toUpperCase().includes('NÃO') ? 'rejected' : 'approved'}`}>
+                  {analysisResult.recomendacao}
+                </div>
               </div>
             </GlassCard>
 
-            <div className="scores-grid">
-              {analysisResult.scorecard && Object.entries(analysisResult.scorecard).map(([key, value]) => (
-                <GlassCard key={key} className="score-card">
-                  <span className="score-label">{formatScoreLabel(key)}</span>
-                  <div className="score-ring">
-                    <span className="score-value">{value}</span>
-                    <span className="score-max">/5</span>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
+            {/* TL;DR Resumo de 30 Segundos */}
+            <GlassCard style={{ borderLeft: '4px solid #00e800', padding: '18px 22px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#00e800', letterSpacing: '0.5px' }}>
+                Resumo Executivo (Leitura de 30 Segundos)
+              </span>
+              <p style={{ marginTop: '6px', fontSize: '0.95rem', lineHeight: '1.6', color: '#f1f5f9' }}>
+                {analysisResult.resumo}
+              </p>
+            </GlassCard>
 
+            {/* Scorecard dos 4 Pilares */}
+            {analysisResult.scorecard && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className="scores-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                  <GlassCard className="score-card">
+                    <span className="score-label">Comportamental ({analysisResult.scorecard.comportamental?.peso || 40}%)</span>
+                    <div className="score-ring">
+                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.comportamental?.nota ?? 3.5}</span>
+                      <span className="score-max">/5</span>
+                    </div>
+                  </GlassCard>
+                  <GlassCard className="score-card">
+                    <span className="score-label">Técnica ({analysisResult.scorecard.tecnica?.peso || 20}%)</span>
+                    <div className="score-ring">
+                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.tecnica?.nota ?? 3.5}</span>
+                      <span className="score-max">/5</span>
+                    </div>
+                  </GlassCard>
+                  <GlassCard className="score-card">
+                    <span className="score-label">Prática ({analysisResult.scorecard.pratica?.peso || 30}%)</span>
+                    <div className="score-ring">
+                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.pratica?.nota ?? 3.5}</span>
+                      <span className="score-max">/5</span>
+                    </div>
+                  </GlassCard>
+                  <GlassCard className="score-card">
+                    <span className="score-label">Alinhamento ({analysisResult.scorecard.alinhamento?.peso || 10}%)</span>
+                    <div className="score-ring">
+                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.alinhamento?.nota ?? 3.5}</span>
+                      <span className="score-max">/5</span>
+                    </div>
+                  </GlassCard>
+                </div>
+
+                {/* Banner de Auditoria Matemática */}
+                <div style={{ background: 'rgba(6, 25, 42, 0.8)', border: '1px dashed #00e800', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                    {analysisResult.scorecard.formula_calculo || 'Conta de score auditável calculada.'}
+                  </span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#00e800' }}>
+                    Score Final: {analysisResult.scorecard.score_final_100 || Math.round((analysisResult.nota_geral || 3.5) * 20)}/100
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Análise STAR com Evidências Concretas */}
+            {analysisResult.star_analysis && analysisResult.star_analysis.length > 0 && (
+              <GlassCard>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: '#ffffff' }}>
+                  Evidências STAR (Situação, Tarefa, Ação Individual, Resultado)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {analysisResult.star_analysis.map((star, idx) => (
+                    <div key={idx} style={{ background: 'rgba(0,0,0,0.25)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', fontSize: '0.88rem', lineHeight: '1.6' }}>
+                      <p><strong>[S] Situação:</strong> {star.situacao}</p>
+                      <p><strong>[T] Tarefa:</strong> {star.tarefa}</p>
+                      <p><strong>[A] Ação Individual:</strong> {star.acao}</p>
+                      <p><strong>[R] Resultado:</strong> <span style={{ color: '#00e800' }}>{star.resultado}</span></p>
+                      {star.ponto_atencao && (
+                        <p style={{ color: '#f59e0b', fontSize: '0.8rem', marginTop: '4px' }}>⚠️ Ponto de Atenção: {star.ponto_atencao}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            )}
+
+            {/* Matriz SWOT */}
+            {analysisResult.swot && (
+              <GlassCard>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: '#ffffff' }}>
+                  Matriz SWOT do Candidato
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                  <div style={{ borderLeft: '3px solid #00e800', padding: '10px', background: 'rgba(0, 232, 0, 0.05)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#00e800', fontSize: '0.85rem', fontWeight: '700' }}>FORÇAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                      {(analysisResult.swot.forcas || []).map((f, i) => <li key={i}>{f}</li>)}
+                    </ul>
+                  </div>
+                  <div style={{ borderLeft: '3px solid #ff3b3b', padding: '10px', background: 'rgba(255, 59, 59, 0.05)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#ff3b3b', fontSize: '0.85rem', fontWeight: '700' }}>FRAQUEZAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                      {(analysisResult.swot.fraquezas || []).map((f, i) => <li key={i}>{f}</li>)}
+                    </ul>
+                  </div>
+                  <div style={{ borderLeft: '3px solid #38bdf8', padding: '10px', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#38bdf8', fontSize: '0.85rem', fontWeight: '700' }}>OPORTUNIDADES</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                      {(analysisResult.swot.oportunidades || []).map((o, i) => <li key={i}>{o}</li>)}
+                    </ul>
+                  </div>
+                  <div style={{ borderLeft: '3px solid #f59e0b', padding: '10px', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: '700' }}>AMEAÇAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                      {(analysisResult.swot.ameacas || []).map((a, i) => <li key={i}>{a}</li>)}
+                    </ul>
+                  </div>
+                </div>
+              </GlassCard>
+            )}
+
+            {/* Temperamento */}
             {analysisResult.temperamento && (
               <GlassCard className="temperament-card">
-                <h3>Temperamento Identificado</h3>
-                <p className="temperament-value">{analysisResult.temperamento}</p>
+                <h3 style={{ fontSize: '0.95rem', color: '#94a3b8' }}>Temperamento Operacional</h3>
+                <p className="temperament-value" style={{ color: '#00e800', fontWeight: '700' }}>
+                  {typeof analysisResult.temperamento === 'string' 
+                    ? analysisResult.temperamento 
+                    : `${analysisResult.temperamento.perfil_estimado || ''} — ${analysisResult.temperamento.leitura_fit || ''}`}
+                </p>
               </GlassCard>
             )}
 
+            {/* Informações Faltantes */}
+            {analysisResult.informacoes_faltantes && analysisResult.informacoes_faltantes.length > 0 && (
+              <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '14px', borderRadius: '8px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#f59e0b', textTransform: 'uppercase' }}>
+                  Honestidade Epistêmica — Critérios sem Dado Suficiente no Material:
+                </span>
+                <ul style={{ paddingLeft: '20px', marginTop: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                  {analysisResult.informacoes_faltantes.map((inf, i) => <li key={i}>{inf}</li>)}
+                </ul>
+              </div>
+            )}
+
+            {/* Justificativa */}
             {analysisResult.justificativa && (
               <GlassCard className="justification-card">
-                <h3>Justificativa da Recomendação</h3>
-                <p>{analysisResult.justificativa}</p>
+                <h3 style={{ fontSize: '0.95rem', color: '#94a3b8', marginBottom: '8px' }}>Parecer Técnico Conclusivo</h3>
+                <p style={{ lineHeight: '1.7', color: '#e2e8f0' }}>{analysisResult.justificativa}</p>
               </GlassCard>
             )}
 
-            <div className="result-actions">
+            {/* Ações */}
+            <div className="result-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
               <button
                 onClick={() => {
                   setAnalysisResult(null);
@@ -538,7 +852,7 @@ export default function CandidatesPage() {
                 }}
                 className="btn-secondary"
               >
-                <ArrowLeft size={16} /> Voltar
+                <ArrowLeft size={16} /> Nova Análise
               </button>
               <button
                 className="btn-indigo"
@@ -546,9 +860,9 @@ export default function CandidatesPage() {
                 disabled={isGeneratingReport}
               >
                 {isGeneratingReport ? (
-                  <><Loader2 className="spin" size={18} /> Gerando...</>
+                  <><Loader2 className="spin" size={18} /> Gerando Parecer...</>
                 ) : (
-                  <>Gerar Relatório Elite (PDF)</>
+                  <>Visualizar Parecer Protocolo Elite (HTML Live)</>
                 )}
               </button>
             </div>

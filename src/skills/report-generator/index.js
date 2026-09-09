@@ -1,363 +1,707 @@
 /**
- * Report Generator Skill
- * Generates HTML reports for candidate analysis
+ * Report Generator Skill — Protocolo Elite (Live Consultoria)
+ * Gera relatórios executivos em HTML autônomos e responsivos com o Design System Live
  */
 
-/**
- * Generate Elite HTML report for a candidate analysis
- * 
- * @param {object} analysis - Analysis data from CV Analyst
- * @param {object} options
- * @param {string} options.companyName
- * @param {string} options.theme - 'dark' or 'light'
- * @returns {string} HTML content
- */
 export function generateReport(analysis, options = {}) {
-  const { companyName = 'RecruteAI', theme = 'dark' } = options;
+  const opts = typeof options === "string" ? { companyName: options } : (options || {});
+  const { 
+    companyName = "Live Consultoria", 
+    repositoryUrl = "",
+    vagaTitulo = "" 
+  } = opts;
+
 
   const {
-    nome,
-    resumo,
-    scorecard,
-    temperamento,
-    swot,
-    recomendacao,
-    justificativa
+    nome = "Candidato",
+    vaga_titulo = vagaTitulo || "Processo Seletivo",
+    familia_vaga = "Técnico / Especialista",
+    gate_check = { status: "OK", motivo: "Requisitos obrigatórios atendidos" },
+    resumo = "",
+    diagnostico_narrativo = "",
+    star_analysis = [],
+    swot = { forcas: [], fraquezas: [], oportunidades: [], ameacas: [] },
+    temperamento = { perfil_estimado: "Analítico", leitura_fit: "Equilibrado", pontos_atencao: "Nenhum" },
+    competencias = [],
+    scorecard = null,
+    informacoes_faltantes = [],
+    recomendacao = "RECOMENDADO",
+    justificativa = "",
+    plano_imersao = []
   } = analysis;
 
-  const overallScore = scorecard
-    ? (Object.values(scorecard).reduce((a, b) => a + b, 0) / Object.keys(scorecard).length).toFixed(1)
-    : "N/A";
+  // Normalização de Scorecard
+  const compNota = scorecard?.comportamental?.nota ?? 3.5;
+  const compPeso = scorecard?.comportamental?.peso ?? 40;
+  const tecNota = scorecard?.tecnica?.nota ?? 3.5;
+  const tecPeso = scorecard?.tecnica?.peso ?? 20;
+  const pratNota = scorecard?.pratica?.nota ?? 3.5;
+  const pratPeso = scorecard?.pratica?.peso ?? 30;
+  const alinNota = scorecard?.alinhamento?.nota ?? 3.5;
+  const alinPeso = scorecard?.alinhamento?.peso ?? 10;
 
-  const getScoreColor = (score) => {
-    if (score >= 4) return "#00F0FF";
-    if (score >= 3) return "#8B5CF6";
-    return "#EF4444";
+  const scoreFinal5 = scorecard?.score_final_5 ?? +(
+    (compNota * (compPeso / 100)) +
+    (tecNota * (tecPeso / 100)) +
+    (pratNota * (pratPeso / 100)) +
+    (alinNota * (alinPeso / 100))
+  ).toFixed(2);
+
+  const scoreFinal100 = scorecard?.score_final_100 ?? Math.round(scoreFinal5 * 20);
+
+  const formulaCalculo = scorecard?.formula_calculo || 
+    `(${compNota} × ${compPeso}%) + (${tecNota} × ${tecPeso}%) + (${pratNota} × ${pratPeso}%) + (${alinNota} × ${alinPeso}%) = ${scoreFinal5}/5 (${scoreFinal100}/100)`;
+
+  // Badge de Recomendação
+  const getBadgeStyle = (rec) => {
+    const text = (rec || "").toUpperCase();
+    if (text.includes("NÃO") || text.includes("REPROV")) {
+      return { bg: "rgba(255, 59, 59, 0.18)", border: "#ff3b3b", color: "#ff6b6b", label: "NÃO RECOMENDADO" };
+    }
+    if (text.includes("RESSALVA") || text.includes("APROFUNDAR")) {
+      return { bg: "rgba(245, 158, 11, 0.18)", border: "#f59e0b", color: "#fbbf24", label: "RECOMENDADO COM RESSALVAS" };
+    }
+    return { bg: "rgba(0, 232, 0, 0.18)", border: "#00e800", color: "#00e800", label: "RECOMENDADO" };
   };
 
-  const getRecommendationClass = (rec) => {
-    if (!rec) return "review";
-    const lower = rec.toLowerCase();
-    if (lower.includes("aprov")) return "approved";
-    if (lower.includes("reprov") || lower.includes("rejeit")) return "rejected";
-    return "review";
-  };
-
-  const formatLabel = (key) => {
-    const labels = {
-      comportamental: "Comportamental",
-      tecnico: "Técnico",
-      comunicacao: "Comunicação",
-      alinhamento: "Alinhamento",
-      dominio_hardskills: "Hard Skills",
-      resolucao_problemas: "Resolução",
-      qualidade_entrega: "Qualidade",
-      profundidade_tecnica: "Profundidade",
-      tomada_decisao: "Decisão",
-      gestao_conflitos: "Conflitos",
-      mentoria_delegacao: "Mentoria",
-      visao_estrategica: "Estratégia"
-    };
-    return labels[key] || key;
-  };
-
-  const formatSwotArray = (arr) => {
-    if (Array.isArray(arr)) return arr.join(', ');
-    return arr || '—';
-  };
-
-  /**
-   * Convert markdown syntax to HTML
-   * Handles: **bold**, *italic*, line breaks
-   */
-  const convertMarkdownToHtml = (text) => {
-    if (!text) return text;
-
-    return text
-      // Bold: **text** -> <strong>text</strong>
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      // Italic: *text* -> <em>text</em>
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // Line breaks: \n -> <br>
-      .replace(/\n/g, '<br>');
-  };
+  const badge = getBadgeStyle(recomendacao);
+  const isGateReprovado = (gate_check?.status || "").toUpperCase().includes("REPROV");
+  const effectiveRepoUrl = repositoryUrl || analysis.repositoryUrl || "#";
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relatório Elite - ${nome || "Candidato"}</title>
+  <title>Parecer Técnico de Alinhamento — ${nome} | Live Consultoria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --canvas-bg: #05050A;
-      --card-bg: rgba(20, 20, 25, 0.9);
-      --primary: #F59E0B;
-      --secondary: #00F0FF;
-      --accent: #8B5CF6;
-      --text: #F5F5F7;
-      --text-muted: rgba(245, 245, 247, 0.6);
-      --border: rgba(255, 255, 255, 0.08);
+      --live-deep: #06192a;
+      --live-glass: rgba(10, 36, 61, 0.75);
+      --live-glass-hover: rgba(15, 45, 75, 0.90);
+      --glass-blur: blur(20px) saturate(180%);
+      --live-accent: #00e800;
+      --live-accent-dim: rgba(0, 232, 0, 0.15);
+      --live-danger: #ff3b3b;
+      --live-warning: #f59e0b;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-active: rgba(0, 232, 0, 0.5);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    @page { size: A4; margin: 20mm; }
-
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--canvas-bg);
-      color: var(--text);
+      background-color: var(--live-deep);
+      background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+      color: #e6edf3;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.6;
+      padding: 40px 20px;
       min-height: 100vh;
-      padding: 40px;
     }
 
-    @media print {
-      body { padding: 0; background: white; color: #1a1a1a; }
-      .card { background: #f8f8f8; border: 1px solid #e0e0e0; }
-      .no-print { display: none !important; }
+    .report-wrapper {
+      max-width: 1024px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
     }
 
-    .report-container { max-width: 900px; margin: 0 auto; }
+    .glass-panel {
+      background: var(--live-glass);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
 
     .header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
+      gap: 20px;
+      flex-wrap: wrap;
     }
 
-    .company-info {
-      font-size: 0.85rem;
-      opacity: 0.6;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .report-title {
-      font-size: 0.75rem;
-      background: var(--primary);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-    }
-
-    .candidate-section {
-      display: flex;
-      gap: 32px;
-      margin-bottom: 40px;
-    }
-
-    .avatar {
-      width: 120px;
-      height: 120px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 24px;
+    .brand-group {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: 800;
-      color: white;
-      flex-shrink: 0;
+      gap: 14px;
     }
 
-    .candidate-info { flex: 1; }
-    .candidate-name { font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; line-height: 1.1; }
-    .candidate-summary { font-size: 1.1rem; opacity: 0.8; margin-bottom: 16px; }
-
-    .recommendation-badge {
-      display: inline-block;
-      padding: 10px 24px;
+    .live-logo {
+      background: linear-gradient(135deg, #00c900, #00e800);
+      color: #06192a;
+      font-weight: 900;
+      font-size: 1.2rem;
+      padding: 8px 16px;
       border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .recommendation-badge.approved { background: rgba(0, 240, 255, 0.15); color: var(--secondary); border: 1px solid rgba(0, 240, 255, 0.3); }
-    .recommendation-badge.review { background: rgba(139, 92, 246, 0.15); color: var(--accent); border: 1px solid rgba(139, 92, 246, 0.3); }
-    .recommendation-badge.rejected { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 24px;
-    }
-
-    .card-title {
-      font-size: 0.8rem;
+    .sub-brand {
+      font-size: 0.85rem;
+      color: #8b949e;
       text-transform: uppercase;
       letter-spacing: 1px;
-      opacity: 0.5;
+    }
+
+    .badges-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge-status {
+      padding: 8px 18px;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    .badge-gate {
+      padding: 8px 16px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: ${isGateReprovado ? 'rgba(255, 59, 59, 0.15)' : 'rgba(0, 232, 0, 0.15)'};
+      border: 1px solid ${isGateReprovado ? '#ff3b3b' : '#00e800'};
+      color: ${isGateReprovado ? '#ff6b6b' : '#00e800'};
+    }
+
+    .candidate-headline {
+      margin-top: 20px;
+    }
+
+    .candidate-headline h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .candidate-headline p {
+      font-size: 1.05rem;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+
+    .tldr-box {
+      background: rgba(0, 232, 0, 0.06);
+      border-left: 4px solid var(--live-accent);
+      padding: 20px 24px;
+      border-radius: 0 12px 12px 0;
+      font-size: 1.05rem;
+      color: #f0f6fc;
+      line-height: 1.7;
+    }
+
+    .tldr-box strong {
+      color: var(--live-accent);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .narrative-text {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #d1d5db;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 10px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
       margin-bottom: 20px;
     }
 
-    .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
-    .score-item { text-align: center; padding: 20px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; }
-    .score-label { font-size: 0.75rem; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px; }
-    .score-value { font-size: 2.5rem; font-weight: 800; }
-    .score-max { font-size: 0.9rem; opacity: 0.4; }
-
-    .overall-score {
+    .score-pillar {
+      background: rgba(6, 25, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
       text-align: center;
-      padding: 32px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(139, 92, 246, 0.1));
-      border-radius: 16px;
     }
-    .overall-label { font-size: 0.85rem; text-transform: uppercase; opacity: 0.6; margin-bottom: 8px; }
-    .overall-value {
-      font-size: 4rem;
+
+    .score-pillar h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      margin-bottom: 8px;
+    }
+
+    .score-pillar .number {
+      font-size: 2rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--secondary), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--live-accent);
     }
 
-    .temperament-display { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
-
-    .swot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .swot-item { padding: 20px; border-radius: 12px; }
-    .swot-item.strengths { background: rgba(0, 240, 255, 0.1); border-left: 3px solid var(--secondary); }
-    .swot-item.weaknesses { background: rgba(239, 68, 68, 0.1); border-left: 3px solid #EF4444; }
-    .swot-item.opportunities { background: rgba(139, 92, 246, 0.1); border-left: 3px solid var(--accent); }
-    .swot-item.threats { background: rgba(251, 191, 36, 0.1); border-left: 3px solid #FBBF24; }
-    .swot-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 12px; opacity: 0.8; }
-    .swot-content { font-size: 0.9rem; line-height: 1.6; }
-
-    .justification {
-      font-size: 1rem;
-      line-height: 1.8;
-      padding: 24px;
-      background: rgba(245, 158, 11, 0.05);
-      border-left: 3px solid var(--primary);
-      border-radius: 0 12px 12px 0;
+    .score-pillar .weight {
+      font-size: 0.75rem;
+      color: #6e7681;
     }
 
-    .footer {
-      margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
+    .formula-banner {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed var(--border-active);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #7ee787;
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
-      opacity: 0.5;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .print-button {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 16px 32px;
+    .formula-banner strong {
+      font-size: 1.2rem;
+      color: #ffffff;
+    }
+
+    .star-card {
+      background: rgba(6, 25, 42, 0.5);
+      border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .star-row {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .star-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
     }
-    .print-button:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245, 158, 11, 0.5); }
-    .print-button svg { width: 20px; height: 20px; }
+    .badge-s { background: #1e3a8a; color: #93c5fd; }
+    .badge-t { background: #3730a3; color: #c7d2fe; }
+    .badge-a { background: #065f46; color: #6ee7b7; }
+    .badge-r { background: #14532d; color: #86efac; }
+
+    .star-content { font-size: 0.95rem; line-height: 1.6; }
+    .star-content strong { color: #f0f6fc; }
+
+    .swot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .swot-card {
+      border-radius: 12px;
+      padding: 20px;
+      background: rgba(6, 25, 42, 0.6);
+      border: 1px solid;
+    }
+    .swot-forcas { border-color: #00e800; }
+    .swot-forcas h4 { color: #00e800; }
+    .swot-fraquezas { border-color: #ff3b3b; }
+    .swot-fraquezas h4 { color: #ff3b3b; }
+    .swot-oportunidades { border-color: #38bdf8; }
+    .swot-oportunidades h4 { color: #38bdf8; }
+    .swot-ameacas { border-color: #f59e0b; }
+    .swot-ameacas h4 { color: #f59e0b; }
+
+    .swot-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .swot-card ul {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .swot-card li {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      position: relative;
+      padding-left: 14px;
+    }
+
+    .swot-card li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: inherit;
+    }
+
+    .skills-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .skill-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .skill-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .skill-bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .skill-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00c900, #00e800);
+      border-radius: 4px;
+    }
+
+    .skill-evidence {
+      font-size: 0.78rem;
+      color: #8b949e;
+      font-style: italic;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      border-left: 2px solid var(--live-accent);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .timeline-item {
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -31px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--live-accent);
+      border: 3px solid var(--live-deep);
+    }
+
+    .timeline-item h5 {
+      font-size: 0.95rem;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .timeline-item p {
+      font-size: 0.88rem;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .cta-btn {
+      background: linear-gradient(135deg, #00c900, #00e800);
+      color: #06192a;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 232, 0, 0.4);
+    }
+
+    @media print {
+      body { background: #ffffff; color: #111827; padding: 0; }
+      .glass-panel { background: #ffffff; border: 1px solid #e5e7eb; box-shadow: none; color: #111827; }
+      .narrative-text { color: #1f2937; }
+      .cta-btn { display: none; }
+    }
   </style>
 </head>
 <body>
-  <div class="report-container">
-    <header class="header">
-      <div class="company-info">${companyName}</div>
-      <div class="report-title">Relatório Elite</div>
-    </header>
 
-    <section class="candidate-section">
-      <div class="avatar">${(nome || "C").charAt(0).toUpperCase()}</div>
-      <div class="candidate-info">
-        <h1 class="candidate-name">${nome || "Candidato"}</h1>
-        <p class="candidate-summary">${convertMarkdownToHtml(resumo) || "Análise de perfil profissional realizada com metodologia STAR e Matriz SWOT."}</p>
-        <div class="recommendation-badge ${getRecommendationClass(recomendacao)}">${recomendacao || "Em Análise"}</div>
-      </div>
-    </section>
-
-    <div class="card">
-      <div class="card-title">Scorecard de Competências</div>
-      <div class="scores-grid">
-        ${scorecard ? Object.entries(scorecard).map(([key, value]) => `
-          <div class="score-item">
-            <div class="score-label">${formatLabel(key)}</div>
-            <div class="score-value" style="color: ${getScoreColor(value)}">${value}<span class="score-max">/5</span></div>
-          </div>
-        `).join('') : '<p>Scorecard não disponível</p>'}
-      </div>
-      <div class="overall-score">
-        <div class="overall-label">Score Geral</div>
-        <div class="overall-value">${overallScore}</div>
-      </div>
-    </div>
-
-    ${temperamento ? `
-    <div class="card">
-      <div class="card-title">Temperamento Identificado</div>
-      <div class="temperament-display">${convertMarkdownToHtml(temperamento)}</div>
-    </div>
-    ` : ''}
-
-    ${swot ? `
-    <div class="card">
-      <div class="card-title">Matriz SWOT</div>
-      <div class="swot-grid">
-        <div class="swot-item strengths">
-          <div class="swot-title">Forças</div>
-          <div class="swot-content">${formatSwotArray(swot.forcas || swot.strengths)}</div>
+<div class="report-wrapper">
+  <!-- CABEÇALHO EXECUTIVO -->
+  <div class="glass-panel">
+    <div class="header">
+      <div class="brand-group">
+        <div class="live-logo">LIVE</div>
+        <div>
+          <div class="sub-brand">Consultoria Empresarial — R&S Científico</div>
+          <div style="font-size: 0.75rem; color: #6e7681;">Cliente: ${companyName}</div>
         </div>
-        <div class="swot-item weaknesses">
-          <div class="swot-title">Fraquezas</div>
-          <div class="swot-content">${formatSwotArray(swot.fraquezas || swot.weaknesses)}</div>
+      </div>
+
+      <div class="badges-group">
+        <div class="badge-gate">
+          <i data-lucide="${isGateReprovado ? 'alert-triangle' : 'check-circle'}" size="14"></i>
+          Gate Check: ${gate_check.status}
         </div>
-        <div class="swot-item opportunities">
-          <div class="swot-title">Oportunidades</div>
-          <div class="swot-content">${formatSwotArray(swot.oportunidades || swot.opportunities)}</div>
-        </div>
-        <div class="swot-item threats">
-          <div class="swot-title">Ameaças</div>
-          <div class="swot-content">${formatSwotArray(swot.ameacas || swot.threats)}</div>
+        <div class="badge-status" style="background: ${badge.bg}; border-color: ${badge.border}; color: ${badge.color};">
+          ${badge.label}
         </div>
       </div>
     </div>
-    ` : ''}
 
-    ${justificativa ? `
-    <div class="card">
-      <div class="card-title">Justificativa da Recomendação</div>
-      <div class="justification">${convertMarkdownToHtml(justificativa)}</div>
+    <div class="candidate-headline">
+      <h1>${nome}</h1>
+      <p>Vaga: <strong>${vaga_titulo}</strong> • Família: <strong>${familia_vaga}</strong></p>
+      ${isGateReprovado ? `<div style="margin-top: 10px; color: #ff6b6b; font-size: 0.88rem; font-weight: 600;">Motivo Reprovação Gate: ${gate_check.motivo}</div>` : ''}
     </div>
-    ` : ''}
-
-    <footer class="footer">
-      <span>Gerado por ${companyName} | Protocolo Elite V6.0</span>
-      <span>${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" })}</span>
-    </footer>
   </div>
 
-  <button class="print-button no-print" onclick="window.print()">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-    </svg>
-    Salvar como PDF
-  </button>
+  <!-- RESUMO (TL;DR 30 SEGUNDOS) -->
+  <div class="glass-panel">
+    <div class="tldr-box">
+      <strong>Resumo Executivo (Leitura de 30 Segundos)</strong>
+      ${resumo || "Candidato avaliado sob a metodologia científica da Live Consultoria com validação de consistência e alinhamento prático."}
+    </div>
+  </div>
+
+  <!-- DIAGNÓSTICO NARRATIVO -->
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="compass"></i> 1. Trajetória e Diagnóstico de Maturidade</h3>
+    <div class="narrative-text">
+      ${diagnostico_narrativo || "Histórico com densidade de experiência e trajetória alinhada aos desafios do cliente."}
+    </div>
+  </div>
+
+  <!-- SCORECARD DASHBOARD AUDITÁVEL -->
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="calculator"></i> 2. Scorecard Auditável dos 4 Pilares</h3>
+    
+    <div class="score-grid">
+      <div class="score-pillar">
+        <h4>Comportamental</h4>
+        <div class="number">${compNota}</div>
+        <div class="weight">Peso: ${compPeso}%</div>
+      </div>
+      <div class="score-pillar">
+        <h4>Técnica</h4>
+        <div class="number">${tecNota}</div>
+        <div class="weight">Peso: ${tecPeso}%</div>
+      </div>
+      <div class="score-pillar">
+        <h4>Prática / Testes</h4>
+        <div class="number">${pratNota}</div>
+        <div class="weight">Peso: ${pratPeso}%</div>
+      </div>
+      <div class="score-pillar">
+        <h4>Alinhamento</h4>
+        <div class="number">${alinNota}</div>
+        <div class="weight">Peso: ${alinPeso}%</div>
+      </div>
+    </div>
+
+    <div class="formula-banner">
+      <div>Conta Explicada: ${formulaCalculo}</div>
+      <div>Score Final: <strong>${scoreFinal100}/100</strong> (${scoreFinal5}/5)</div>
+    </div>
+  </div>
+
+  <!-- ANÁLISE STAR -->
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="target"></i> 3. Análise Comportamental STAR (Evidências Individuais)</h3>
+    ${star_analysis && star_analysis.length > 0 ? star_analysis.map(item => `
+      <div class="star-card">
+        <div class="star-row">
+          <div class="star-badge badge-s">S</div>
+          <div class="star-content"><strong>Situação:</strong> ${item.situacao}</div>
+        </div>
+        <div class="star-row">
+          <div class="star-badge badge-t">T</div>
+          <div class="star-content"><strong>Tarefa:</strong> ${item.tarefa}</div>
+        </div>
+        <div class="star-row">
+          <div class="star-badge badge-a">A</div>
+          <div class="star-content"><strong>Ação Individual:</strong> ${item.acao}</div>
+        </div>
+        <div class="star-row">
+          <div class="star-badge badge-r">R</div>
+          <div class="star-content"><strong>Resultado Mensurável:</strong> ${item.resultado}</div>
+        </div>
+        ${item.ponto_atencao ? `<div style="font-size: 0.8rem; color: #f59e0b; margin-top: 6px; padding-left: 52px;">Ponto de Atenção: ${item.ponto_atencao}</div>` : ''}
+      </div>
+    `).join('') : '<p style="color: #8b949e;">Nenhuma evidência STAR formal anexada.</p>'}
+  </div>
+
+  <!-- MATRIZ SWOT E TEMPERAMENTO -->
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="grid"></i> 4. Matriz SWOT e Temperamento Operacional</h3>
+    
+    <div class="swot-grid">
+      <div class="swot-card swot-forcas">
+        <h4>Forças (Evidenciadas)</h4>
+        <ul>${(swot.forcas || []).map(f => `<li>${f}</li>`).join('')}</ul>
+      </div>
+
+      <div class="swot-card swot-fraquezas">
+        <h4>Fraquezas / Gaps Reais</h4>
+        <ul>${(swot.fraquezas || []).map(f => `<li>${f}</li>`).join('')}</ul>
+      </div>
+
+      <div class="swot-card swot-oportunidades">
+        <h4>Oportunidades</h4>
+        <ul>${(swot.oportunidades || []).map(o => `<li>${o}</li>`).join('')}</ul>
+      </div>
+
+      <div class="swot-card swot-ameacas">
+        <h4>Ameaças / Riscos</h4>
+        <ul>${(swot.ameacas || []).map(a => `<li>${a}</li>`).join('')}</ul>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; padding: 18px; background: rgba(6, 25, 42, 0.4); border-radius: 12px; border: 1px solid var(--border-subtle);">
+      <h4 style="color: #ffffff; font-size: 0.95rem; margin-bottom: 6px;">
+        <i data-lucide="user-check" size="16"></i> Heurística de Temperamento: <strong>${temperamento.perfil_estimado}</strong>
+      </h4>
+      <p style="font-size: 0.88rem; color: #8b949e; line-height: 1.6;">
+        ${temperamento.leitura_fit} | <em>Atenção a:</em> ${temperamento.pontos_atencao}
+      </p>
+    </div>
+  </div>
+
+  <!-- COMPETÊNCIAS ESPECÍFICAS DA FAMÍLIA -->
+  ${competencias && competencias.length > 0 ? `
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="award"></i> 5. Competências e Rastreabilidade de Evidências</h3>
+    <div class="skills-container">
+      ${competencias.map(c => `
+        <div class="skill-row">
+          <div class="skill-meta">
+            <span>${c.nome} (${c.pilar})</span>
+            <span>${c.nota}/5 • <span style="color: ${c.tipo_evidencia === 'explicita' ? '#00e800' : '#f59e0b'}">${c.tipo_evidencia === 'explicita' ? 'Evidência Literal' : 'Inferência'}</span></span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width: ${(c.nota / 5) * 100}%;"></div>
+          </div>
+          <div class="skill-evidence">"${c.evidencia}"</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- PLANO DE IMERSÃO E TESTE -->
+  ${plano_imersao && plano_imersao.length > 0 ? `
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="clock"></i> 6. Plano de Imersão e Validação Prática</h3>
+    <div class="timeline">
+      ${plano_imersao.map(step => `
+        <div class="timeline-item">
+          <h5>${step.periodo}: ${step.foco}</h5>
+          <p>Ação / Teste de Validação: ${step.acao_validacao}</p>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  <!-- INFORMAÇÕES FALTANTES E PARECER DO CONSULTOR -->
+  <div class="glass-panel">
+    <h3 class="section-title"><i data-lucide="check-square"></i> 7. Parecer Conclusivo do Consultor</h3>
+    
+    ${informacoes_faltantes && informacoes_faltantes.length > 0 ? `
+      <div style="margin-bottom: 20px; padding: 14px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
+        <strong style="color: #f59e0b; font-size: 0.85rem; text-transform: uppercase;">Honestidade Epistêmica — Informações Não Confirmadas no Material:</strong>
+        <ul style="margin-top: 6px; padding-left: 20px; font-size: 0.85rem; color: #d1d5db;">
+          ${informacoes_faltantes.map(inf => `<li>${inf}</li>`).join('')}
+        </ul>
+      </div>
+    ` : ''}
+
+    <div style="font-size: 1rem; color: #f0f6fc; line-height: 1.7; margin-bottom: 24px;">
+      ${justificativa || "Parecer fundamentado na matriz de competências e aderência aos requisitos do cliente."}
+    </div>
+
+    <div class="footer-actions">
+      <div style="font-size: 0.8rem; color: #6e7681;">
+        Documento gerado sob o Protocolo Elite — Live Consultoria Empresarial.
+      </div>
+      <a href="${effectiveRepoUrl}" target="_blank" class="cta-btn">
+        <i data-lucide="folder-open"></i> Acessar Repositório do Candidato
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+</script>
 </body>
 </html>`;
 }
 
-// Maintain backward compatibility
 export const generateEliteReport = generateReport;

@@ -1,185 +1,54 @@
-# RecruitAI - Plataforma de Recrutamento Inteligente
-
-Sistema de recrutamento e seleção com IA generativa para criação de vagas, análise de candidatos e geração de relatórios executivos.
-
-## Tecnologias Utilizadas
-
-- **Frontend**: Next.js 15, React 19
-- **Backend**: Next.js API Routes
-- **Banco de Dados**: Firebase Firestore
-- **Autenticação**: Firebase Auth (Email/Senha + Google)
-- **IA**: Google Gemini 2.0 Flash
-- **Deploy**: Netlify
-
-## Configuração do Ambiente
-
-### 1. Variáveis de Ambiente
-
-Crie um arquivo `.env.local` na raiz do projeto:
-
-```env
-# Firebase Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_projeto
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
-
-# Gemini AI (server-side only - não expor no cliente)
-GEMINI_API_KEY=sua_chave_gemini
-```
-
-### 2. Firebase Setup
-
-1. Acesse [Firebase Console](https://console.firebase.google.com)
-2. Crie um novo projeto ou use um existente
-3. Ative **Authentication** com providers Email/Senha e Google
-4. Crie um banco **Firestore Database** em modo test
-5. Em Authentication → Settings → Authorized domains, adicione seu domínio Netlify
-
-### 3. Gemini API Key
-
-1. Acesse [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Crie uma API Key
-3. Adicione ao `.env.local` como `GEMINI_API_KEY`
-
-> **Nota**: O sistema possui tratamento de erro automático para chaves inválidas (Erro 400), exibindo mensagens amigáveis na interface.
-
-## Instalação e Execução
-
-```bash
-# Instalar dependências
-npm install
-
-# Rodar em desenvolvimento
-npm run dev
-
-# Build para produção
-npm run build
-```
-
-## Estrutura do Projeto
-
-```
-src/
-├── app/
-│   ├── api/
-│   │   ├── analyze-candidate/    # API de análise de candidatos
-│   │   ├── generate-job/         # API de geração de vagas
-│   │   └── generate-report/      # API de relatórios HTML/PDF
-│   ├── dashboard/
-│   │   ├── candidates/           # Página de análise de talentos
-│   │   ├── jobs/                 # Página de vagas
-│   │   └── settings/             # Configurações
-│   ├── login/                    # Autenticação
-│   └── onboarding/               # Configuração inicial
-├── components/
-├── context/                      # AuthContext
-├── hooks/                        # useSubscription
-├── lib/                          # Firebase config
-└── services/
-    └── aiService.js              # Prompts e integração Gemini
-```
-
-## Funcionalidades
-
-### Modo 1: Arquiteto de Vagas
-- **Arquétipo Mental Unificado**: Seleção integrada de perfil (Hunter/Farmer/Técnico/Liderança)
-- Driver motivacional (Financeiro/Competição/Propósito)
-- Geração automática de texto persuasivo sem emojis
-- UI Polida: Botões Outlined e alto contraste (Humanidade Sintética V2)
-
-### Modo 2: Analista de Perfil (Protocolo Elite V6.0)
-- Upload de CV (.txt, .pdf, .doc, .docx)
-- Transcrição de entrevistas
-- Análise STAR diferenciada por perfil
-- Scorecard com competências específicas:
-  - **Técnico**: Domínio Hard Skills, Resolução Problemas, Qualidade Entrega, Profundidade Técnica
-  - **Liderança**: Tomada Decisão, Gestão Conflitos, Mentoria/Delegar, Visão Estratégica
-- Identificação de temperamento
-- Red Flags para perfis de liderança (centralização)
-- Geração de relatório HTML exportável
-
-## Deploy no Netlify
-
-1. Push do código para GitHub
-2. Conecte o repositório no Netlify
-3. Configure as variáveis de ambiente no Netlify:
-   - Todas as `NEXT_PUBLIC_FIREBASE_*`
-   - `GEMINI_API_KEY`
-4. Build command: `npm run build`
-5. Publish directory: `.next`
-6. Adicione o domínio do Netlify no Firebase Auth → Authorized domains
-
-## Protocolo Elite V6.0
-
-### Diferenciação Técnico vs Liderança
-
-| Aspecto | Perfil Técnico | Perfil Liderança |
-|---------|----------------|------------------|
-| Foco STAR | Eficiência individual | Resultados de equipe |
-| Verbos | Executar, Analisar, Solucionar | Disseminar, Treinar, Planejar |
-| Temperamentos ideais | Melancólico, Fleumático | Colérico, Sanguíneo |
-| Red Flags | - | "Eu fiz" sem mencionar equipe |
-
-### Competências Avaliadas
-
-**Técnico:**
-1. Domínio de Hard Skills
-2. Resolução de Problemas
-3. Qualidade de Entrega
-4. Profundidade Técnica
-
-**Liderança:**
-1. Tomada de Decisão
-2. Gestão de Conflitos
-3. Mentoria/Delegar
-4. Visão Estratégica
-
-## Suporte
-
-Para dúvidas ou problemas, abra uma Issue no repositório ou envie email para suporte.
+# Consultor de Inteligência em R&S — Live Consultoria
+> **Produto Oficial de Recrutamento & Seleção com Inteligência Artificial do Ecossistema Live**
 
 ---
 
+## 📌 Visão Geral do Produto
 
-### Atualizações Recentes (v0.3.0 - Hotfix & Stabilization)
+O **Consultor de Inteligência em R&S** é uma plataforma corporativa completa desenvolvida para transformar a forma como empresas contratam talentos. O sistema opera em dois modos integrados:
 
-#### 1. Core & IA
-- **Modelo Atualizado**: Migração para `gemini-2.5-flash` (Único modelo estável/disponível no ambiente atual).
-- **Prompt Engineering**: Ajuste para gerar "LinkedIn Posts" formatados (Bullets, Hook e CTA) ao invés de cartas.
-- **Tokens**: Aumento de limite para 4096 tokens (evita cortes no texto).
-
-#### 2. Funcionalidades Críticas
-- **Auto-Save**: Vagas geradas são salvas automaticamente no Firestore.
-- **Correção de Deploy**: Ajuste no caminho de importação do Firebase (`config` -> `lib`) que quebrava o build.
-
-#### 3. Interface (UI)
-- **Texto**: Dashboard atualizado para refletir todos os perfis (Hunter, Farmer, Técnico, Liderança).
-- **Layout**: Altura da caixa de texto aumentada para 70vh.
-- **Estilo**: Botões arredondados e remoção de efeitos indesejados no card de formulário.
-
-#### 4. Backlog & Manutenção
-- **Backlog**: Criação de `product_backlog.md` para rastrear melhorias futuras (Tradução e Suporte).
-
-### Atualizações Recentes (v0.4.0 - Large Files & Context)
-
-#### 1. Upload de Arquivos Grandes (Hybrid Strategy)
-- **Firebase Storage**: Arquivos > 4.5MB (ex: áudios longos) são enviados diretamente para o Storage, ignorando o limite de 6MB do Netlify.
-- **Gemini File API**: O backend baixa o arquivo do Storage e reenvia para a API do Google, permitindo processar arquivos de até 2GB.
-- **Correção de Erro 400**: Tratamento robusto para erros de body size e validação de tipos.
-
-#### 2. Integração Transcrição + Currículo
-- **Contexto Cruzado**: Nova funcionalidade na aba "Transcrição" permite vincular a análise a um candidato existente.
-- **Validação de Discurso**: A IA cruza o resumo e scores do CV (Análise Anterior) com o conteúdo da entrevista para verificar consistência.
-- **UI**: Novo seletor de candidatos na aba de transcrição.
-
-#### 3. Core Fixes
-- **Styled-JSX**: Correção definitiva de tags aninhadas que quebravam o build.
-- **Firebase Init**: Correção de `ReferenceError: getApps` restaurando imports críticos.
-
+1. **Modo 1 (Arquiteto de Vagas):** Criação de anúncios sóbrios, sem clichês tóxicos, com separação explícita de requisitos *Obrigatórios (Eliminatórios)* vs *Desejáveis*, além da geração instantânea do **Roteiro Socrático de Entrevista** com simulação prática (Role Play Cenários A/B) e teste de *Coachability*.
+2. **Modo 2 (Analista de Candidatos):** Triagem automatizada com barreira de **Gate Check eliminatório**, cálculo auditável de notas em **4 Pilares Ponderados** (Comportamental, Técnica, Prática e Alinhamento), **STAR quantitativo**, **Matriz SWOT** e análise de temperamentos.
+3. **Protocolo Elite:** Geração de parecer executivo visual em HTML estilizado com o padrão estético da Live Consultoria (`#06192a` / `#00e800`) e exportação direta para apresentação à diretoria e clientes.
+4. **Matriz de Decisão:** Comparador multi-candidatos no dashboard para rankear e decidir contratações em minutos.
 
 ---
 
-© 2026 RecruitAI. Todos os direitos reservados.
+## 📁 Estrutura de Pastas & Documentação
+
+```
+d:\Automacao\Consultoria\clientes\ecossistema-live\produtos\recrutamento-selecao-ia\
+├── MANUAL_WEB_DESIGNER_IA.md        <-- Guia completo de UI/UX, fluxos e textos na tela
+├── DEPLOY_NETLIFY_FIREBASE.md       <-- Guia de infraestrutura, coleções Firestore e Netlify
+├── netlify.toml                     <-- Configuração oficial de deploy no Netlify
+├── firestore.rules                  <-- Regras de segurança prontas para o Cloud Firestore
+├── .env.example                     <-- Modelo de variáveis de ambiente
+├── src/                             <-- Código-fonte do Next.js (App Router)
+│   ├── app/                         <-- Páginas do Dashboard, Vagas e Candidatos
+│   ├── components/                  <-- Componentes UI (GlassCard, StatCard, etc.)
+│   ├── context/                     <-- Contexto de Autenticação Firebase
+│   ├── lib/                         <-- Validações Zod e regras das 6 Famílias
+│   ├── services/                    <-- Serviços de IA e Geração de Relatórios
+│   └── skills/                      <-- Motores de Job Architect, CV Analyst e Protocolo Elite
+└── package.json                     <-- Dependências do projeto
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Frontend & Serverless:** Next.js (App Router, Tailwind CSS, Lucide React).
+- **Hospedagem & Deploy:** [Netlify](https://www.netlify.com/) via plugin `@netlify/plugin-nextjs`.
+- **Autenticação:** [Google Firebase Authentication](https://firebase.google.com/) (Email/Senha e Google Sign-In).
+- **Banco de Dados:** [Google Cloud Firestore](https://firebase.google.com/docs/firestore) (Multi-tenant isolado por usuário).
+- **Inteligência Artificial:** Google Gemini API (modelos Flash com Structured Output).
+
+---
+
+## 📖 Como Começar
+
+1. **Para Designers e Desenvolvedores de Interface:**
+   - Leia o [MANUAL_WEB_DESIGNER_IA.md](file:///d:/Automacao/Consultoria/clientes/ecossistema-live/produtos/recrutamento-selecao-ia/MANUAL_WEB_DESIGNER_IA.md) para entender a paleta de cores, os passos do usuário e os componentes de tela.
+
+2. **Para Engenheiros de DevOps e Infraestrutura:**
+   - Siga as instruções do [DEPLOY_NETLIFY_FIREBASE.md](file:///d:/Automacao/Consultoria/clientes/ecossistema-live/produtos/recrutamento-selecao-ia/DEPLOY_NETLIFY_FIREBASE.md) para configurar o Firebase Console, aplicar as `firestore.rules` e publicar no Netlify.

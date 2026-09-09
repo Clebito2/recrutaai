@@ -3,6 +3,8 @@
  * Centralized client for all AI interactions
  */
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const DEFAULT_MODEL = "gemini-2.0-flash";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent`;
 
@@ -207,9 +209,6 @@ export async function callGeminiStructured({ systemPrompt, userContent, schema, 
     throw new Error("Todos os modelos de IA falharam (Limites de API excedidos). Aguarde 1 minuto e tente novamente.");
 }
 
-import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 /**
  * Call Gemini with multimodal content (text + file)
  * Supports both Base64 (inlineData) and File API (fileData)
@@ -266,6 +265,7 @@ export async function uploadFileToGemini(filePath, mimeType) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY missing");
 
+    const { GoogleAIFileManager } = await import("@google/generative-ai/server");
     const fileManager = new GoogleAIFileManager(apiKey);
 
     try {

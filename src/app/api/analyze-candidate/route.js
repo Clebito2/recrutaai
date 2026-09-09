@@ -21,7 +21,7 @@ export async function POST(request) {
             );
         }
 
-        const { companyName, cvContent, jobContext, profileLevel, jobId, previousAnalysis } = validation.data;
+        const { companyName, cvContent, jobContext, profileLevel, jobFamily, customWeights, repositoryUrl, jobId, previousAnalysis } = validation.data;
 
         // Fetch jobData if jobId is provided
         let jobData = null;
@@ -32,13 +32,20 @@ export async function POST(request) {
             }
         }
 
-        // Pass profileLevel and jobData to get differentiated analysis
+        // Determina a família da vaga (prioriza parâmetro explícito, depois o cadastro na vaga, depois profileLevel)
+        const effectiveFamily = jobFamily || jobData?.family || (jobData?.profileType === "lideranca" ? "lideranca" : (profileLevel || "tecnico"));
+        const effectiveWeights = customWeights || jobData?.customWeights;
+
+        // Executa análise com a inteligência do Padrão Live
         const analysis = await analyzeCandidate(
             companyName,
             cvContent,
             {
                 jobContext,
                 profileLevel: profileLevel || 'tecnico',
+                jobFamily: effectiveFamily,
+                customWeights: effectiveWeights,
+                repositoryUrl: repositoryUrl || jobData?.repositoryUrl,
                 jobData,
                 previousAnalysis
             }
