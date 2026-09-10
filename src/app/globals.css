@@ -44,10 +44,6 @@ a:hover {
     text-decoration: underline;
 }
 
-a:visited {
-    color: var(--purple-700);
-}
-
 body {
     background-color: var(--canvas);
     color: var(--ink-700);

@@ -227,10 +227,12 @@ export default function DashboardLayout({ children }) {
           margin-bottom: 8px;
         }
 
-        .nav-item {
+        .nav-item,
+        .nav-item:link,
+        .nav-item:visited {
           padding: 10px 16px;
           border-radius: 8px;
-          color: rgba(255, 255, 255, 0.82);
+          color: rgba(255, 255, 255, 0.88) !important;
           text-decoration: none !important;
           font-weight: 600;
           font-size: 0.9rem;
@@ -241,15 +243,17 @@ export default function DashboardLayout({ children }) {
           gap: 10px;
         }
 
-        .nav-item:hover {
-          background: rgba(255, 255, 255, 0.12);
+        .nav-item:hover,
+        .nav-item:hover:visited {
+          background: rgba(255, 255, 255, 0.12) !important;
           color: #FFFFFF !important;
         }
 
-        .nav-item.active {
+        .nav-item.active,
+        .nav-item.active:visited {
           background: var(--purple-600) !important;
           border-color: var(--purple-600) !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
           color: #FFFFFF !important;
         }
 
