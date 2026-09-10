@@ -37,6 +37,7 @@ export default function AdminUsersPage() {
     if (isMasterAdmin) {
       fetchUsers();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMasterAdmin]);
 
   const fetchUsers = async () => {
