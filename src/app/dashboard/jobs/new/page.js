@@ -208,6 +208,20 @@ export default function NewJobPage() {
                 <span className="helper-text">Adaptado dinamicamente para {formData.family === 'outro' ? 'perfil customizado' : formData.family}</span>
               </div>
 
+              {/* Se o arquétipo for customizado/outro, permitir especificar */}
+              {(formData.archetype === 'outro' || formData.archetype === 'custom') && (
+                <div className="form-group full-width animate-fade">
+                  <label><HelpCircle size={16} /> Especificação do Arquétipo Personalizado</label>
+                  <input
+                    name="customArchetypeDetail"
+                    value={formData.customArchetypeDetail || ""}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Closer Consultivo, Líder Técnico de Transição, Especialista em Licitações..."
+                  />
+                  <span className="helper-text">Descreva a postura, estilo de trabalho e foco que este profissional deve ter.</span>
+                </div>
+              )}
+
               {/* Se a família for "Outro", permitir customizar nome específico */}
               {formData.family === 'outro' && (
                 <div className="form-group full-width animate-fade">
@@ -231,6 +245,19 @@ export default function NewJobPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Se o motivador for "Outro", permitir customizar */}
+              {formData.motivator === 'outro' && (
+                <div className="form-group full-width animate-fade">
+                  <label><HelpCircle size={16} /> Especificação do Motivador Personalizado</label>
+                  <input
+                    name="customMotivatorDetail"
+                    value={formData.customMotivatorDetail || ""}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Flexibilidade geográfica, projetos de alta relevância social, etc..."
+                  />
+                </div>
+              )}
 
               {/* Requisitos Obrigatórios (Gate Check) */}
               <div className="form-group">

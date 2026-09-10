@@ -465,10 +465,22 @@ export default function CandidatesPage() {
                   )}
                 </div>
 
-                {/* Aviso para PDFs escaneados */}
+                {/* Confirmação de suporte a PDF e OCR */}
                 {file && (file.name.endsWith('.pdf') || file.type === 'application/pdf') && (
-                  <p className="pdf-warning">
-                    ⚠️ PDFs escaneados (imagens) não têm texto extraível. Use PDFs com texto selecionável ou exporte para DOCX.
+                  <p style={{
+                    marginTop: '12px',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                    color: '#60A5FA',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <CheckCircle size={16} color="#3B82F6" />
+                    PDF pronto para análise com OCR inteligente (lê texto nativo e documentos escaneados).
                   </p>
                 )}
 

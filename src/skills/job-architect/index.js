@@ -45,28 +45,42 @@ ESTRUTURA OBRIGATÓRIA DO ROTEIRO:
 export const ARCHETYPE_MAP = {
     comercial: {
         hunter: "Hunter (prospecção ativa, abertura de mercado, perfil agressivo)",
-        farmer: "Farmer (relacionamento, gestão de carteira, retenção e expansão)"
+        farmer: "Farmer (relacionamento, gestão de carteira, retenção e expansão)",
+        closer: "Closer / Negociação (fechamento de contas e vendas complexas)",
+        sdr: "SDR / BDR (prospecção e qualificação de leads)",
+        consultivo: "Vendas Consultivas / Key Account Manager",
+        outro: "Outro Arquétipo Comercial (Personalizado)"
     },
-    lideranca: {
-        execucao: "Execução & Comando (foco em entrega de curto/médio prazo e rotinas)",
-        estrategico: "Visão Estratégica (foco em médio/longo prazo, cultura e escala)"
+    atendimento: {
+        suporte: "Suporte Técnico / Resolução de Incidentes & Help Desk",
+        cs: "Customer Success / Adoção, Retenção e Expansão de Clientes",
+        ouvidoria: "Ouvidoria / Gestão de Crise e Retenção Crítica",
+        outro: "Outro Arquétipo de Atendimento (Personalizado)"
     },
     operacoes: {
         padrao: "Manter Padrão & Confiabilidade (foco em processos, compliance e qualidade)",
-        melhoria: "Melhoria Contínua (foco em otimização, eliminação de gargalos e inovação)"
+        melhoria: "Melhoria Contínua (foco em otimização, eliminação de gargalos e inovação)",
+        logistica: "Logística & Supply Chain (planejamento e distribuição)",
+        financeiro_op: "Operações Financeiras / Controladoria & Backoffice",
+        outro: "Outro Arquétipo de Operações (Personalizado)"
     },
     tecnico: {
         profundidade: "Profundidade / Especialista (domínio técnico cirúrgico em stack/área específica)",
-        generalista: "Generalista / Fullstack (versatilidade, visão sistêmica e adaptação rápida)"
+        generalista: "Generalista / Fullstack (versatilidade, visão sistêmica e adaptação rápida)",
+        arquitetura: "Arquitetura & Engenharia de Soluções",
+        outro: "Outro Arquétipo Técnico (Personalizado)"
     },
-    atendimento: {
-        suporte: "Suporte Técnico / Resolução de Incidentes",
-        cs: "Customer Success / Relacionamento Consultivo e Adoção"
+    lideranca: {
+        execucao: "Execução & Comando (foco em entrega de curto/médio prazo e rotinas)",
+        estrategico: "Visão Estratégica (foco em médio/longo prazo, cultura e escala)",
+        mentor: "Liderança Desenvolvedora / Mentoria e Gestão de Pessoas",
+        outro: "Outro Arquétipo de Liderança (Personalizado)"
     },
     outro: {
         geral: "Perfil Operacional / Execução Estruturada",
         analitico: "Perfil Analítico / Planejamento & Qualidade",
         criativo: "Perfil Criativo / Inovação & Comunicação",
+        administrativo: "Perfil Administrativo / Suporte & Organização",
         custom: "Outro Arquétipo Personalizado"
     }
 };
@@ -92,12 +106,21 @@ export function validateInput(data) {
  * Monta o prompt do usuário para geração do anúncio
  */
 export function buildJobPrompt(companyName, data) {
-    const family = data.family || data.profileType || "tecnico";
-    const archetypeDesc = data.archetype || "Perfil alinhado ao segmento";
-    const motivatorDesc = MOTIVATOR_MAP[data.motivator] || data.motivator || "Crescimento profissional e impacto";
+    const family = (data.family === "outro" && data.customFamilyDetail)
+        ? `OUTRO (${data.customFamilyDetail})`
+        : (data.family || data.profileType || "tecnico").toUpperCase();
+
+    const rawArchetype = ARCHETYPE_MAP[data.family]?.[data.archetype] || data.archetype || "Perfil alinhado ao segmento";
+    const archetypeDesc = ((data.archetype === "outro" || data.archetype === "custom") && data.customArchetypeDetail)
+        ? `${rawArchetype} — Detalhe: ${data.customArchetypeDetail}`
+        : rawArchetype;
+
+    const motivatorDesc = (data.motivator === "outro" && data.customMotivatorDetail)
+        ? `Outro Motivador: ${data.customMotivatorDetail}`
+        : (MOTIVATOR_MAP[data.motivator] || data.motivator || "Crescimento profissional e impacto");
 
     return `EMPRESA CLIENTE: ${companyName}
-FAMÍLIA DA VAGA: ${family.toUpperCase()}
+FAMÍLIA DA VAGA: ${family}
 ARQUÉTIPO DE ATUAÇÃO: ${archetypeDesc}
 MOTIVADOR PRINCIPAL: ${motivatorDesc}
 TÍTULO DA VAGA: ${data.title}
@@ -118,11 +141,18 @@ Redija o anúncio oficial da vaga seguindo estritamente a estrutura de 7 tópico
  * Monta o prompt para o Roteiro Estruturado de Entrevista
  */
 export function buildInterviewGuidePrompt(companyName, data) {
-    const family = data.family || data.profileType || "tecnico";
+    const family = (data.family === "outro" && data.customFamilyDetail)
+        ? `OUTRO (${data.customFamilyDetail})`
+        : (data.family || data.profileType || "tecnico").toUpperCase();
+
+    const rawArchetype = ARCHETYPE_MAP[data.family]?.[data.archetype] || data.archetype || "Padrão";
+    const archetypeDesc = ((data.archetype === "outro" || data.archetype === "custom") && data.customArchetypeDetail)
+        ? `${rawArchetype} — Detalhe: ${data.customArchetypeDetail}`
+        : rawArchetype;
 
     return `EMPRESA CLIENTE: ${companyName}
-VAGA: ${data.title} (${family.toUpperCase()})
-ARQUÉTIPO: ${data.archetype || "Padrão"}
+VAGA: ${data.title} (${family})
+ARQUÉTIPO: ${archetypeDesc}
 REQUISITOS OBRIGATÓRIOS: ${data.mustHaves || "Não especificados"}
 REQUISITOS DESEJÁVEIS: ${data.niceToHaves || "Não especificados"}
 
