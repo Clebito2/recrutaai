@@ -6,12 +6,13 @@ import SubscriptionGuard from "../../../../components/common/SubscriptionGuard";
 import PageHeader from "../../../../components/common/PageHeader";
 import MetaList from "../../../../components/common/MetaList";
 import MetaItem from "../../../../components/common/MetaItem";
-import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText, Building2, Edit3, Save, X, ListChecks } from "lucide-react";
+import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText, Building2, Edit3, Save, X, ListChecks, Share2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
 import { JOB_FAMILIES, FAMILY_DEFAULT_WEIGHTS } from "../../../../lib/validation";
+import JobDisseminationHub from "../../../../components/jobs/JobDisseminationHub";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -96,7 +97,7 @@ export default function JobDetails() {
 
   const actions = (
     <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-      {!isEditing ? (
+      {activeTab !== "social" && !isEditing && (
         <>
           <button onClick={handleStartEdit} className="btn-secondary">
             <Edit3 size={16} /> Editar Texto
@@ -105,14 +106,9 @@ export default function JobDetails() {
             {copied ? <Check size={18} /> : <Copy size={18} />}
             {copied ? "Copiado" : activeTab === "guide" ? "Copiar Roteiro" : "Copiar Anúncio"}
           </button>
-          <button 
-            onClick={() => router.push(`/dashboard/candidates?jobId=${job.id}`)}
-            className="btn-indigo"
-          >
-            Analisar Candidatos
-          </button>
         </>
-      ) : (
+      )}
+      {activeTab !== "social" && isEditing && (
         <>
           <button onClick={() => setIsEditing(false)} className="btn-secondary" disabled={saving}>
             <X size={16} /> Cancelar
@@ -122,6 +118,12 @@ export default function JobDetails() {
           </button>
         </>
       )}
+      <button 
+        onClick={() => router.push(`/dashboard/candidates?jobId=${job.id}`)}
+        className="btn-indigo"
+      >
+        Analisar Candidatos
+      </button>
     </div>
   );
 
@@ -149,31 +151,43 @@ export default function JobDetails() {
           >
             <MessageSquareQuote size={16} /> Roteiro Socrático de Entrevista
           </button>
+          <button 
+            className={`tab-btn ${activeTab === 'social' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('social'); setIsEditing(false); }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <Share2 size={16} /> Divulgação (WhatsApp & Instagram)
+          </button>
         </div>
 
-        <div className="job-grid">
-          <div className="main-content">
-            <GlassCard className="content-card">
-              {isEditing ? (
-                <div className="editor-wrapper">
-                  <div className="editor-info">
-                    <span>Editando: {activeTab === "ad" ? "Anúncio Oficial" : "Roteiro Socrático de Entrevista"}</span>
-                  </div>
-                  <textarea
-                    className="job-textarea"
-                    value={editedText}
-                    onChange={(e) => setEditedText(e.target.value)}
-                    rows={22}
-                    placeholder="Edite o conteúdo..."
-                  />
-                </div>
-              ) : activeTab === "ad" ? (
-                <pre className="job-text">{job.jobDescription || job.description || "Nenhuma descrição de anúncio salva para esta vaga."}</pre>
-              ) : (
-                <pre className="job-text guide-text">{job.interviewGuide || "Nenhum roteiro de entrevista estruturado foi gerado para esta vaga. Você pode gerar através do Arquiteto de Vagas."}</pre>
-              )}
-            </GlassCard>
+        {activeTab === "social" ? (
+          <div style={{ marginTop: "24px" }}>
+            <JobDisseminationHub job={job} />
           </div>
+        ) : (
+          <div className="job-grid">
+            <div className="main-content">
+              <GlassCard className="content-card">
+                {isEditing ? (
+                  <div className="editor-wrapper">
+                    <div className="editor-info">
+                      <span>Editando: {activeTab === "ad" ? "Anúncio Oficial" : "Roteiro Socrático de Entrevista"}</span>
+                    </div>
+                    <textarea
+                      className="job-textarea"
+                      value={editedText}
+                      onChange={(e) => setEditedText(e.target.value)}
+                      rows={22}
+                      placeholder="Edite o conteúdo..."
+                    />
+                  </div>
+                ) : activeTab === "ad" ? (
+                  <pre className="job-text">{job.jobDescription || job.description || "Nenhuma descrição de anúncio salva para esta vaga."}</pre>
+                ) : (
+                  <pre className="job-text guide-text">{job.interviewGuide || "Nenhum roteiro de entrevista estruturado foi gerado para esta vaga. Você pode gerar através do Arquiteto de Vagas."}</pre>
+                )}
+              </GlassCard>
+            </div>
 
           <div className="sidebar">
             <GlassCard className="meta-card">
@@ -248,6 +262,7 @@ export default function JobDetails() {
             </GlassCard>
           </div>
         </div>
+        )}
 
         <style jsx>{`
           .job-details-container {

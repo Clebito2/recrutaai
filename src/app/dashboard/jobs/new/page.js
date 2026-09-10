@@ -15,6 +15,7 @@ import PageHeader from "@/components/common/PageHeader";
 import { ARCHETYPE_MAP, MOTIVATOR_MAP } from "@/skills/job-architect";
 import { FAMILY_DEFAULT_WEIGHTS } from "@/lib/validation";
 import { cleanJobAdText } from "@/lib/formatters";
+import JobDisseminationHub from "@/components/jobs/JobDisseminationHub";
 
 const FAMILIES = [
   { id: "comercial", label: "Comercial / Vendas", weights: "40% Comp / 20% Téc / 30% Prát / 10% Alin" },
@@ -386,7 +387,8 @@ export default function NewJobPage() {
             </button>
           </GlassCard>
         ) : (
-          <GlassCard className="preview-card animate-fade">
+          <>
+            <GlassCard className="preview-card animate-fade">
             <div className="preview-header">
               <div className="preview-info-col">
                 <span className="step-pill">Anúncio Formatado</span>
@@ -422,6 +424,16 @@ export default function NewJobPage() {
               <pre className="clean-ad-text">{cleanJobAdText(generatedDesc)}</pre>
             </div>
           </GlassCard>
+
+          {/* Kit de Divulgação em Redes (WhatsApp & Instagram) */}
+          <div style={{ marginTop: "24px" }}>
+            <JobDisseminationHub job={{
+              ...formData,
+              jobDescription: cleanJobAdText(generatedDesc),
+              description: cleanJobAdText(generatedDesc)
+            }} />
+          </div>
+        </>
         )}
 
         <style jsx>{`
