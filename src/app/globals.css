@@ -272,3 +272,58 @@ label {
     outline: 2px solid var(--status-danger);
     outline-offset: 2px;
 }
+
+/* --- Forçar cor branca absoluta em todos os itens do Menu Lateral --- */
+.sidebar,
+.sidebar a,
+.sidebar a:link,
+.sidebar a:visited,
+.sidebar .nav-item,
+.sidebar .nav-item:link,
+.sidebar .nav-item:visited,
+.sidebar .nav-section-title,
+.sidebar .company-name,
+.sidebar .brand {
+    color: #FFFFFF !important;
+}
+
+.sidebar .nav-section-title {
+    color: #FFFFFF !important;
+    opacity: 0.95;
+    font-weight: 700;
+}
+
+.sidebar .nav-item,
+.sidebar .nav-item:link,
+.sidebar .nav-item:visited {
+    color: #FFFFFF !important;
+}
+
+.sidebar .nav-item:hover,
+.sidebar .nav-item:hover:visited {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+}
+
+.sidebar .nav-item.active,
+.sidebar .nav-item.active:visited {
+    background: var(--purple-600) !important;
+    color: #FFFFFF !important;
+}
+
+/* --- Ocultar selo flutuante 'Powered by Netlify' / Netlify Drawer --- */
+#netlify-hud,
+[data-netlify-badge],
+.netlify-badge,
+[class*="netlify-hud"],
+iframe#netlify-hud-widget,
+div[data-testid="netlify-drawer"],
+#netlify-drawer,
+div[class*="feedback-drawer"],
+div[class*="netlify-drawer"],
+a[href*="netlify.com"][class*="badge"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

@@ -135,7 +135,7 @@ export default function DashboardLayout({ children }) {
 
           {isMasterAdmin && (
             <div className="nav-section">
-              <span className="nav-section-title" style={{ color: "#D8B4FE" }}>Administração</span>
+              <span className="nav-section-title" style={{ color: "#FFFFFF" }}>Administração</span>
               <Link
                 href="/dashboard/admin/users"
                 className={`nav-item ${pathname === "/dashboard/admin/users" ? "active" : ""}`}
@@ -270,9 +270,10 @@ export default function DashboardLayout({ children }) {
         }
 
         .nav-section-title {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: rgba(255, 255, 255, 0.55);
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: #FFFFFF !important;
+          opacity: 0.9;
           text-transform: uppercase;
           letter-spacing: 1.2px;
           padding: 0 12px;
@@ -284,9 +285,9 @@ export default function DashboardLayout({ children }) {
         .nav-item:visited {
           padding: 10px 16px;
           border-radius: 8px;
-          color: rgba(255, 255, 255, 0.88) !important;
+          color: #FFFFFF !important;
           text-decoration: none !important;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 0.9rem;
           transition: all 0.2s ease;
           margin-bottom: 4px;
