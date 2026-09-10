@@ -64,7 +64,10 @@ export const ARCHETYPE_MAP = {
         cs: "Customer Success / Relacionamento Consultivo e Adoção"
     },
     outro: {
-        geral: "Perfil Operacional e Estruturado"
+        geral: "Perfil Operacional / Execução Estruturada",
+        analitico: "Perfil Analítico / Planejamento & Qualidade",
+        criativo: "Perfil Criativo / Inovação & Comunicação",
+        custom: "Outro Arquétipo Personalizado"
     }
 };
 
@@ -72,7 +75,9 @@ export const MOTIVATOR_MAP = {
     financeiro: "Ambição Financeira / Comissão (foco em metas, ganhos variáveis e recompensa por entrega)",
     desafio: "Desafio / Competição (superação de benchmarks, reconhecimento e liderança de mercado)",
     estabilidade: "Estabilidade / Carreira (segurança, solidez, progressão estruturada e processos claros)",
-    proposito: "Propósito / Impacto (alinhamento a valores, transformação de clientes e colaboração)"
+    proposito: "Propósito / Impacto (alinhamento a valores, transformação de clientes e colaboração)",
+    crescimento: "Aprendizado Acelerado & Autonomia (ambiente dinâmico e desenvolvimento contínuo)",
+    outro: "Outro Motivador Específico"
 };
 
 /**

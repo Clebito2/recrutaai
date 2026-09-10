@@ -56,9 +56,24 @@ export default function Login() {
     setError("");
 
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      if (!user) {
+        // Redirect disparado
+        return;
+      }
     } catch (err) {
-      setError(err.message || "Erro ao entrar com Google.");
+      console.error("[Login] Erro ao entrar com Google:", err);
+      let userMsg = "Erro ao entrar com o Google.";
+      if (err.code === "auth/internal-error") {
+        userMsg = "Erro de conexão/permissão no Google Auth. Se o popup falhou, tente recarregar a página ou utilize login por E-mail e Senha.";
+      } else if (err.code === "auth/popup-blocked") {
+        userMsg = "A janela pop-up do Google foi bloqueada pelo navegador. Redirecionando automaticamente...";
+      } else if (err.code === "auth/unauthorized-domain") {
+        userMsg = "Domínio não autorizado no Firebase Auth. Acesse o Console e adicione este domínio aos Domínios Autorizados.";
+      } else if (err.message) {
+        userMsg = err.message;
+      }
+      setError(userMsg);
     } finally {
       setLoading(false);
     }
@@ -139,7 +154,7 @@ export default function Login() {
             <span>ou</span>
           </div>
 
-          <button onClick={handleGoogleSignIn} className="btn-google" disabled={loading}>
+          <button type="button" onClick={handleGoogleSignIn} className="btn-google" disabled={loading}>
             Continuar com Google
           </button>
 

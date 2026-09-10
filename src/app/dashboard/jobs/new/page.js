@@ -186,7 +186,7 @@ export default function NewJobPage() {
 
               {/* Família de Vaga */}
               <div className="form-group">
-                <label><Brain size={16} /> Família de Vaga (Padrão Live)</label>
+                <label><Brain size={16} /> Família de Vaga</label>
                 <select name="family" value={formData.family} onChange={handleInputChange}>
                   {FAMILIES.map(f => (
                     <option key={f.id} value={f.id}>{f.label}</option>
@@ -205,8 +205,22 @@ export default function NewJobPage() {
                     <option key={key} value={key}>{desc}</option>
                   ))}
                 </select>
-                <span className="helper-text">Adaptado dinamicamente para {formData.family}</span>
+                <span className="helper-text">Adaptado dinamicamente para {formData.family === 'outro' ? 'perfil customizado' : formData.family}</span>
               </div>
+
+              {/* Se a família for "Outro", permitir customizar nome específico */}
+              {formData.family === 'outro' && (
+                <div className="form-group full-width animate-fade">
+                  <label><HelpCircle size={16} /> Descrição / Detalhe da Família de Cargo</label>
+                  <input
+                    name="customFamilyDetail"
+                    value={formData.customFamilyDetail || ""}
+                    onChange={handleInputChange}
+                    placeholder="Ex: Recursos Humanos, Jurídico, Engenharia Civil, Logística..."
+                  />
+                  <span className="helper-text">Informe a área de atuação para a IA calibrar a redação e competências.</span>
+                </div>
+              )}
 
               {/* Motivador Principal */}
               <div className="form-group full-width">
@@ -368,15 +382,15 @@ export default function NewJobPage() {
           }
           .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #00e800;
+            border-color: #3B82F6;
           }
           .btn-indigo { 
-            background: linear-gradient(135deg, #00c900, #00e800); 
-            color: #06192a; 
+            background: #3B82F6; 
+            color: #FFFFFF; 
             border: none; 
             padding: 16px; 
             border-radius: 10px; 
-            font-weight: 800; 
+            font-weight: 700; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
@@ -385,26 +399,31 @@ export default function NewJobPage() {
             transition: all 0.2s ease;
           }
           .btn-indigo:hover {
+            background: #2563EB;
             transform: translateY(-1px);
-            box-shadow: 0 4px 20px rgba(0, 232, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
           }
           .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #F8FAFC;
+            border: 1px solid #1E293B;
             padding: 10px 16px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
+          }
+          .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
           }
           .preview-card { padding: 32px; }
-          .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px; }
+          .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E293B; padding-bottom: 16px; margin-bottom: 20px; }
           .preview-tabs { display: flex; gap: 10px; }
-          .tab-btn { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
-          .tab-btn.active { background: rgba(0, 232, 0, 0.15); border-color: #00e800; color: #00e800; }
+          .tab-btn { background: #131B2A; border: 1px solid #1E293B; color: #94A3B8; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
+          .tab-btn.active { background: #3B82F6; border-color: #3B82F6; color: #FFFFFF; }
           .preview-actions { display: flex; gap: 12px; }
-          .preview-content { background: rgba(6, 25, 42, 0.6); padding: 28px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); line-height: 1.8; color: #e2e8f0; }
-          .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: #00e800; }
+          .preview-content { background: #131B2A; padding: 28px; border-radius: 12px; border: 1px solid #1E293B; line-height: 1.8; color: #F8FAFC; }
+          .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: #3B82F6; }
           .error-msg { display: flex; align-items: center; gap: 8px; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; }
           .spin { animation: spin 1s linear infinite; }
           @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }

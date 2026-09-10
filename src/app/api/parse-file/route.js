@@ -40,14 +40,37 @@ export async function POST(req) {
                 const data = await pdf(buffer);
                 text = data.text;
             } catch (pdfError) {
-                console.error('[parse-file] PDF parse error:', pdfError.message);
-                if (pdfError.message?.includes('Invalid PDF') || pdfError.message?.includes('Bad XRef')) {
-                    return NextResponse.json(
-                        { error: 'PDF inválido ou corrompido. Tente exportar novamente ou use um arquivo DOCX/TXT.' },
-                        { status: 422 }
-                    );
+                console.warn('[parse-file] pdf-parse falhou, tentando fallback Gemini Multimodal:', pdfError.message);
+            }
+
+            // Se o PDF for escaneado, imagem, vetorizado no Canva ou pdf-parse falhou:
+            if (!text || !text.trim()) {
+                console.log(`[parse-file] PDF sem camada de texto direta (${fileName}). Ativando OCR com Gemini Multimodal...`);
+                try {
+                    const { callGeminiMultimodal } = await import('@/skills/gemini-client');
+                    const base64Data = buffer.toString('base64');
+                    const ocrPrompt = "Extraia e transcreva com máxima fidelidade TODO o texto e informações contidas neste currículo. Preserve a ordem e organização: Dados Pessoais/Contato, Objetivo, Resumo Profissional, Experiências Anteriores (com empresas, cargos, datas e responsabilidades), Formação Acadêmica, Cursos e Habilidades. Retorne apenas o texto puro transcrito, sem introduções ou conclusões.";
+                    
+                    const extracted = await callGeminiMultimodal({
+                        systemPrompt: "Você é um especialista em OCR e processamento de documentos e currículos profissionais.",
+                        textPrompt: ocrPrompt,
+                        fileData: {
+                            mimeType: 'application/pdf',
+                            data: base64Data
+                        },
+                        config: {
+                            temperature: 0.1,
+                            maxOutputTokens: 4096
+                        }
+                    });
+
+                    if (extracted && extracted.trim()) {
+                        text = extracted;
+                        console.log(`[parse-file] Gemini OCR concluiu extração com sucesso: ${text.length} caracteres extraídos.`);
+                    }
+                } catch (geminiError) {
+                    console.error('[parse-file] Erro no fallback Gemini Multimodal:', geminiError.message);
                 }
-                throw pdfError;
             }
         } else if (isDOCX) {
             try {
@@ -82,7 +105,7 @@ export async function POST(req) {
             return NextResponse.json(
                 {
                     error: isPDF
-                        ? 'PDF sem texto extraível. Verifique se não é um PDF escaneado (imagem). Use PDF com texto selecionável ou exporte para DOCX.'
+                        ? 'Não foi possível extrair texto legível deste PDF mesmo após OCR. Verifique se o arquivo não está corrompido ou protegido por senha.'
                         : 'Não foi possível extrair texto do arquivo. Verifique se o arquivo não está vazio ou corrompido.'
                 },
                 { status: 422 }

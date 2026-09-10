@@ -123,8 +123,8 @@ export default function DashboardLayout({ children }) {
 
         .sidebar {
           width: 280px;
-          background: #1A1614;
-          border-right: 1px solid var(--border-glass);
+          background: #0F172A;
+          border-right: 1px solid #1E293B;
           display: flex;
           flex-direction: column;
           position: fixed;
@@ -134,26 +134,26 @@ export default function DashboardLayout({ children }) {
 
         .sidebar-header {
           padding: 28px 24px 20px;
-          border-bottom: 1px solid var(--border-glass);
+          border-bottom: 1px solid #1E293B;
         }
 
         .brand {
           font-size: 1.5rem;
           font-weight: 800;
           text-decoration: none;
-          color: var(--text-primary);
+          color: #F8FAFC;
           letter-spacing: -0.02em;
         }
 
         .accent {
-          color: var(--action-primary);
+          color: #3B82F6;
         }
 
         .company-badge {
           margin: 20px 20px 0;
           padding: 16px 18px;
-          background: rgba(244, 169, 0, 0.08);
-          border: 1px solid rgba(244, 169, 0, 0.15);
+          background: rgba(59, 130, 246, 0.08);
+          border: 1px solid rgba(59, 130, 246, 0.2);
           border-radius: 10px;
         }
 
@@ -161,7 +161,7 @@ export default function DashboardLayout({ children }) {
           display: block;
           font-size: 0.7rem;
           font-weight: 700;
-          color: var(--action-primary);
+          color: #60A5FA;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 6px;
@@ -171,7 +171,7 @@ export default function DashboardLayout({ children }) {
           display: block;
           font-size: 1rem;
           font-weight: 600;
-          color: var(--text-primary);
+          color: #F8FAFC;
         }
 
         .sidebar-nav {
@@ -191,45 +191,44 @@ export default function DashboardLayout({ children }) {
         .nav-section-title {
           font-size: 0.7rem;
           font-weight: 700;
-          color: var(--text-muted);
+          color: #94A3B8;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           padding: 0 12px;
           margin-bottom: 8px;
-          opacity: 0.6;
+          opacity: 0.8;
         }
 
         .nav-item {
           padding: 12px 18px;
           border-radius: 8px;
-          color: var(--text-primary);
+          color: #94A3B8;
           text-decoration: none !important;
           font-weight: 600;
           font-size: 0.95rem;
           transition: all 0.2s ease;
           margin-bottom: 8px;
           display: flex;
-          justify-content: center;
           align-items: center;
-          text-align: center;
+          gap: 10px;
         }
 
         .nav-item:hover {
-          background: rgba(251, 247, 240, 0.1);
-          border-color: rgba(251, 247, 240, 0.6) !important;
+          background: rgba(255, 255, 255, 0.05);
+          color: #FFFFFF !important;
           transform: translateX(4px);
         }
 
         .nav-item.active {
-          background: var(--action-primary) !important;
-          border-color: var(--action-primary) !important;
-          box-shadow: 0 4px 12px rgba(244, 169, 0, 0.4);
-          color: var(--text-dark) !important;
+          background: #3B82F6 !important;
+          border-color: #3B82F6 !important;
+          box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+          color: #FFFFFF !important;
         }
 
         .sidebar-footer {
           padding: 20px;
-          border-top: 1px solid var(--border-glass);
+          border-top: 1px solid #1E293B;
           margin-top: auto;
         }
 

@@ -198,9 +198,9 @@ export default function JobDetails() {
           }
 
           .tab-btn.active {
-            background: rgba(0, 232, 0, 0.15);
-            border-color: #00e800;
-            color: #00e800;
+            background: #3B82F6;
+            border-color: #3B82F6;
+            color: #FFFFFF;
             font-weight: 600;
           }
 
@@ -219,16 +219,16 @@ export default function JobDetails() {
             white-space: pre-wrap;
             font-family: var(--font-ui);
             line-height: 1.7;
-            color: rgba(255, 255, 255, 0.9);
+            color: #F8FAFC;
             font-size: 1rem;
           }
 
           .guide-text {
-            color: #e2e8f0;
-            background: rgba(6, 25, 42, 0.4);
+            color: #F8FAFC;
+            background: #131B2A;
             padding: 16px;
             border-radius: 8px;
-            border-left: 3px solid #00e800;
+            border-left: 3px solid #3B82F6;
           }
 
           .meta-card {
@@ -238,14 +238,14 @@ export default function JobDetails() {
           .weights-section {
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #1E293B;
           }
 
           .weights-section h4 {
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #00e800;
+            color: #60A5FA;
             margin-bottom: 12px;
           }
 
@@ -271,14 +271,14 @@ export default function JobDetails() {
           .repo-section {
             margin-top: 20px;
             padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #1E293B;
           }
 
           .repo-link {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #00e800;
+            color: #3B82F6;
             font-size: 0.85rem;
             text-decoration: none;
           }
@@ -289,7 +289,7 @@ export default function JobDetails() {
 
           .btn-secondary {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-glass);
+            border: 1px solid #1E293B;
             color: white;
             padding: 10px 18px;
             border-radius: 8px;
@@ -306,8 +306,8 @@ export default function JobDetails() {
           }
 
           .btn-indigo {
-            background: #00e800;
-            color: #06192a;
+            background: #3B82F6;
+            color: #FFFFFF;
             font-weight: 600;
             padding: 10px 18px;
             border-radius: 8px;

@@ -7,7 +7,9 @@ import {
     createUserWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -21,32 +23,50 @@ export function AuthProvider({ children }) {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Listen for auth state changes
+    // Listen for redirect results & auth state changes
     useEffect(() => {
+        // Captura retorno de signInWithRedirect caso o popup tenha sido bloqueado
+        if (typeof window !== "undefined") {
+            getRedirectResult(auth).catch((redirectErr) => {
+                console.warn("[Auth] getRedirectResult:", redirectErr.message);
+            });
+        }
+
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
 
             if (firebaseUser) {
-                // Fetch or create user profile in Firestore
-                const profileRef = doc(db, "users", firebaseUser.uid);
-                const profileSnap = await getDoc(profileRef);
+                try {
+                    // Fetch or create user profile in Firestore
+                    const profileRef = doc(db, "users", firebaseUser.uid);
+                    const profileSnap = await getDoc(profileRef);
 
-                if (profileSnap.exists()) {
-                    setUserProfile(profileSnap.data());
-                } else {
-                    // New user - create profile with trial
-                    const newProfile = {
+                    if (profileSnap.exists()) {
+                        setUserProfile(profileSnap.data());
+                    } else {
+                        // New user - create profile with trial
+                        const newProfile = {
+                            email: firebaseUser.email,
+                            displayName: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split("@")[0] : "Usuário"),
+                            createdAt: serverTimestamp(),
+                            trialStart: serverTimestamp(),
+                            plan: "trial",
+                            companyName: null,
+                            jobsCount: 0,
+                            cvCount: 0
+                        };
+                        await setDoc(profileRef, newProfile);
+                        setUserProfile(newProfile);
+                    }
+                } catch (firestoreErr) {
+                    console.warn("[Auth] Aviso ao sincronizar perfil no Firestore:", firestoreErr.message);
+                    // Resiliência: não bloqueia a sessão se o Firestore tiver regras restritivas
+                    setUserProfile({
                         email: firebaseUser.email,
-                        displayName: firebaseUser.displayName || firebaseUser.email.split("@")[0],
-                        createdAt: serverTimestamp(),
-                        trialStart: serverTimestamp(),
+                        displayName: firebaseUser.displayName || "Usuário",
                         plan: "trial",
-                        companyName: null,
-                        jobsCount: 0,
-                        cvCount: 0
-                    };
-                    await setDoc(profileRef, newProfile);
-                    setUserProfile(newProfile);
+                        companyName: "Minha Empresa"
+                    });
                 }
             } else {
                 setUserProfile(null);
@@ -70,11 +90,32 @@ export function AuthProvider({ children }) {
         return result.user;
     };
 
-    // Sign in with Google
+    // Sign in with Google (Popup com Fallback Automático para Redirect)
     const signInWithGoogle = async () => {
         const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        return result.user;
+        provider.setCustomParameters({ prompt: "select_account" });
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            return result.user;
+        } catch (popupError) {
+            console.warn("[Auth] signInWithPopup falhou, avaliando fallback...", popupError.code, popupError.message);
+            
+            const shouldFallbackToRedirect = [
+                "auth/internal-error",
+                "auth/popup-blocked",
+                "auth/cancelled-popup-request",
+                "auth/popup-closed-by-user"
+            ].includes(popupError.code);
+
+            if (shouldFallbackToRedirect && typeof window !== "undefined") {
+                console.log("[Auth] Executando signInWithRedirect como fallback...");
+                await signInWithRedirect(auth, provider);
+                return null;
+            }
+
+            throw popupError;
+        }
     };
 
     // Log out

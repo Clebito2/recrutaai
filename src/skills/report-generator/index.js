@@ -56,12 +56,12 @@ export function generateReport(analysis, options = {}) {
   const getBadgeStyle = (rec) => {
     const text = (rec || "").toUpperCase();
     if (text.includes("NÃO") || text.includes("REPROV")) {
-      return { bg: "rgba(255, 59, 59, 0.18)", border: "#ff3b3b", color: "#ff6b6b", label: "NÃO RECOMENDADO" };
+      return { bg: "rgba(239, 68, 68, 0.18)", border: "#EF4444", color: "#EF4444", label: "NÃO RECOMENDADO" };
     }
     if (text.includes("RESSALVA") || text.includes("APROFUNDAR")) {
       return { bg: "rgba(245, 158, 11, 0.18)", border: "#f59e0b", color: "#fbbf24", label: "RECOMENDADO COM RESSALVAS" };
     }
-    return { bg: "rgba(0, 232, 0, 0.18)", border: "#00e800", color: "#00e800", label: "RECOMENDADO" };
+    return { bg: "rgba(16, 185, 129, 0.18)", border: "#10B981", color: "#10B981", label: "RECOMENDADO" };
   };
 
   const badge = getBadgeStyle(recomendacao);
@@ -73,23 +73,23 @@ export function generateReport(analysis, options = {}) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parecer Técnico de Alinhamento — ${nome} | Live Consultoria</title>
+  <title>Parecer Técnico de Avaliação — ${nome}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --live-deep: #06192a;
-      --live-glass: rgba(10, 36, 61, 0.75);
-      --live-glass-hover: rgba(15, 45, 75, 0.90);
+      --live-deep: #0B0F17;
+      --live-glass: #131B2A;
+      --live-glass-hover: #1E293B;
       --glass-blur: blur(20px) saturate(180%);
-      --live-accent: #00e800;
-      --live-accent-dim: rgba(0, 232, 0, 0.15);
-      --live-danger: #ff3b3b;
-      --live-warning: #f59e0b;
-      --border-subtle: rgba(255, 255, 255, 0.1);
-      --border-active: rgba(0, 232, 0, 0.5);
+      --live-accent: #10B981;
+      --live-accent-dim: rgba(16, 185, 129, 0.15);
+      --live-danger: #EF4444;
+      --live-warning: #F59E0B;
+      --border-subtle: #1E293B;
+      --border-active: #3B82F6;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -140,8 +140,8 @@ export function generateReport(analysis, options = {}) {
     }
 
     .live-logo {
-      background: linear-gradient(135deg, #00c900, #00e800);
-      color: #06192a;
+      background: #3B82F6;
+      color: #FFFFFF;
       font-weight: 900;
       font-size: 1.2rem;
       padding: 8px 16px;
@@ -181,9 +181,9 @@ export function generateReport(analysis, options = {}) {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: ${isGateReprovado ? 'rgba(255, 59, 59, 0.15)' : 'rgba(0, 232, 0, 0.15)'};
-      border: 1px solid ${isGateReprovado ? '#ff3b3b' : '#00e800'};
-      color: ${isGateReprovado ? '#ff6b6b' : '#00e800'};
+      background: ${isGateReprovado ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)'};
+      border: 1px solid ${isGateReprovado ? '#EF4444' : '#10B981'};
+      color: ${isGateReprovado ? '#EF4444' : '#10B981'};
     }
 
     .candidate-headline {
@@ -337,13 +337,13 @@ export function generateReport(analysis, options = {}) {
     .swot-card {
       border-radius: 12px;
       padding: 20px;
-      background: rgba(6, 25, 42, 0.6);
-      border: 1px solid;
+      background: #131B2A;
+      border: 1px solid #1E293B;
     }
-    .swot-forcas { border-color: #00e800; }
-    .swot-forcas h4 { color: #00e800; }
-    .swot-fraquezas { border-color: #ff3b3b; }
-    .swot-fraquezas h4 { color: #ff3b3b; }
+    .swot-forcas { border-color: #10B981; }
+    .swot-forcas h4 { color: #10B981; }
+    .swot-fraquezas { border-color: #EF4444; }
+    .swot-fraquezas h4 { color: #EF4444; }
     .swot-oportunidades { border-color: #38bdf8; }
     .swot-oportunidades h4 { color: #38bdf8; }
     .swot-ameacas { border-color: #f59e0b; }
@@ -406,7 +406,7 @@ export function generateReport(analysis, options = {}) {
 
     .skill-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #00c900, #00e800);
+      background: linear-gradient(90deg, #2563EB, #3B82F6);
       border-radius: 4px;
     }
 
@@ -465,9 +465,9 @@ export function generateReport(analysis, options = {}) {
     }
 
     .cta-btn {
-      background: linear-gradient(135deg, #00c900, #00e800);
-      color: #06192a;
-      font-weight: 800;
+      background: #3B82F6;
+      color: #FFFFFF;
+      font-weight: 700;
       text-decoration: none;
       padding: 14px 28px;
       border-radius: 10px;
@@ -478,8 +478,9 @@ export function generateReport(analysis, options = {}) {
     }
 
     .cta-btn:hover {
+      background: #2563EB;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0, 232, 0, 0.4);
     }
 
     @media print {
@@ -642,7 +643,7 @@ export function generateReport(analysis, options = {}) {
         <div class="skill-row">
           <div class="skill-meta">
             <span>${c.nome} (${c.pilar})</span>
-            <span>${c.nota}/5 • <span style="color: ${c.tipo_evidencia === 'explicita' ? '#00e800' : '#f59e0b'}">${c.tipo_evidencia === 'explicita' ? 'Evidência Literal' : 'Inferência'}</span></span>
+            <span>${c.nota}/5 • <span style="color: ${c.tipo_evidencia === 'explicita' ? '#10B981' : '#f59e0b'}">${c.tipo_evidencia === 'explicita' ? 'Evidência Literal' : 'Inferência'}</span></span>
           </div>
           <div class="skill-bar-track">
             <div class="skill-bar-fill" style="width: ${(c.nota / 5) * 100}%;"></div>

@@ -356,9 +356,9 @@ export default function CandidatesPage() {
                       width: '100%',
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      background: 'rgba(10, 36, 61, 0.5)',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      color: 'white'
+                      background: '#131B2A',
+                      border: '1px solid #1E293B',
+                      color: '#F8FAFC'
                     }}
                   >
                     <option value="">-- Sem vaga vinculada (Triagem Avulsa por Família) --</option>
@@ -371,8 +371,8 @@ export default function CandidatesPage() {
                 </div>
 
                 <div className="selector-group">
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#e2e8f0' }}>
-                    Família de Vaga Padrão Live (Determina pesos e critérios):
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#F8FAFC' }}>
+                    Família da Vaga (Determina pesos e critérios do arquétipo):
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
                     {[
@@ -393,12 +393,13 @@ export default function CandidatesPage() {
                         style={{
                           padding: '8px 12px',
                           borderRadius: '8px',
-                          border: selectedFamily === f.id ? '1px solid #00e800' : '1px solid rgba(255,255,255,0.1)',
-                          background: selectedFamily === f.id ? 'rgba(0, 232, 0, 0.15)' : 'rgba(0,0,0,0.2)',
-                          color: selectedFamily === f.id ? '#00e800' : '#94a3b8',
+                          border: selectedFamily === f.id ? '1px solid #3B82F6' : '1px solid #1E293B',
+                          background: selectedFamily === f.id ? '#3B82F6' : '#131B2A',
+                          color: selectedFamily === f.id ? '#FFFFFF' : '#94A3B8',
                           fontWeight: '600',
                           fontSize: '0.82rem',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
                         }}
                       >
                         {f.label}
@@ -564,16 +565,16 @@ export default function CandidatesPage() {
                   </div>
                 ) : (
                   <div className="history-container">
-                    {/* Tabela Comparativa Multi-Candidatos (Seção 3.6 do Padrão Live) */}
+                    {/* Tabela Comparativa Multi-Candidatos */}
                     {history.length > 1 && (
-                      <div className="comparison-box" style={{ marginBottom: '32px', background: 'rgba(6, 25, 42, 0.6)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <h3 style={{ fontSize: '1.05rem', color: '#00e800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div className="comparison-box" style={{ marginBottom: '32px', background: '#131B2A', padding: '20px', borderRadius: '12px', border: '1px solid #1E293B' }}>
+                        <h3 style={{ fontSize: '1.05rem', color: '#60A5FA', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Users size={18} /> Comparador de Candidatos (Matriz de Decisão)
                         </h3>
                         <div style={{ overflowX: 'auto' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                             <thead>
-                              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.12)', textAlign: 'left', color: '#8b949e' }}>
+                              <tr style={{ borderBottom: '1px solid #1E293B', textAlign: 'left', color: '#94A3B8' }}>
                                 <th style={{ padding: '8px' }}>Candidato</th>
                                 <th style={{ padding: '8px' }}>Vaga / Perfil</th>
                                 <th style={{ padding: '8px' }}>Gate Check</th>
@@ -599,13 +600,13 @@ export default function CandidatesPage() {
                                     <td style={{ padding: '10px 8px' }}>
                                       <span style={{ 
                                         padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
-                                        background: isGateReprov ? 'rgba(255, 59, 59, 0.2)' : 'rgba(0, 232, 0, 0.15)',
-                                        color: isGateReprov ? '#ff6b6b' : '#00e800'
+                                        background: isGateReprov ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                                        color: isGateReprov ? '#EF4444' : '#10B981'
                                       }}>
                                         {ana.gate_check?.status || "OK"}
                                       </span>
                                     </td>
-                                    <td style={{ padding: '10px 8px', fontWeight: '800', color: '#00e800' }}>
+                                    <td style={{ padding: '10px 8px', fontWeight: '800', color: '#10B981' }}>
                                       {ana.scorecard?.score_final_100 ? `${ana.scorecard.score_final_100}/100` : (ana.nota_geral ? `${ana.nota_geral}/5` : '—')}
                                     </td>
                                     <td style={{ padding: '10px 8px', color: '#cbd5e1' }}>
@@ -615,7 +616,7 @@ export default function CandidatesPage() {
                                       {ana.swot?.ameacas?.[0] || ana.swot?.fraquezas?.[0] || '—'}
                                     </td>
                                     <td style={{ padding: '10px 8px' }}>
-                                      <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: (ana.recomendacao || "").toUpperCase().includes("NÃO") ? '#ff6b6b' : '#00e800' }}>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: (ana.recomendacao || "").toUpperCase().includes("NÃO") ? '#EF4444' : '#10B981' }}>
                                         {ana.recomendacao || "AVALIADO"}
                                       </span>
                                     </td>
@@ -685,9 +686,9 @@ export default function CandidatesPage() {
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <div style={{
                   padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700',
-                  background: analysisResult.gate_check?.status === 'REPROVADO' ? 'rgba(255, 59, 59, 0.2)' : 'rgba(0, 232, 0, 0.15)',
-                  color: analysisResult.gate_check?.status === 'REPROVADO' ? '#ff6b6b' : '#00e800',
-                  border: `1px solid ${analysisResult.gate_check?.status === 'REPROVADO' ? '#ff3b3b' : '#00e800'}`
+                  background: analysisResult.gate_check?.status === 'REPROVADO' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                  color: analysisResult.gate_check?.status === 'REPROVADO' ? '#EF4444' : '#10B981',
+                  border: `1px solid ${analysisResult.gate_check?.status === 'REPROVADO' ? '#EF4444' : '#10B981'}`
                 }}>
                   Gate: {analysisResult.gate_check?.status || 'OK'}
                 </div>
@@ -697,9 +698,9 @@ export default function CandidatesPage() {
               </div>
             </GlassCard>
 
-            {/* TL;DR Resumo de 30 Segundos */}
-            <GlassCard style={{ borderLeft: '4px solid #00e800', padding: '18px 22px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#00e800', letterSpacing: '0.5px' }}>
+            {/* TL;DR Resumo Executivo */}
+            <GlassCard style={{ borderLeft: '4px solid #3B82F6', padding: '18px 22px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#60A5FA', letterSpacing: '0.5px' }}>
                 Resumo Executivo (Leitura de 30 Segundos)
               </span>
               <p style={{ marginTop: '6px', fontSize: '0.95rem', lineHeight: '1.6', color: '#f1f5f9' }}>
@@ -714,39 +715,39 @@ export default function CandidatesPage() {
                   <GlassCard className="score-card">
                     <span className="score-label">Comportamental ({analysisResult.scorecard.comportamental?.peso || 40}%)</span>
                     <div className="score-ring">
-                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.comportamental?.nota ?? 3.5}</span>
+                      <span className="score-value" style={{ color: '#3B82F6' }}>{analysisResult.scorecard.comportamental?.nota ?? 3.5}</span>
                       <span className="score-max">/5</span>
                     </div>
                   </GlassCard>
                   <GlassCard className="score-card">
                     <span className="score-label">Técnica ({analysisResult.scorecard.tecnica?.peso || 20}%)</span>
                     <div className="score-ring">
-                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.tecnica?.nota ?? 3.5}</span>
+                      <span className="score-value" style={{ color: '#3B82F6' }}>{analysisResult.scorecard.tecnica?.nota ?? 3.5}</span>
                       <span className="score-max">/5</span>
                     </div>
                   </GlassCard>
                   <GlassCard className="score-card">
                     <span className="score-label">Prática ({analysisResult.scorecard.pratica?.peso || 30}%)</span>
                     <div className="score-ring">
-                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.pratica?.nota ?? 3.5}</span>
+                      <span className="score-value" style={{ color: '#3B82F6' }}>{analysisResult.scorecard.pratica?.nota ?? 3.5}</span>
                       <span className="score-max">/5</span>
                     </div>
                   </GlassCard>
                   <GlassCard className="score-card">
                     <span className="score-label">Alinhamento ({analysisResult.scorecard.alinhamento?.peso || 10}%)</span>
                     <div className="score-ring">
-                      <span className="score-value" style={{ color: '#00e800' }}>{analysisResult.scorecard.alinhamento?.nota ?? 3.5}</span>
+                      <span className="score-value" style={{ color: '#3B82F6' }}>{analysisResult.scorecard.alinhamento?.nota ?? 3.5}</span>
                       <span className="score-max">/5</span>
                     </div>
                   </GlassCard>
                 </div>
 
                 {/* Banner de Auditoria Matemática */}
-                <div style={{ background: 'rgba(6, 25, 42, 0.8)', border: '1px dashed #00e800', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontFamily: 'monospace' }}>
+                <div style={{ background: '#131B2A', border: '1px dashed #3B82F6', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontFamily: 'monospace' }}>
                   <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
                     {analysisResult.scorecard.formula_calculo || 'Conta de score auditável calculada.'}
                   </span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#00e800' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#10B981' }}>
                     Score Final: {analysisResult.scorecard.score_final_100 || Math.round((analysisResult.nota_geral || 3.5) * 20)}/100
                   </span>
                 </div>
@@ -765,7 +766,7 @@ export default function CandidatesPage() {
                       <p><strong>[S] Situação:</strong> {star.situacao}</p>
                       <p><strong>[T] Tarefa:</strong> {star.tarefa}</p>
                       <p><strong>[A] Ação Individual:</strong> {star.acao}</p>
-                      <p><strong>[R] Resultado:</strong> <span style={{ color: '#00e800' }}>{star.resultado}</span></p>
+                      <p><strong>[R] Resultado:</strong> <span style={{ color: '#10B981' }}>{star.resultado}</span></p>
                       {star.ponto_atencao && (
                         <p style={{ color: '#f59e0b', fontSize: '0.8rem', marginTop: '4px' }}>⚠️ Ponto de Atenção: {star.ponto_atencao}</p>
                       )}
@@ -782,8 +783,8 @@ export default function CandidatesPage() {
                   Matriz SWOT do Candidato
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
-                  <div style={{ borderLeft: '3px solid #00e800', padding: '10px', background: 'rgba(0, 232, 0, 0.05)', borderRadius: '4px' }}>
-                    <h5 style={{ color: '#00e800', fontSize: '0.85rem', fontWeight: '700' }}>FORÇAS</h5>
+                  <div style={{ borderLeft: '3px solid #10B981', padding: '10px', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#10B981', fontSize: '0.85rem', fontWeight: '700' }}>FORÇAS</h5>
                     <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
                       {(analysisResult.swot.forcas || []).map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
@@ -814,7 +815,7 @@ export default function CandidatesPage() {
             {analysisResult.temperamento && (
               <GlassCard className="temperament-card">
                 <h3 style={{ fontSize: '0.95rem', color: '#94a3b8' }}>Temperamento Operacional</h3>
-                <p className="temperament-value" style={{ color: '#00e800', fontWeight: '700' }}>
+                <p className="temperament-value" style={{ color: '#3B82F6', fontWeight: '700' }}>
                   {typeof analysisResult.temperamento === 'string' 
                     ? analysisResult.temperamento 
                     : `${analysisResult.temperamento.perfil_estimado || ''} — ${analysisResult.temperamento.leitura_fit || ''}`}

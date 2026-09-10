@@ -1,32 +1,35 @@
 :root {
-    /* --- Canvas (Golden Hour) --- */
-    --canvas-bg: #1A1614;
-    --canvas-card: rgba(42, 36, 32, 0.9);
-    --canvas-card-hover: rgba(52, 44, 38, 0.95);
+    /* --- Modern Neutral Dark Palette (Clean, High Contrast, No Mud/Brown) --- */
+    --canvas-bg: #0B0F17;
+    --canvas-card: #131B2A;
+    --canvas-card-hover: #1A2438;
+    --canvas-surface: #1E293B;
 
-    /* --- Brand Colors (Golden Hour) --- */
-    --action-primary: #F4A900;
-    --action-secondary: #C1666B;
-    --action-accent: #D4B896;
+    /* --- Action Colors --- */
+    --action-primary: #3B82F6;
+    --action-primary-hover: #2563EB;
+    --action-secondary: #06B6D4;
+    --action-accent: #60A5FA;
 
-    /* --- Text Colors --- */
-    --text-primary: #FBF7F0;
-    --text-muted: #D4B896;
-    --text-dark: #4A403A;
+    /* --- Text Colors (Crisp White & Clear Slate) --- */
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --text-dark: #0F172A;
 
-    /* --- Semantic (Warm Tones) --- */
-    --status-success: #7D9B6A;
-    --status-warning: #E8A838;
-    --status-danger: #C45C4B;
+    /* --- Semantic Status --- */
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
 
-    /* --- Borders & Glass (Warm) --- */
-    --border-glass: rgba(212, 184, 150, 0.15);
-    --border-active: rgba(244, 169, 0, 0.5);
-    --glass-blur: blur(20px) saturate(150%);
+    /* --- Borders & Glass --- */
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --border-active: rgba(59, 130, 246, 0.5);
+    --glass-blur: blur(16px);
 
-    /* --- Typography (FreeSans) --- */
-    --font-ui: 'FreeSans', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-heading: 'FreeSans', 'Open Sans', sans-serif;
+    /* --- Typography --- */
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+    --font-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
 
     /* --- Animation --- */
     --transition-fast: 0.15s ease;
@@ -39,19 +42,24 @@
     box-sizing: border-box;
 }
 
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:visited {
+    color: inherit;
+}
+
 body {
     background-color: var(--canvas-bg);
-    background-image:
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(244, 169, 0, 0.08) 0%, transparent 50%);
     color: var(--text-primary);
     font-family: var(--font-ui);
     font-size: 15px;
     min-height: 100vh;
-    line-height: 1.65;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
 }
 
 h1,
@@ -121,10 +129,10 @@ p {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-/* Primary Button (Orange/Gold) */
+/* Primary Button (Electric Blue / Modern SaaS) */
 .btn-indigo {
-    background: linear-gradient(135deg, var(--action-primary), #E8A838);
-    color: #1A1614;
+    background: linear-gradient(135deg, var(--action-primary), var(--action-primary-hover));
+    color: #FFFFFF;
     border: none;
     padding: 14px 28px;
     border-radius: 8px;
@@ -136,13 +144,14 @@ p {
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    box-shadow: 0 4px 16px rgba(244, 169, 0, 0.25);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
 .btn-indigo:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(244, 169, 0, 0.35);
-    background: linear-gradient(135deg, #FFC107, var(--action-primary));
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.45);
+    background: linear-gradient(135deg, #60A5FA, var(--action-primary));
+    color: #FFFFFF;
 }
 
 .btn-indigo:disabled {
@@ -154,8 +163,8 @@ p {
 
 /* Secondary Button */
 .btn-secondary {
-    background: transparent;
-    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
     border: 1px solid var(--border-glass);
     padding: 14px 28px;
     border-radius: 8px;
@@ -170,9 +179,9 @@ p {
 }
 
 .btn-secondary:hover {
-    background: rgba(212, 184, 150, 0.1);
-    border-color: var(--action-accent);
-    color: var(--action-accent);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--action-primary);
+    color: #FFFFFF;
 }
 
 /* Text Utilities */
