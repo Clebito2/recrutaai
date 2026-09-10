@@ -80,6 +80,9 @@ export const jobDiagnosticSchema = z.object({
     workModel: z.string().optional(),
     benefits: z.string().optional(),
     customWeights: weightsSchema.optional(),
-    repositoryUrl: z.string().optional()
+    repositoryUrl: z.string().optional(),
+    candidateName: z.string().optional(),
+    candidateScore: z.any().optional(),
+    candidateAnalysis: z.any().optional()
 });
 

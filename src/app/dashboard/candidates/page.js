@@ -4,13 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
 import UploadProgress from "../../../components/common/UploadProgress";
 import SubscriptionGuard from "../../../components/common/SubscriptionGuard";
-import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft, Zap, Users, ShieldAlert } from "lucide-react";
+import { Upload, FileText, Mic, Loader2, CheckCircle, AlertCircle, ChevronRight, User, History, Calendar, ArrowLeft, Zap, Users, ShieldAlert, Info, Sparkles, Copy, Check, Brain } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
 import { db } from "../../../lib/firebase";
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { detectProfileLevel, getDetectionMessage } from "../../../utils/profileDetection";
+import { cleanGuideText } from "../../../lib/formatters";
 
 // Limites de validação no cliente
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -30,6 +31,9 @@ export default function CandidatesPage() {
   const [jobs, setJobs] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [isGeneratingGuide, setIsGeneratingGuide] = useState(false);
+  const [candidateGuide, setCandidateGuide] = useState("");
+  const [guideCopied, setGuideCopied] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
@@ -111,15 +115,17 @@ export default function CandidatesPage() {
     try {
       if (!user) return;
       const selectedJob = jobs.find(j => j.id === selectedJobId);
-      await addDoc(collection(db, "candidates"), {
+      const docRef = await addDoc(collection(db, "candidates"), {
         userId: user.uid,
         jobId: selectedJobId || null,
         name: analysisData.nome || "Candidato",
         role: analysisData.vaga_titulo || selectedJob?.title || selectedFamily,
         jobFamily: selectedFamily,
         analysis: analysisData,
+        candidateGuide: candidateGuide || null,
         createdAt: serverTimestamp()
       });
+      setAnalysisResult(prev => prev ? { ...prev, docId: docRef.id } : prev);
     } catch (e) {
       console.error("Failed to auto-save analysis:", e);
     }
@@ -237,8 +243,9 @@ export default function CandidatesPage() {
         body: JSON.stringify({
           companyName,
           cvContent: content,
-          jobContext: '',
+          jobContext: currentJob?.mustHaves || '',
           jobId: selectedJobId || undefined,
+          jobData: currentJob || undefined,
           jobFamily: selectedFamily,
           profileLevel: selectedFamily === 'lideranca' ? 'lideranca' : 'tecnico'
         })
@@ -255,7 +262,11 @@ export default function CandidatesPage() {
       // ── ETAPA 3: Salvar no Firestore ───────────────────────
       setUploadStep('saving');
       await saveAnalysisToHistory(data.analysis);
-      await incrementUsage('cv');
+      try {
+        await incrementUsage('cv');
+      } catch (usageErr) {
+        console.warn("[candidates] Aviso ao atualizar contador:", usageErr);
+      }
 
       setUploadStep('done');
 
@@ -302,6 +313,81 @@ export default function CandidatesPage() {
     }
   };
 
+  const handleGenerateCandidateGuide = async () => {
+    if (!analysisResult) return;
+    setIsGeneratingGuide(true);
+    setCandidateGuide("");
+    setError("");
+
+    try {
+      const currentJob = jobs.find(j => j.id === (analysisResult.jobId || selectedJobId));
+      const companyName = currentJob?.companyName || userProfile?.companyName || 'Empresa Contratante';
+
+      const response = await fetch('/api/generate-interview-guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName,
+          diagnosticData: {
+            title: analysisResult.vaga_titulo || currentJob?.title || "Vaga em Seleção",
+            companyName: companyName,
+            family: analysisResult.familia_vaga || selectedFamily || currentJob?.family || "outro",
+            archetype: currentJob?.archetype || "geral",
+            mustHaves: currentJob?.mustHaves || "Critérios técnicos e eliminatórios da vaga",
+            niceToHaves: currentJob?.niceToHaves || "",
+            candidateName: analysisResult.nome || "Candidato",
+            candidateScore: analysisResult.scorecard?.score_final_100 || Math.round((analysisResult.nota_geral || 3.5) * 20),
+            candidateAnalysis: {
+              pontos_fortes: analysisResult.swot?.forcas || [],
+              pontos_fracos: analysisResult.swot?.fraquezas || [],
+              red_flags: analysisResult.swot?.ameacas || (analysisResult.gate_check?.motivo ? [analysisResult.gate_check.motivo] : []),
+              informacoes_faltantes: analysisResult.informacoes_faltantes || [],
+              temperamento: analysisResult.temperamento
+            }
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Erro ao gerar roteiro socrático.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+        setCandidateGuide(fullText);
+      }
+
+      if (analysisResult.docId) {
+        try {
+          await updateDoc(doc(db, "candidates", analysisResult.docId), {
+            candidateGuide: fullText
+          });
+        } catch (saveErr) {
+          console.warn("Aviso ao salvar roteiro no histórico:", saveErr);
+        }
+      }
+    } catch (err) {
+      console.error("Erro no roteiro socrático:", err);
+      setError(err.message || "Falha ao gerar roteiro socrático.");
+    } finally {
+      setIsGeneratingGuide(false);
+    }
+  };
+
+  const handleCopyGuide = () => {
+    if (!candidateGuide) return;
+    navigator.clipboard.writeText(cleanGuideText(candidateGuide));
+    setGuideCopied(true);
+    setTimeout(() => setGuideCopied(false), 2500);
+  };
+
   // ─── RENDER ──────────────────────────────────────────────────────
   return (
     <SubscriptionGuard type="cv">
@@ -312,6 +398,25 @@ export default function CandidatesPage() {
             <p>Analise candidatos com metodologia STAR e Matriz SWOT automatizada.</p>
           </div>
         </header>
+
+        {/* Guia de Instruções da Ferramenta */}
+        <div className="tool-guide-card animate-fade">
+          <div className="guide-icon">
+            <Info size={22} color="#3B82F6" />
+          </div>
+          <div className="guide-text">
+            <strong>Instruções do Analista de Perfil & Ranqueamento:</strong>
+            <p>
+              1. <strong>Vaga de Referência:</strong> Selecione a vaga para aplicar o <em>Gate Check</em> eliminatório e calibrar os pesos dos 4 pilares do cargo.
+              <br />
+              2. <strong>Upload do CV:</strong> Envie o currículo (.pdf, .docx, .txt) ou cole as notas/transcrição da entrevista para a IA processar.
+              <br />
+              3. <strong>Avaliação STAR & Ranking:</strong> A IA audita evidências, calcula a pontuação matemática de 0 a 100 e aponta forças, fraquezas e riscos.
+              <br />
+              4. <strong>Roteiro Socrático & Role Play:</strong> No perfil do candidato, clique em <em>Gerar Roteiro Socrático</em> para obter perguntas e dinâmicas formuladas exclusivamente para investigar as fragilidades deste candidato.
+            </p>
+          </div>
+        </div>
 
         {!analysisResult ? (
           <GlassCard className="analysis-card">
@@ -605,7 +710,10 @@ export default function CandidatesPage() {
                                 return (
                                   <tr 
                                     key={item.id} 
-                                    onClick={() => setAnalysisResult(ana)}
+                                    onClick={() => {
+                                      setAnalysisResult({ ...ana, docId: item.id, jobId: item.jobId });
+                                      setCandidateGuide(item.candidateGuide || "");
+                                    }}
                                     style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', transition: 'background 0.2s' }}
                                     className="comparison-row"
                                   >
@@ -645,7 +753,10 @@ export default function CandidatesPage() {
 
                     <div className="history-list">
                       {history.map(item => (
-                        <div key={item.id} className="history-item" onClick={() => setAnalysisResult(item.analysis)}>
+                        <div key={item.id} className="history-item" onClick={() => {
+                          setAnalysisResult({ ...(item.analysis || {}), docId: item.id, jobId: item.jobId });
+                          setCandidateGuide(item.candidateGuide || "");
+                        }}>
                           <div className="history-avatar"><User size={20} /></div>
                           <div className="history-info">
                             <strong>{item.name}</strong>
@@ -857,11 +968,70 @@ export default function CandidatesPage() {
               </GlassCard>
             )}
 
+            {/* Roteiro Socrático de Entrevista & Role Play Personalizado */}
+            <GlassCard className="socratic-guide-card" style={{ borderLeft: '4px solid #3B82F6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Brain size={20} color="#3B82F6" /> Roteiro Socrático & Role Play Personalizado
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
+                    Perguntas investigativas e simulação prática calibradas cirurgicamente para as lacunas e riscos de <strong>{analysisResult.nome || 'Candidato'}</strong>.
+                  </p>
+                </div>
+                <button
+                  className="btn-socratic"
+                  onClick={handleGenerateCandidateGuide}
+                  disabled={isGeneratingGuide}
+                >
+                  {isGeneratingGuide ? (
+                    <><Loader2 className="spin" size={16} /> Gerando Roteiro Socrático...</>
+                  ) : (
+                    <><Sparkles size={16} /> {candidateGuide ? "Regerar Roteiro Socrático" : "Gerar Roteiro Socrático & Role Play"}</>
+                  )}
+                </button>
+              </div>
+
+              {/* Dicas Metodológicas de Entrevista */}
+              <div className="socratic-instructions-box">
+                <strong style={{ color: '#60A5FA', display: 'block', marginBottom: '4px' }}>
+                  Metodologia Live de Entrevista Investigativa:
+                </strong>
+                <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  <li><strong>Investigação Socrática:</strong> Não faça perguntas genéricas; confronte o candidato sobre as lacunas e pontos fracos apontados no diagnóstico.</li>
+                  <li><strong>Simulação de Role Play:</strong> Conduza a dinâmica situacional prática para avaliar a execução sob pressão.</li>
+                  <li><strong>Teste de Coachability:</strong> Forneça um feedback corretivo e observe se ele reage defensivamente ou assimila com maturidade.</li>
+                </ul>
+              </div>
+
+              {candidateGuide && (
+                <div className="candidate-guide-display" style={{ marginTop: '18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: '#60A5FA' }}>
+                      Roteiro Oficial do Candidato (Formatado e Sem Asteriscos)
+                    </span>
+                    <button
+                      onClick={handleCopyGuide}
+                      className="btn-secondary"
+                      style={{ fontSize: '0.8rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      {guideCopied ? <><Check size={14} color="#10B981" /> Roteiro Copiado</> : <><Copy size={14} /> Copiar Roteiro</>}
+                    </button>
+                  </div>
+                  <div className="clean-guide-wrapper">
+                    <pre className="clean-guide-text">{cleanGuideText(candidateGuide)}</pre>
+                  </div>
+                </div>
+              )}
+            </GlassCard>
+
             {/* Ações */}
             <div className="result-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
               <button
                 onClick={() => {
                   setAnalysisResult(null);
+                  setCandidateGuide("");
+                  setGuideCopied(false);
                   setUploadStep('idle');
                   setLevelSuggestion(null);
                 }}
@@ -910,6 +1080,69 @@ export default function CandidatesPage() {
 
           .header-info p {
             opacity: 0.6;
+          }
+
+          .tool-guide-card {
+            display: flex;
+            background: #131B2A;
+            border: 1px solid #1E293B;
+            border-left: 4px solid #3B82F6;
+            padding: 16px 20px;
+            border-radius: 10px;
+            gap: 14px;
+            margin-bottom: 24px;
+            align-items: flex-start;
+          }
+          .guide-icon { flex-shrink: 0; margin-top: 2px; }
+          .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
+
+          .btn-socratic {
+            background: #3B82F6;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+          }
+          .btn-socratic:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+          }
+          .btn-socratic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+          }
+
+          .socratic-instructions-box {
+            background: #131B2A;
+            border: 1px solid #1E293B;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+          }
+
+          .clean-guide-wrapper {
+            background: #131B2A;
+            border: 1px solid #1E293B;
+            border-radius: 10px;
+            padding: 22px;
+            overflow-x: auto;
+          }
+          .clean-guide-text {
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #F8FAFC;
+            margin: 0;
           }
 
           .analysis-card {

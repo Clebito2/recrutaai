@@ -21,14 +21,18 @@ export async function POST(request) {
             );
         }
 
-        const { companyName, cvContent, jobContext, profileLevel, jobFamily, customWeights, repositoryUrl, jobId, previousAnalysis } = validation.data;
+        const { companyName, cvContent, jobContext, profileLevel, jobFamily, customWeights, repositoryUrl, jobId, jobData: incomingJobData, previousAnalysis } = validation.data;
 
-        // Fetch jobData if jobId is provided
-        let jobData = null;
-        if (jobId) {
-            const jobDoc = await getDoc(doc(db, "jobs", jobId));
-            if (jobDoc.exists()) {
-                jobData = jobDoc.data();
+        // Fetch jobData if jobId is provided and not already passed by client
+        let jobData = incomingJobData || null;
+        if (!jobData && jobId) {
+            try {
+                const jobDoc = await getDoc(doc(db, "jobs", jobId));
+                if (jobDoc.exists()) {
+                    jobData = jobDoc.data();
+                }
+            } catch (err) {
+                console.warn("[analyze-candidate] Aviso ao buscar vaga no Firestore (seguindo com dados do payload):", err.message);
             }
         }
 

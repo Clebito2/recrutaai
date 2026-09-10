@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import GlassCard from "../../../components/common/GlassCard";
-import { Calendar, Clock, User, MapPin, FileText, Trash2, Plus } from "lucide-react";
+import { Calendar, Clock, User, MapPin, FileText, Trash2, Plus, Info } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { db } from "../../../lib/firebase";
@@ -85,6 +85,23 @@ export default function InterviewsPage() {
           Agendar Nova
         </Link>
       </header>
+
+      {/* Guia de Instruções da Ferramenta */}
+      <div className="tool-guide-card animate-fade">
+        <div className="guide-icon">
+          <Info size={22} color="#3B82F6" />
+        </div>
+        <div className="guide-text">
+          <strong>Instruções de Condução de Entrevistas Live:</strong>
+          <p>
+            1. <strong>Agendamento:</strong> Vincule as datas de entrevistas diretamente a partir da triagem de candidatos.
+            <br />
+            2. <strong>Roteiro Socrático Personalizado:</strong> Antes da sessão, acesse a aba <strong>Candidatos</strong> e gere o <em>Roteiro Socrático & Role Play</em> específico para investigar as fragilidades deste candidato.
+            <br />
+            3. <strong>Condução & Simulação:</strong> Aplique o caso prático proposto e dê o feedback corretivo para mensurar a <em>Coachability</em> com o scorecard da vaga.
+          </p>
+        </div>
+      </div>
 
       {loading ? (
         <div className="loading-state">
@@ -340,6 +357,20 @@ export default function InterviewsPage() {
         .empty-state p {
           opacity: 0.6;
         }
+
+        .tool-guide-card {
+          display: flex;
+          background: #131B2A;
+          border: 1px solid #1E293B;
+          border-left: 4px solid #3B82F6;
+          padding: 16px 20px;
+          border-radius: 10px;
+          gap: 14px;
+          margin-bottom: 24px;
+          align-items: flex-start;
+        }
+        .guide-icon { flex-shrink: 0; margin-top: 2px; }
+        .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
 
         @media (max-width: 768px) {
           .page-header {

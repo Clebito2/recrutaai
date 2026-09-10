@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import GlassCard from "../../components/common/GlassCard";
 import StatCard from "../../components/common/StatCard";
-import { Plus, TrendingUp, Users, Calendar, Briefcase, ArrowRight, Zap, Target } from "lucide-react";
+import { Plus, TrendingUp, Users, Calendar, Briefcase, ArrowRight, Zap, Target, Info } from "lucide-react";
 import Link from "next/link";
 import { useSubscription } from "../../hooks/useSubscription";
 import { db } from "../../lib/firebase";
@@ -45,6 +45,36 @@ export default function DashboardHome() {
             <Users size={20} />
             <span>Analisar CV</span>
           </Link>
+        </div>
+      </div>
+
+      {/* Guia de Fluxo da Plataforma */}
+      <div className="platform-workflow-banner">
+        <div className="workflow-title-row">
+          <Info size={20} color="#3B82F6" />
+          <h3>Como Funciona o Fluxo Live de R&S</h3>
+        </div>
+        <div className="workflow-steps-grid">
+          <div className="workflow-step-card">
+            <span className="step-badge">1</span>
+            <h4>Arquiteto de Vagas</h4>
+            <p>Cadastre a empresa contratante, os pesos da família e os critérios eliminatórios do <em>Gate Check</em>.</p>
+          </div>
+          <div className="workflow-step-card">
+            <span className="step-badge">2</span>
+            <h4>Anúncio Formatado</h4>
+            <p>Gere o anúncio sob medida, limpo e sem asteriscos, pronto para publicação em canais de atração.</p>
+          </div>
+          <div className="workflow-step-card">
+            <span className="step-badge">3</span>
+            <h4>Triagem STAR & Ranking</h4>
+            <p>Receba os currículos, faça o upload e obtenha o score de 0 a 100 com auditoria matemática e SWOT.</p>
+          </div>
+          <div className="workflow-step-card">
+            <span className="step-badge">4</span>
+            <h4>Entrevista Socrática</h4>
+            <p>Gere o roteiro socrático e o role play <strong>personalizado para cada candidato</strong> aprovado no ranking.</p>
+          </div>
         </div>
       </div>
 
@@ -142,14 +172,79 @@ export default function DashboardHome() {
 
         /* Hero Section */
         .dashboard-hero {
-          background: linear-gradient(135deg, rgba(244, 169, 0, 0.1) 0%, rgba(193, 102, 107, 0.1) 100%);
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(30, 41, 59, 0.5) 100%);
           border-radius: 20px;
-          padding: 40px;
-          margin-bottom: 32px;
+          padding: 36px 40px;
+          margin-bottom: 24px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border: 1px solid rgba(244, 169, 0, 0.2);
+          border: 1px solid #1E293B;
+        }
+
+        /* Platform Workflow Banner */
+        .platform-workflow-banner {
+          background: #131B2A;
+          border: 1px solid #1E293B;
+          border-radius: 16px;
+          padding: 24px 28px;
+          margin-bottom: 32px;
+        }
+
+        .workflow-title-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+
+        .workflow-title-row h3 {
+          font-size: 1.05rem;
+          font-weight: 700;
+          color: #F8FAFC;
+          margin: 0;
+        }
+
+        .workflow-steps-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+        }
+
+        .workflow-step-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 12px;
+          padding: 16px;
+          position: relative;
+        }
+
+        .step-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #3B82F6;
+          color: #FFFFFF;
+          font-weight: 800;
+          font-size: 0.8rem;
+          margin-bottom: 10px;
+        }
+
+        .workflow-step-card h4 {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #FFFFFF;
+          margin-bottom: 6px;
+        }
+
+        .workflow-step-card p {
+          font-size: 0.82rem;
+          color: #94A3B8;
+          line-height: 1.5;
+          margin: 0;
         }
 
         .hero-content h1 {

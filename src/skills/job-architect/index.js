@@ -8,25 +8,45 @@ import { callGemini, removeEmojis } from '../gemini-client/index.js';
 export const SYSTEM_PROMPT_JOB = `Você é o Consultor Sênior de R&S da Live Consultoria.
 Sua missão é elaborar descritivos de vaga de alto calibre seguindo a metodologia de funil da Live, adaptada à família de vaga e à empresa cliente indicada.
 
-DIRETRIZES MANDATÓRIAS DE SOBRIEDADE INSTITUCIONAL:
-- NUNCA invente nomes como "Empresa Teste" ou similares. Use RIGOROSAMENTE o nome exato da EMPRESA CLIENTE fornecido nos dados.
-- PROIBIDO iniciar com saudações informais ou perguntas apelativas/motivacionais (Ex: "Olá, Conectado(a)!", "Cansado de apenas executar?", "Sonha em liderar...", "Temos a vaga dos seus sonhos").
+DIRETRIZES MANDATÓRIAS DE FORMATAÇÃO E SOBRIEDADE:
+- NUNCA utilize asteriscos duplos (**) para negrito. Escreva os títulos das seções em CAIXA ALTA, precedidos e seguidos de quebras de linha duplas.
+- O anúncio DEVE ter quebras de linha claras e parágrafos bem espaçados, utilizando traço (- ) para itens de lista.
+- NUNCA invente nomes como "Empresa Teste". Use RIGOROSAMENTE o nome exato da EMPRESA CLIENTE fornecido nos dados.
+- PROIBIDO iniciar com saudações informais ou perguntas motivacionais (Ex: "Olá, Conectado(a)!", "Cansado de apenas executar?", "Sonha em liderar...").
 - PROIBIDO qualquer emoji no corpo do anúncio.
 - PROIBIDOS títulos como 'Ninja', 'Jedi', 'Rockstar' ou clichês vazios ('vestir a camisa', 'empresa líder', 'somos movidos pela inovação').
 - Inicie DIRETAMENTE pelo Título da Posição e pela descrição institucional da EMPRESA CLIENTE.
-- Bullet points objetivos e formatação limpa em Markdown.
-- Chamada para diversidade com linguagem neutra e inclusiva.
 
-ESTRUTURA FIXA DA REDAÇÃO (NÃO DESVIAR):
-1. **Título da Vaga** — Claro, direto e sem jargões inflados.
-2. **Sobre [Nome Exato da Empresa Cliente]** — Descrição institucional sóbria focada em autoridade e mercado.
-3. **Responsabilidades e Atribuições** — Verbos de ação específicos da família de vaga.
-4. **Requisitos Comportamentais (Obrigatório)** — Soft skills extraídas das competências-chave da família, ajustadas ao arquétipo.
-5. **Requisitos Técnicos** — Divididos com clareza entre:
-   - *Obrigatórios (Critérios Eliminatórios do Gate Check)*
-   - *Desejáveis (Diferenciais Competitivos)*
-6. **O Que Oferecemos** — Remuneração (ou faixa) e benefícios de forma transparente.
-7. **Chamada para Diversidade** — Fechamento em tom profissional convidando talentos diversos.`;
+ESTRUTURA FIXA DA REDAÇÃO (SEPARAR CADA SEÇÃO COM QUEBRAS DE LINHA DUPLAS):
+
+TÍTULO DA VAGA: [Cargo]
+
+SOBRE A [NOME EXATO DA EMPRESA CLIENTE]
+[Parágrafo institucional sóbrio sobre autoridade e mercado]
+
+RESPONSABILIDADES E ATRIBUIÇÕES
+- [Item 1 com verbo de ação]
+- [Item 2 com verbo de ação]
+
+REQUISITOS COMPORTAMENTAIS
+- [Soft skill 1 alinhada ao arquétipo]
+- [Soft skill 2 alinhada ao arquétipo]
+
+REQUISITOS TÉCNICOS OBRIGATÓRIOS (GATE CHECK ELIMINATÓRIO)
+- [Requisito eliminatório 1]
+- [Requisito eliminatório 2]
+
+DIFERENCIAIS DESEJÁVEIS
+- [Requisito desejável 1]
+- [Requisito desejável 2]
+
+O QUE OFERECEMOS
+- Remuneração: [Faixa Salarial / OTE]
+- Modelo de Trabalho: [Modelo]
+- Benefícios: [Benefícios]
+
+COMPROMISSO COM A DIVERSIDADE
+[Fechamento profissional e inclusivo]`;
 
 export const SYSTEM_PROMPT_INTERVIEW = `Você é o Consultor Sênior de R&S da Live Consultoria, especialista em Entrevistas Comportamentais Socráticas.
 Sua missão é gerar um Roteiro de Entrevista Estruturada para que o gestor ou consultor conduza um processo seletivo científico, profundo e auditável.
@@ -156,13 +176,31 @@ export function buildInterviewGuidePrompt(companyName, data) {
         ? `${rawArchetype} — Detalhe: ${data.customArchetypeDetail}`
         : rawArchetype;
 
-    return `EMPRESA CLIENTE (CONTRATANTE): ${targetCompany}
+    let prompt = `EMPRESA CLIENTE (CONTRATANTE): ${targetCompany}
 VAGA: ${data.title} (${family})
 ARQUÉTIPO: ${archetypeDesc}
 REQUISITOS OBRIGATÓRIOS: ${data.mustHaves || "Não especificados"}
-REQUISITOS DESEJÁVEIS: ${data.niceToHaves || "Não especificados"}
+REQUISITOS DESEJÁVEIS: ${data.niceToHaves || "Não especificados"}\n\n`;
 
-Elabore o Guia de Entrevista Socrática completo (Blocos 1 a 6 + Role Play com feedback de Coachability e Scorecard com pesos da família) para apoiar o entrevistador.`;
+    if (data.candidateName || data.candidateAnalysis) {
+        prompt += `### CANDIDATO EM AVALIAÇÃO (ROTEIRO SOCRÁTICO PERSONALIZADO):
+Nome: ${data.candidateName || "Candidato"}
+Score Obtido no CV: ${data.candidateScore || "N/A"}
+Pontos Fortes Identificados: ${JSON.stringify(data.candidateAnalysis?.pontos_fortes || [])}
+Pontos Fracos / Gaps Detectados: ${JSON.stringify(data.candidateAnalysis?.pontos_fracos || data.candidateAnalysis?.gaps || [])}
+Red Flags a Investigar: ${JSON.stringify(data.candidateAnalysis?.red_flags || [])}
+Informações Faltantes do CV: ${JSON.stringify(data.candidateAnalysis?.informacoes_faltantes || [])}
+Temperamento Avaliado: ${data.candidateAnalysis?.temperamento?.predominante || "Não especificado"}
+
+DIRETRIZ DE PERSONALIZAÇÃO PARA ESTE CANDIDATO:
+- Elabore perguntas socráticas focadas cirurgicamente nas lacunas, inconsistências e red flags detectadas no currículo deste candidato.
+- No Bloco de Role Play, desenhe uma simulação prática que teste diretamente os pontos de maior risco ou dúvidas levantadas na triagem.
+- O Teste de Coachability deve conter um feedback calibrado para o temperamento e nível deste profissional.\n\n`;
+    }
+
+    prompt += `Elabore o Guia de Entrevista Socrática completo (Blocos 1 a 5 + Role Play com feedback de Coachability e Scorecard com pesos da família) para apoiar o entrevistador com rigor científico.`;
+
+    return prompt;
 }
 
 /**

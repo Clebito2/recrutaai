@@ -6,7 +6,7 @@ import SubscriptionGuard from "@/components/common/SubscriptionGuard";
 import { 
   Briefcase, Target, Brain, ListChecks, DollarSign, MapPin, Zap, 
   Loader2, Sparkles, AlertCircle, FileText, CheckCircle2, ShieldAlert,
-  FolderGit2, Users, HelpCircle, Building2
+  FolderGit2, Users, HelpCircle, Building2, Copy, Check, Info
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import PageHeader from "@/components/common/PageHeader";
 import { ARCHETYPE_MAP, MOTIVATOR_MAP } from "@/skills/job-architect";
 import { FAMILY_DEFAULT_WEIGHTS } from "@/lib/validation";
+import { cleanJobAdText } from "@/lib/formatters";
 
 const FAMILIES = [
   { id: "comercial", label: "Comercial / Vendas", weights: "40% Comp / 20% Téc / 30% Prát / 10% Alin" },
@@ -26,11 +27,9 @@ const FAMILIES = [
 
 export default function NewJobPage() {
   const [step, setStep] = useState(1);
-  const [activePreviewTab, setActivePreviewTab] = useState("ad"); // 'ad' | 'interview'
   const [isGeneratingAd, setIsGeneratingAd] = useState(false);
-  const [isGeneratingGuide, setIsGeneratingGuide] = useState(false);
   const [generatedDesc, setGeneratedDesc] = useState("");
-  const [generatedGuide, setGeneratedGuide] = useState("");
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const { user, userProfile } = useAuth();
 
@@ -114,55 +113,22 @@ export default function NewJobPage() {
     }
   };
 
-  const handleGenerateInterviewGuide = async () => {
-    if (generatedGuide) return; // Já gerado
-    setIsGeneratingGuide(true);
-    const targetCompany = formData.companyName?.trim() || userProfile?.companyName || "Empresa Contratante";
-
-    try {
-      const response = await fetch("/api/generate-interview-guide", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: targetCompany,
-          diagnosticData: {
-            ...formData,
-            companyName: targetCompany
-          }
-        })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Erro ao gerar roteiro");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        setGeneratedGuide(prev => prev + chunk);
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    } finally {
-      setIsGeneratingGuide(false);
-    }
+  const handleCopyAd = async () => {
+    const text = cleanJobAdText(generatedDesc);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSave = async () => {
     try {
       const targetCompany = formData.companyName?.trim() || userProfile?.companyName || "Empresa Contratante";
+      const cleanDesc = cleanJobAdText(generatedDesc);
       await addDoc(collection(db, "jobs"), {
         ...formData,
         companyName: targetCompany,
-        description: generatedDesc,
-        jobDescription: generatedDesc, // salvar ambos para compatibilidade
-        interviewGuide: generatedGuide || null,
+        description: cleanDesc,
+        jobDescription: cleanDesc,
         customWeights: FAMILY_DEFAULT_WEIGHTS[formData.family] || FAMILY_DEFAULT_WEIGHTS.tecnico,
         userId: user.uid,
         status: "active",
@@ -183,6 +149,23 @@ export default function NewJobPage() {
           title="Engenharia de Vagas & Seleção"
           subtitle="Metodologia Científica Live Consultoria: Funil de Atração, Gate Check e Roteiro de Entrevista Socrática."
         />
+
+        {/* Guia de Instruções da Ferramenta */}
+        <div className="tool-guide-card animate-fade">
+          <div className="guide-icon">
+            <Info size={22} color="#3B82F6" />
+          </div>
+          <div className="guide-text">
+            <strong>Instruções do Arquiteto de Vagas:</strong>
+            <p>
+              1. Defina a <strong>Empresa Contratante</strong> e os critérios eliminatórios no <strong>Gate Check</strong>.
+              <br />
+              2. A IA redigirá o <strong>Anúncio Oficial sem clichês</strong>, formatado com quebras de linha e pronto para copiar e publicar.
+              <br />
+              3. <em>Metodologia Live:</em> O <strong>Roteiro Socrático de Entrevista & Role Play</strong> é gerado de forma <strong>personalizada para cada candidato</strong> após a triagem e ranqueamento dos currículos na aba <strong>Candidatos</strong>.
+            </p>
+          </div>
+        </div>
 
         {step === 1 ? (
           <GlassCard className="form-card">
@@ -366,55 +349,46 @@ export default function NewJobPage() {
               {isGeneratingAd ? (
                 <><Loader2 className="spin" size={20} /> Redigindo Anúncio com Sobriedade Live...</>
               ) : (
-                <>Gerar Descritivo de Vaga & Funil Live <Sparkles size={18} /></>
+                <>Gerar Anúncio Oficial da Vaga <Sparkles size={18} /></>
               )}
             </button>
           </GlassCard>
         ) : (
           <GlassCard className="preview-card animate-fade">
             <div className="preview-header">
-              <div className="preview-tabs">
-                <button 
-                  className={`tab-btn ${activePreviewTab === 'ad' ? 'active' : ''}`}
-                  onClick={() => setActivePreviewTab('ad')}
-                >
-                  <FileText size={16} /> Anúncio Oficial da Vaga
-                </button>
-                <button 
-                  className={`tab-btn ${activePreviewTab === 'interview' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActivePreviewTab('interview');
-                    if (!generatedGuide && !isGeneratingGuide) handleGenerateInterviewGuide();
-                  }}
-                >
-                  <Brain size={16} /> Guia de Entrevista Socrática & Role Play
-                </button>
+              <div className="preview-info-col">
+                <span className="step-pill">Anúncio Formatado</span>
+                <h2>{formData.title}</h2>
+                <span className="client-subtitle">Empresa Contratante: <strong>{formData.companyName || userProfile?.companyName}</strong></span>
               </div>
 
               <div className="preview-actions">
-                <button onClick={() => setStep(1)} className="btn-secondary">Editar Diagnóstico</button>
+                <button onClick={handleCopyAd} className="btn-secondary">
+                  {copied ? <><Check size={16} color="#10B981" /> Copiado</> : <><Copy size={16} /> Copiar Anúncio</>}
+                </button>
+                <button onClick={() => setStep(1)} className="btn-secondary">Editar Critérios</button>
                 <button onClick={handleSave} className="btn-indigo">
                   <CheckCircle2 size={16} /> Salvar e Ativar Vaga
                 </button>
               </div>
             </div>
 
-            {activePreviewTab === 'ad' ? (
-              <div className="preview-content whitespace-pre-wrap font-mono">
-                {generatedDesc}
+            {/* Aviso da metodologia sobre a personalização do roteiro socrático */}
+            <div className="socratic-callout">
+              <div className="callout-icon">
+                <Brain size={22} color="#3B82F6" />
               </div>
-            ) : (
-              <div className="preview-content whitespace-pre-wrap">
-                {isGeneratingGuide ? (
-                  <div className="loading-box">
-                    <Loader2 className="spin" size={24} />
-                    <p>Estruturando Roteiro Socrático com STAR, Cenas A/B de Role Play e Teste de Coachability...</p>
-                  </div>
-                ) : (
-                  generatedGuide || "Clique na aba acima para gerar o Roteiro de Entrevista."
-                )}
+              <div className="callout-content">
+                <strong>Roteiro Socrático de Entrevista & Role Play Personalizado:</strong>
+                <p>
+                  O roteiro com perguntas socráticas, simulação de role play e teste de coachability é gerado <strong>sob medida para cada candidato</strong> após a triagem dos currículos na aba <strong>Candidatos</strong>.
+                </p>
               </div>
-            )}
+            </div>
+
+            <div className="clean-ad-wrapper">
+              <pre className="clean-ad-text">{cleanJobAdText(generatedDesc)}</pre>
+            </div>
           </GlassCard>
         )}
 
@@ -481,6 +455,59 @@ export default function NewJobPage() {
           .preview-content { background: #131B2A; padding: 28px; border-radius: 12px; border: 1px solid #1E293B; line-height: 1.8; color: #F8FAFC; }
           .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: #3B82F6; }
           .error-msg { display: flex; align-items: center; gap: 8px; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+          .tool-guide-card {
+            display: flex;
+            background: #131B2A;
+            border: 1px solid #1E293B;
+            border-left: 4px solid #3B82F6;
+            padding: 16px 20px;
+            border-radius: 10px;
+            gap: 14px;
+            margin-bottom: 24px;
+            align-items: flex-start;
+          }
+          .guide-icon { flex-shrink: 0; margin-top: 2px; }
+          .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
+          .step-pill {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60A5FA;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+          }
+          .client-subtitle { font-size: 0.85rem; color: #94A3B8; display: block; margin-top: 4px; }
+          .socratic-callout {
+            display: flex;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            padding: 14px 18px;
+            border-radius: 8px;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+          }
+          .callout-icon { flex-shrink: 0; margin-top: 2px; }
+          .callout-content { font-size: 0.85rem; color: #CBD5E1; line-height: 1.5; }
+          .clean-ad-wrapper {
+            background: #131B2A;
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid #1E293B;
+            overflow-x: auto;
+          }
+          .clean-ad-text {
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #F8FAFC;
+            margin: 0;
+          }
           .spin { animation: spin 1s linear infinite; }
           @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
         `}</style>
