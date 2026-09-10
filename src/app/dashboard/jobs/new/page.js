@@ -35,9 +35,11 @@ export default function NewJobPage() {
 
   const [formData, setFormData] = useState({
     companyName: userProfile?.companyName || "",
+    companyDescription: "",
     title: "",
     family: "comercial",
     archetype: "hunter",
+    responsibilities: "",
     motivator: "financeiro",
     mustHaves: "",
     niceToHaves: "",
@@ -185,6 +187,21 @@ export default function NewJobPage() {
                 </span>
               </div>
 
+              {/* Sobre a Empresa / Contexto do Negócio */}
+              <div className="form-group full-width">
+                <label><Building2 size={16} /> Sobre a Empresa (Segmento, Cultura, Momento & Diferenciais)</label>
+                <textarea
+                  name="companyDescription"
+                  rows={3}
+                  value={formData.companyDescription}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Empresa de tecnologia B2B líder em soluções logísticas, com mais de 500 clientes corporativos. Estamos em fase de expansão acelerada após rodada de investimento Série A, com cultura orientada a dados, autonomia e alta velocidade..."
+                />
+                <span className="helper-text">
+                  Apresente o segmento, momento e diferencial para a IA redigir um 'Sobre a Empresa' autêntico e sem clichês.
+                </span>
+              </div>
+
               {/* Título da Vaga */}
               <div className="form-group full-width">
                 <label><Briefcase size={16} /> Título da Vaga</label>
@@ -247,6 +264,21 @@ export default function NewJobPage() {
                   <span className="helper-text">Informe a área de atuação para a IA calibrar a redação e competências.</span>
                 </div>
               )}
+
+              {/* Principais Atribuições e Responsabilidades */}
+              <div className="form-group full-width">
+                <label><ListChecks size={16} /> Principais Atribuições & Responsabilidades (Dia a Dia e Metas)</label>
+                <textarea
+                  name="responsibilities"
+                  rows={4}
+                  value={formData.responsibilities}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Prospecção ativa de contas enterprise (ticket médio R$ 50k); Negociação direta com C-levels; Alimentar e gerenciar pipeline no CRM HubSpot; Conduzir demonstrações técnicas do produto; Atingir metas trimestrais de novas vendas..."
+                />
+                <span className="helper-text">
+                  Descreva as rotinas, entregas prioritárias e metas reais para que o anúncio reflita a prática do cargo.
+                </span>
+              </div>
 
               {/* Motivador Principal */}
               <div className="form-group full-width">

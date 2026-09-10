@@ -22,11 +22,13 @@ ESTRUTURA FIXA DA REDAÇÃO (SEPARAR CADA SEÇÃO COM QUEBRAS DE LINHA DUPLAS):
 TÍTULO DA VAGA: [Cargo]
 
 SOBRE A [NOME EXATO DA EMPRESA CLIENTE]
-[Parágrafo institucional sóbrio sobre autoridade e mercado]
+[Parágrafo institucional aprofundado e sóbrio sobre a empresa, destacando segmento, autoridade, diferenciais de mercado e momento atual com base nas informações fornecidas. Nunca utilize clichês vazios como 'empresa líder inovadora'.]
 
 RESPONSABILIDADES E ATRIBUIÇÕES
-- [Item 1 com verbo de ação]
-- [Item 2 com verbo de ação]
+- [Atribuição concreta baseada na rotina informada, iniciada com verbo de ação no infinitivo]
+- [Atribuição concreta baseada na rotina informada, iniciada com verbo de ação no infinitivo]
+- [Atribuição concreta baseada na rotina informada, iniciada com verbo de ação no infinitivo]
+- [Atribuição concreta baseada na rotina informada, iniciada com verbo de ação no infinitivo]
 
 REQUISITOS COMPORTAMENTAIS
 - [Soft skill 1 alinhada ao arquétipo]
@@ -145,10 +147,18 @@ export function buildJobPrompt(companyName, data) {
 
     return `EMPRESA CLIENTE (CONTRATANTE): ${targetCompany}
 (ATENÇÃO: Utilize impreterivelmente o nome "${targetCompany}" como a empresa contratante na seção "Sobre a Empresa" e ao longo de todo o texto. Não utilize "Empresa Teste" nem qualquer outro nome fictício).
+
+CONTEXTO E INFORMAÇÕES SOBRE A EMPRESA (SEGMENTO, MOMENTO, CULTURA E DIFERENCIAIS):
+${data.companyDescription?.trim() || "Empresa com atuação consolidada em seu setor, focada em qualidade, diferenciação e crescimento sustentável."}
+
+TÍTULO DA VAGA: ${data.title}
 FAMÍLIA DA VAGA: ${family}
 ARQUÉTIPO DE ATUAÇÃO: ${archetypeDesc}
 MOTIVADOR PRINCIPAL: ${motivatorDesc}
-TÍTULO DA VAGA: ${data.title}
+
+PRINCIPAIS ATRIBUIÇÕES E RESPONSABILIDADES DO DIA A DIA (ROTINA E ENTREGAS REAIS):
+${data.responsibilities?.trim() || "Execução e acompanhamento das rotinas e projetos prioritários da função, garantindo qualidade e cumprimento de metas."}
+
 MODELO DE TRABALHO: ${data.workModel || "A combinar"}
 FAIXA SALARIAL / REMUNERAÇÃO: ${data.salary || "Compatível com o mercado"}
 BENEFÍCIOS: ${data.benefits || "Pacote padrão corporativo"}
@@ -159,7 +169,8 @@ ${data.mustHaves || "Experiência sólida na área"}
 REQUISITOS DESEJÁVEIS (DIFERENCIAIS):
 ${data.niceToHaves || "Certificações e experiências adicionais"}
 
-Redija o anúncio oficial da vaga seguindo estritamente a estrutura de 7 tópicos da Seção 2 do Padrão Live, mantendo sobriedade radical e sem emojis.`;
+DIRETRIZ DE REDAÇÃO ESPECÍFICA:
+Aprofunde as seções 'SOBRE A EMPRESA' e 'RESPONSABILIDADES E ATRIBUIÇÕES' utilizando fielmente os detalhes concretos acima, garantindo um anúncio atraente, autêntico e 100% livre de clichês ou generalismos. Redija o anúncio oficial da vaga seguindo estritamente a estrutura de 7 tópicos da Seção 2 do Padrão Live, mantendo sobriedade radical e sem emojis.`;
 }
 
 /**

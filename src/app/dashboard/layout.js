@@ -105,6 +105,29 @@ export default function DashboardLayout({ children }) {
               </Link>
             ))}
           </div>
+
+          {isMasterAdmin && (
+            <div className="nav-section">
+              <span className="nav-section-title" style={{ color: "#3B82F6" }}>Administração</span>
+              <Link
+                href="/dashboard/admin/users"
+                className={`nav-item ${pathname === "/dashboard/admin/users" ? "active" : ""}`}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+              >
+                <span>Aprovar Usuários</span>
+                <span style={{ 
+                  background: "#3B82F6", 
+                  color: "#FFFFFF", 
+                  fontSize: "0.65rem", 
+                  fontWeight: "800", 
+                  padding: "1px 6px", 
+                  borderRadius: "10px" 
+                }}>
+                  ADMIN
+                </span>
+              </Link>
+            </div>
+          )}
         </nav>
 
         <div className="sidebar-footer">

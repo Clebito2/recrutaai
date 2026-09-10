@@ -63,6 +63,7 @@ export const analysisRequestSchema = z.object({
 
 export const jobDiagnosticSchema = z.object({
     companyName: z.string().optional(),
+    companyDescription: z.string().optional(),
     title: z.string().min(2),
     family: z.enum([
         "comercial",
@@ -73,6 +74,7 @@ export const jobDiagnosticSchema = z.object({
         "outro"
     ]).default("tecnico"),
     archetype: z.string().optional(),
+    responsibilities: z.string().optional(),
     motivator: z.string().optional(),
     mustHaves: z.string().optional(),
     niceToHaves: z.string().optional(),

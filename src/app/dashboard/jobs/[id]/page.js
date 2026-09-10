@@ -6,7 +6,7 @@ import SubscriptionGuard from "../../../../components/common/SubscriptionGuard";
 import PageHeader from "../../../../components/common/PageHeader";
 import MetaList from "../../../../components/common/MetaList";
 import MetaItem from "../../../../components/common/MetaItem";
-import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText, Building2, Edit3, Save, X } from "lucide-react";
+import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText, Building2, Edit3, Save, X, ListChecks } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -181,6 +181,20 @@ export default function JobDetails() {
                 <MetaItem icon={<Building2 size={16} />} label="Empresa Contratante">
                   {companyName}
                 </MetaItem>
+                {job.companyDescription && (
+                  <MetaItem icon={<Building2 size={16} />} label="Sobre a Empresa">
+                    <span style={{ fontSize: "0.82rem", color: "#CBD5E1", lineHeight: "1.5" }}>
+                      {job.companyDescription}
+                    </span>
+                  </MetaItem>
+                )}
+                {job.responsibilities && (
+                  <MetaItem icon={<ListChecks size={16} />} label="Atribuições / Rotina">
+                    <span style={{ fontSize: "0.82rem", color: "#CBD5E1", lineHeight: "1.5" }}>
+                      {job.responsibilities}
+                    </span>
+                  </MetaItem>
+                )}
                 <MetaItem icon={<Briefcase size={16} />} label="Família Funcional">
                   {familyLabel}
                 </MetaItem>

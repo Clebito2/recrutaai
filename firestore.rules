@@ -10,22 +10,30 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function isMasterAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'cleber.ihs@gmail.com' ||
+        request.auth.token.email == 'cleberdonato@ecossistemalive.com.br'
+      );
+    }
+
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isMasterAdmin();
+      allow list: if isMasterAdmin();
     }
 
     match /jobs/{jobId} {
-      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || isMasterAdmin());
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
     match /candidates/{candidateId} {
-      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || isMasterAdmin());
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
     match /interviews/{interviewId} {
-      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || isMasterAdmin());
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
   }
