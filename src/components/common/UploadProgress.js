@@ -25,7 +25,7 @@ export default function UploadProgress({ step }) {
             background: 'rgba(255, 255, 255, 0.04)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            border: '1px solid #FFFFFF',
             borderRadius: '14px',
             padding: '20px 24px',
             animation: 'fadeIn 0.3s ease-out forwards',

@@ -360,7 +360,7 @@ export default function InterviewsPage() {
 
         .tool-guide-card {
           display: flex;
-          background: var(--ink-900);
+          background: #FFFFFF;
           border: 1px solid var(--line);
           border-left: 4px solid var(--purple-600);
           padding: 16px 20px;

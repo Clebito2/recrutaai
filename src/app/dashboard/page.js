@@ -172,7 +172,7 @@ export default function DashboardHome() {
 
         /* Hero Section */
         .dashboard-hero {
-          background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(30, 41, 59, 0.5) 100%);
+          background: #FFFFFF;
           border-radius: 20px;
           padding: 36px 40px;
           margin-bottom: 24px;
@@ -184,7 +184,7 @@ export default function DashboardHome() {
 
         /* Platform Workflow Banner */
         .platform-workflow-banner {
-          background: var(--ink-900);
+          background: #FFFFFF;
           border: 1px solid var(--line);
           border-radius: 16px;
           padding: 24px 28px;
@@ -213,7 +213,7 @@ export default function DashboardHome() {
 
         .workflow-step-card {
           background: var(--purple-100);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          border: 1px solid var(--line);
           border-radius: 12px;
           padding: 16px;
           position: relative;
@@ -290,20 +290,20 @@ export default function DashboardHome() {
         }
 
         .action-btn.primary:hover {
-          background: #2563EB;
+          background: var(--purple-600);
           transform: translateY(-2px);
           box-shadow: 0 6px 30px rgba(59, 130, 246, 0.45);
         }
 
         .action-btn.secondary {
-          background: rgba(255, 255, 255, 0.08);
+          background: #FFFFFF;
           color: var(--ink-900);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          border: 1px solid var(--purple-100);
         }
 
         .action-btn.secondary:hover {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.25);
+          background: var(--purple-100);
+          border-color: var(--purple-100);
         }
 
         /* Stats Grid */
@@ -349,7 +349,7 @@ export default function DashboardHome() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(59, 130, 246, 0.12);
+          background: var(--purple-100);
           color: var(--purple-600);
         }
 
@@ -365,7 +365,7 @@ export default function DashboardHome() {
         }
 
         .status-badge.active {
-          background: rgba(16, 185, 129, 0.15);
+          background: rgba(16, 185, 129, 0.1);
           color: var(--status-success);
         }
 

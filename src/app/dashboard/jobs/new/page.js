@@ -461,12 +461,12 @@ export default function NewJobPage() {
             transition: all 0.2s ease;
           }
           .btn-indigo:hover {
-            background: #2563EB;
+            background: var(--purple-600);
             transform: translateY(-1px);
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
           }
           .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
+            background: #FFFFFF;
             color: var(--ink-900);
             border: 1px solid var(--line);
             padding: 10px 16px;
@@ -476,20 +476,20 @@ export default function NewJobPage() {
             transition: all 0.2s;
           }
           .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--purple-100);
           }
           .preview-card { padding: 32px; }
           .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px; }
           .preview-tabs { display: flex; gap: 10px; }
-          .tab-btn { background: var(--ink-900); border: 1px solid var(--line); color: var(--ink-500); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
+          .tab-btn { background: #FFFFFF; border: 1px solid var(--line); color: var(--ink-500); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
           .tab-btn.active { background: var(--purple-600); border-color: var(--purple-600); color: var(--ink-900); }
           .preview-actions { display: flex; gap: 12px; }
-          .preview-content { background: var(--ink-900); padding: 28px; border-radius: 12px; border: 1px solid var(--line); line-height: 1.8; color: var(--ink-900); }
+          .preview-content { background: #FFFFFF; padding: 28px; border-radius: 12px; border: 1px solid var(--line); line-height: 1.8; color: var(--ink-900); }
           .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: var(--purple-600); }
           .error-msg { display: flex; align-items: center; gap: 8px; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; }
           .tool-guide-card {
             display: flex;
-            background: var(--ink-900);
+            background: #FFFFFF;
             border: 1px solid var(--line);
             border-left: 4px solid var(--purple-600);
             padding: 16px 20px;
@@ -526,7 +526,7 @@ export default function NewJobPage() {
           .callout-icon { flex-shrink: 0; margin-top: 2px; }
           .callout-content { font-size: 0.85rem; color: var(--ink-700); line-height: 1.5; }
           .clean-ad-wrapper {
-            background: var(--ink-900);
+            background: #FFFFFF;
             padding: 28px;
             border-radius: 12px;
             border: 1px solid var(--line);

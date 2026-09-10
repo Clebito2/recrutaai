@@ -465,7 +465,7 @@ export default function PendingApprovalPage() {
         }
 
         .btn-indigo:hover {
-          background: #2563EB;
+          background: var(--purple-600);
         }
 
         .btn-secondary {

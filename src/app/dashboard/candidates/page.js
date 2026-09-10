@@ -722,7 +722,7 @@ export default function CandidatesPage() {
                                     <td style={{ padding: '10px 8px' }}>
                                       <span style={{ 
                                         padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
-                                        background: isGateReprov ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                                        background: isGateReprov ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.1)',
                                         color: isGateReprov ? '#EF4444' : '#10B981'
                                       }}>
                                         {ana.gate_check?.status || "OK"}
@@ -811,7 +811,7 @@ export default function CandidatesPage() {
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <div style={{
                   padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700',
-                  background: analysisResult.gate_check?.status === 'REPROVADO' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)',
+                  background: analysisResult.gate_check?.status === 'REPROVADO' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.1)',
                   color: analysisResult.gate_check?.status === 'REPROVADO' ? '#EF4444' : '#10B981',
                   border: `1px solid ${analysisResult.gate_check?.status === 'REPROVADO' ? '#EF4444' : '#10B981'}`
                 }}>
@@ -1084,7 +1084,7 @@ export default function CandidatesPage() {
 
           .tool-guide-card {
             display: flex;
-            background: var(--ink-900);
+            background: #FFFFFF;
             border: 1px solid var(--line);
             border-left: 4px solid var(--purple-600);
             padding: 16px 20px;
@@ -1111,7 +1111,7 @@ export default function CandidatesPage() {
             transition: all 0.2s ease;
           }
           .btn-socratic:hover {
-            background: #2563EB;
+            background: var(--purple-600);
             transform: translateY(-1px);
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
           }
@@ -1122,7 +1122,7 @@ export default function CandidatesPage() {
           }
 
           .socratic-instructions-box {
-            background: var(--ink-900);
+            background: #FFFFFF;
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 14px 18px;
@@ -1130,7 +1130,7 @@ export default function CandidatesPage() {
           }
 
           .clean-guide-wrapper {
-            background: var(--ink-900);
+            background: #FFFFFF;
             border: 1px solid var(--line);
             border-radius: 10px;
             padding: 22px;

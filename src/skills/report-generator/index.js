@@ -85,7 +85,7 @@ export function generateReport(analysis, options = {}) {
       --live-glass-hover: #1E293B;
       --glass-blur: blur(20px) saturate(180%);
       --live-accent: #10B981;
-      --live-accent-dim: rgba(16, 185, 129, 0.15);
+      --live-accent-dim: rgba(16, 185, 129, 0.1);
       --live-danger: #EF4444;
       --live-warning: #F59E0B;
       --border-subtle: #1E293B;
@@ -181,7 +181,7 @@ export function generateReport(analysis, options = {}) {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: ${isGateReprovado ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)'};
+      background: ${isGateReprovado ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.1)'};
       border: 1px solid ${isGateReprovado ? '#EF4444' : '#10B981'};
       color: ${isGateReprovado ? '#EF4444' : '#10B981'};
     }
@@ -399,14 +399,14 @@ export function generateReport(analysis, options = {}) {
 
     .skill-bar-track {
       height: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      background: #FFFFFF;
       border-radius: 4px;
       overflow: hidden;
     }
 
     .skill-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #2563EB, #3B82F6);
+      background: linear-gradient(90deg, var(--purple-600), #3B82F6);
       border-radius: 4px;
     }
 
@@ -478,7 +478,7 @@ export function generateReport(analysis, options = {}) {
     }
 
     .cta-btn:hover {
-      background: #2563EB;
+      background: var(--purple-600);
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
       transform: translateY(-2px);
     }

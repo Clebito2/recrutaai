@@ -328,7 +328,7 @@ export default function AdminUsersPage() {
         }
 
         .btn-refresh {
-          background: var(--ink-900);
+          background: #FFFFFF;
           color: var(--ink-500);
           border: 1px solid var(--line);
           padding: 8px 16px;
@@ -403,7 +403,7 @@ export default function AdminUsersPage() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: var(--ink-900);
+          background: #FFFFFF;
           border: 1px solid var(--line);
           border-radius: 8px;
           padding: 10px 14px;
@@ -424,7 +424,7 @@ export default function AdminUsersPage() {
           gap: 8px;
         }
         .pill {
-          background: var(--ink-900);
+          background: #FFFFFF;
           border: 1px solid var(--line);
           color: var(--ink-500);
           padding: 8px 14px;

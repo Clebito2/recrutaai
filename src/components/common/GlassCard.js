@@ -8,7 +8,7 @@ const GlassCard = ({ children, className = '', ...props }) => {
       {children}
       <style jsx>{`
         .glass-card {
-          background: var(--ink-900);
+          background: #FFFFFF;
           border: 1px solid var(--line);
           border-radius: 12px;
           transition: all 0.2s ease;

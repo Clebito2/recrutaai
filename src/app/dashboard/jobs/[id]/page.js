@@ -304,7 +304,7 @@ export default function JobDetails() {
 
           .guide-text {
             color: var(--ink-900);
-            background: var(--ink-900);
+            background: #FFFFFF;
             padding: 16px;
             border-radius: 8px;
             border-left: 3px solid var(--purple-600);
