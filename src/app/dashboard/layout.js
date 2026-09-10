@@ -69,8 +69,9 @@ export default function DashboardLayout({ children }) {
     <div className="dashboard-layout">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <Link href="/dashboard" className="brand brand-underline">
-            <span className="text-brand-recruit">Recrute</span><span className="text-brand-ai" style={{ color: "var(--status-warning)" }}>AI</span>
+          <Link href="/dashboard" className="brand">
+            <span style={{ color: "#FFFFFF" }}>Recrute</span>
+            <span style={{ color: "#A3E635", marginLeft: "2px" }}>AI</span>
           </Link>
         </div>
 
@@ -108,7 +109,7 @@ export default function DashboardLayout({ children }) {
 
           {isMasterAdmin && (
             <div className="nav-section">
-              <span className="nav-section-title" style={{ color: "var(--purple-600)" }}>Administração</span>
+              <span className="nav-section-title" style={{ color: "#D8B4FE" }}>Administração</span>
               <Link
                 href="/dashboard/admin/users"
                 className={`nav-item ${pathname === "/dashboard/admin/users" ? "active" : ""}`}
@@ -116,11 +117,11 @@ export default function DashboardLayout({ children }) {
               >
                 <span>Aprovar Usuários</span>
                 <span style={{ 
-                  background: "#3B82F6", 
+                  background: "var(--purple-600)", 
                   color: "#FFFFFF", 
                   fontSize: "0.65rem", 
                   fontWeight: "800", 
-                  padding: "1px 6px", 
+                  padding: "2px 7px", 
                   borderRadius: "10px" 
                 }}>
                   ADMIN
@@ -171,7 +172,7 @@ export default function DashboardLayout({ children }) {
           font-size: 1.5rem;
           font-weight: 800;
           text-decoration: none;
-          color: var(--ink-900);
+          color: #FFFFFF !important;
           letter-spacing: -0.02em;
           display: block;
           text-align: center;
@@ -179,27 +180,27 @@ export default function DashboardLayout({ children }) {
 
         .company-badge {
           margin: 20px 16px 0;
-          padding: 16px;
-          background: var(--purple-100);
-          border: 1px solid var(--line);
+          padding: 14px 16px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
           border-radius: 8px;
         }
 
         .company-label {
           display: block;
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           font-weight: 700;
-          color: var(--purple-100);
+          color: #D8B4FE;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
           margin-bottom: 4px;
         }
 
         .company-name {
           display: block;
           font-size: 0.95rem;
-          font-weight: 600;
-          color: var(--ink-900);
+          font-weight: 700;
+          color: #FFFFFF;
         }
 
         .sidebar-nav {
@@ -219,9 +220,9 @@ export default function DashboardLayout({ children }) {
         .nav-section-title {
           font-size: 0.7rem;
           font-weight: 700;
-          color: var(--ink-500);
+          color: rgba(255, 255, 255, 0.55);
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.2px;
           padding: 0 12px;
           margin-bottom: 8px;
         }
@@ -229,7 +230,7 @@ export default function DashboardLayout({ children }) {
         .nav-item {
           padding: 10px 16px;
           border-radius: 8px;
-          color: var(--ink-700);
+          color: rgba(255, 255, 255, 0.82);
           text-decoration: none !important;
           font-weight: 600;
           font-size: 0.9rem;
@@ -241,20 +242,20 @@ export default function DashboardLayout({ children }) {
         }
 
         .nav-item:hover {
-          background: var(--purple-100);
-          color: var(--ink-900) !important;
+          background: rgba(255, 255, 255, 0.12);
+          color: #FFFFFF !important;
         }
 
         .nav-item.active {
           background: var(--purple-600) !important;
           border-color: var(--purple-600) !important;
-          box-shadow: none;
-          color: var(--ink-900) !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          color: #FFFFFF !important;
         }
 
         .sidebar-footer {
           padding: 16px;
-          border-top: 1px solid var(--purple-800);
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
           margin-top: auto;
         }
 
@@ -264,9 +265,9 @@ export default function DashboardLayout({ children }) {
 
         .user-label {
           display: block;
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           font-weight: 600;
-          color: var(--ink-500);
+          color: rgba(255, 255, 255, 0.5);
           text-transform: uppercase;
           letter-spacing: 1px;
           margin-bottom: 2px;
@@ -274,15 +275,15 @@ export default function DashboardLayout({ children }) {
 
         .user-email {
           font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.8);
+          color: rgba(255, 255, 255, 0.85);
           word-break: break-all;
         }
 
         .logout-btn {
           width: 100%;
-          background: var(--purple-100);
-          border: 1px solid var(--line);
-          color: rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: rgba(255, 255, 255, 0.85);
           padding: 10px;
           border-radius: 8px;
           font-weight: 600;
@@ -292,9 +293,9 @@ export default function DashboardLayout({ children }) {
         }
 
         .logout-btn:hover {
-          background: rgba(239, 68, 68, 0.1);
-          border-color: rgba(239, 68, 68, 0.3);
-          color: var(--status-danger);
+          background: rgba(239, 68, 68, 0.2);
+          border-color: rgba(239, 68, 68, 0.4);
+          color: #EF4444;
         }
 
         .main-content {

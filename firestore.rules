@@ -12,14 +12,15 @@ service cloud.firestore {
 
     function isMasterAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == 'cleber.ihs@gmail.com' ||
-        request.auth.token.email == 'cleberdonato@ecossistemalive.com.br'
+        request.auth.token.email.lower() == 'cleber.ihs@gmail.com' ||
+        request.auth.token.email.lower() == 'cleberdonato@ecossistemalive.com.br'
       );
     }
 
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isMasterAdmin();
+      allow get: if isOwner(userId) || isMasterAdmin();
       allow list: if isMasterAdmin();
+      allow write: if isOwner(userId) || isMasterAdmin();
     }
 
     match /jobs/{jobId} {
@@ -38,3 +39,4 @@ service cloud.firestore {
     }
   }
 }
+
