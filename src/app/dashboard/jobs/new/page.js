@@ -155,7 +155,7 @@ export default function NewJobPage() {
         {/* Guia de Instruções da Ferramenta */}
         <div className="tool-guide-card animate-fade">
           <div className="guide-icon">
-            <Info size={22} color="#3B82F6" />
+            <Info size={22} color="var(--purple-600)" />
           </div>
           <div className="guide-text">
             <strong>Instruções do Arquiteto de Vagas:</strong>
@@ -408,7 +408,7 @@ export default function NewJobPage() {
             {/* Aviso da metodologia sobre a personalização do roteiro socrático */}
             <div className="socratic-callout">
               <div className="callout-icon">
-                <Brain size={22} color="#3B82F6" />
+                <Brain size={22} color="var(--purple-600)" />
               </div>
               <div className="callout-content">
                 <strong>Roteiro Socrático de Entrevista & Role Play Personalizado:</strong>
@@ -444,11 +444,11 @@ export default function NewJobPage() {
           }
           .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #3B82F6;
+            border-color: var(--purple-600);
           }
           .btn-indigo { 
-            background: #3B82F6; 
-            color: #FFFFFF; 
+            background: var(--purple-600); 
+            color: var(--ink-900); 
             border: none; 
             padding: 16px; 
             border-radius: 10px; 
@@ -467,8 +467,8 @@ export default function NewJobPage() {
           }
           .btn-secondary {
             background: rgba(255, 255, 255, 0.08);
-            color: #F8FAFC;
-            border: 1px solid #1E293B;
+            color: var(--ink-900);
+            border: 1px solid var(--line);
             padding: 10px 16px;
             border-radius: 8px;
             font-weight: 600;
@@ -479,19 +479,19 @@ export default function NewJobPage() {
             background: rgba(255, 255, 255, 0.15);
           }
           .preview-card { padding: 32px; }
-          .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E293B; padding-bottom: 16px; margin-bottom: 20px; }
+          .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px; }
           .preview-tabs { display: flex; gap: 10px; }
-          .tab-btn { background: #131B2A; border: 1px solid #1E293B; color: #94A3B8; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
-          .tab-btn.active { background: #3B82F6; border-color: #3B82F6; color: #FFFFFF; }
+          .tab-btn { background: var(--ink-900); border: 1px solid var(--line); color: var(--ink-500); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
+          .tab-btn.active { background: var(--purple-600); border-color: var(--purple-600); color: var(--ink-900); }
           .preview-actions { display: flex; gap: 12px; }
-          .preview-content { background: #131B2A; padding: 28px; border-radius: 12px; border: 1px solid #1E293B; line-height: 1.8; color: #F8FAFC; }
-          .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: #3B82F6; }
+          .preview-content { background: var(--ink-900); padding: 28px; border-radius: 12px; border: 1px solid var(--line); line-height: 1.8; color: var(--ink-900); }
+          .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: var(--purple-600); }
           .error-msg { display: flex; align-items: center; gap: 8px; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 20px; }
           .tool-guide-card {
             display: flex;
-            background: #131B2A;
-            border: 1px solid #1E293B;
-            border-left: 4px solid #3B82F6;
+            background: var(--ink-900);
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--purple-600);
             padding: 16px 20px;
             border-radius: 10px;
             gap: 14px;
@@ -503,7 +503,7 @@ export default function NewJobPage() {
           .step-pill {
             display: inline-block;
             background: rgba(59, 130, 246, 0.15);
-            color: #60A5FA;
+            color: var(--purple-600);
             border: 1px solid rgba(59, 130, 246, 0.3);
             padding: 3px 10px;
             border-radius: 12px;
@@ -512,7 +512,7 @@ export default function NewJobPage() {
             margin-bottom: 6px;
             text-transform: uppercase;
           }
-          .client-subtitle { font-size: 0.85rem; color: #94A3B8; display: block; margin-top: 4px; }
+          .client-subtitle { font-size: 0.85rem; color: var(--ink-500); display: block; margin-top: 4px; }
           .socratic-callout {
             display: flex;
             background: rgba(59, 130, 246, 0.08);
@@ -524,12 +524,12 @@ export default function NewJobPage() {
             align-items: flex-start;
           }
           .callout-icon { flex-shrink: 0; margin-top: 2px; }
-          .callout-content { font-size: 0.85rem; color: #CBD5E1; line-height: 1.5; }
+          .callout-content { font-size: 0.85rem; color: var(--ink-700); line-height: 1.5; }
           .clean-ad-wrapper {
-            background: #131B2A;
+            background: var(--ink-900);
             padding: 28px;
             border-radius: 12px;
-            border: 1px solid #1E293B;
+            border: 1px solid var(--line);
             overflow-x: auto;
           }
           .clean-ad-text {
@@ -537,7 +537,7 @@ export default function NewJobPage() {
             font-family: inherit;
             font-size: 0.95rem;
             line-height: 1.8;
-            color: #F8FAFC;
+            color: var(--ink-900);
             margin: 0;
           }
           .spin { animation: spin 1s linear infinite; }

@@ -25,7 +25,7 @@ export default function MetaItem({ icon, label, children }) {
         }
 
         .meta-icon {
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--ink-500);
           margin-top: 2px;
         }
 

@@ -89,7 +89,7 @@ export default function InterviewsPage() {
       {/* Guia de Instruções da Ferramenta */}
       <div className="tool-guide-card animate-fade">
         <div className="guide-icon">
-          <Info size={22} color="#3B82F6" />
+          <Info size={22} color="var(--purple-600)" />
         </div>
         <div className="guide-text">
           <strong>Instruções de Condução de Entrevistas Live:</strong>
@@ -314,8 +314,8 @@ export default function InterviewsPage() {
         }
 
         .status-badge.past {
-          background: rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.5);
+          background: var(--line);
+          color: var(--ink-500);
         }
 
         .interview-details {
@@ -360,9 +360,9 @@ export default function InterviewsPage() {
 
         .tool-guide-card {
           display: flex;
-          background: #131B2A;
-          border: 1px solid #1E293B;
-          border-left: 4px solid #3B82F6;
+          background: var(--ink-900);
+          border: 1px solid var(--line);
+          border-left: 4px solid var(--purple-600);
           padding: 16px 20px;
           border-radius: 10px;
           gap: 14px;

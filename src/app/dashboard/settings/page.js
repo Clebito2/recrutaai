@@ -309,7 +309,7 @@ export default function SettingsPage() {
           width: 44px;
           height: 24px;
           appearance: none;
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--line);
           border-radius: 12px;
           position: relative;
           cursor: pointer;

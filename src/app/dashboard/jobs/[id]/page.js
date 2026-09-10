@@ -266,9 +266,9 @@ export default function JobDetails() {
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
+            background: var(--purple-100);
+            border: 1px solid var(--line);
+            color: var(--ink-700);
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
@@ -277,9 +277,9 @@ export default function JobDetails() {
           }
 
           .tab-btn.active {
-            background: #3B82F6;
-            border-color: #3B82F6;
-            color: #FFFFFF;
+            background: var(--purple-600);
+            border-color: var(--purple-600);
+            color: var(--ink-900);
             font-weight: 600;
           }
 
@@ -298,16 +298,16 @@ export default function JobDetails() {
             white-space: pre-wrap;
             font-family: var(--font-ui);
             line-height: 1.7;
-            color: #F8FAFC;
+            color: var(--ink-900);
             font-size: 1rem;
           }
 
           .guide-text {
-            color: #F8FAFC;
-            background: #131B2A;
+            color: var(--ink-900);
+            background: var(--ink-900);
             padding: 16px;
             border-radius: 8px;
-            border-left: 3px solid #3B82F6;
+            border-left: 3px solid var(--purple-600);
           }
 
           .meta-card {
@@ -325,18 +325,18 @@ export default function JobDetails() {
             justify-content: space-between;
             align-items: center;
             font-size: 0.85rem;
-            color: #60A5FA;
+            color: var(--purple-600);
             font-weight: 600;
           }
 
           .job-textarea {
             width: 100%;
             min-height: 480px;
-            background: #0B0F17;
-            border: 1px solid #1E293B;
+            background: #FFFFFF;
+            border: 1px solid var(--line);
             border-radius: 8px;
             padding: 18px;
-            color: #F8FAFC;
+            color: var(--ink-900);
             font-family: inherit;
             font-size: 0.95rem;
             line-height: 1.7;
@@ -346,20 +346,20 @@ export default function JobDetails() {
 
           .job-textarea:focus {
             outline: none;
-            border-color: #3B82F6;
+            border-color: var(--purple-600);
           }
 
           .weights-section {
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid #1E293B;
+            border-top: 1px solid var(--line);
           }
 
           .weights-section h4 {
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #60A5FA;
+            color: var(--purple-600);
             margin-bottom: 12px;
           }
 
@@ -385,14 +385,14 @@ export default function JobDetails() {
           .repo-section {
             margin-top: 20px;
             padding-top: 16px;
-            border-top: 1px solid #1E293B;
+            border-top: 1px solid var(--line);
           }
 
           .repo-link {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #3B82F6;
+            color: var(--purple-600);
             font-size: 0.85rem;
             text-decoration: none;
           }
@@ -402,8 +402,8 @@ export default function JobDetails() {
           }
 
           .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #1E293B;
+            background: var(--purple-100);
+            border: 1px solid var(--line);
             color: white;
             padding: 10px 18px;
             border-radius: 8px;
@@ -416,12 +416,12 @@ export default function JobDetails() {
           }
 
           .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--line);
           }
 
           .btn-indigo {
-            background: #3B82F6;
-            color: #FFFFFF;
+            background: var(--purple-600);
+            color: var(--ink-900);
             font-weight: 600;
             padding: 10px 18px;
             border-radius: 8px;

@@ -8,22 +8,17 @@ const GlassCard = ({ children, className = '', ...props }) => {
       {children}
       <style jsx>{`
         .glass-card {
-          background: var(--canvas-card);
-          backdrop-filter: var(--glass-blur);
-          -webkit-backdrop-filter: var(--glass-blur);
-          border: 1px solid var(--border-glass);
-          border-radius: 16px;
-          transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-          overflow: hidden;
+          background: var(--ink-900);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          transition: all 0.2s ease;
           position: relative;
         }
 
         ${!props.noHover ? `
           .glass-card:hover {
-            background: var(--canvas-card-hover);
-            border-color: var(--border-active);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--purple-600);
+            box-shadow: 0 4px 12px rgba(91, 42, 134, 0.1);
           }
         ` : ''}
       `}</style>

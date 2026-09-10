@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }) {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--ink-500);
           }
         `}</style>
       </div>
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }) {
       <aside className="sidebar">
         <div className="sidebar-header">
           <Link href="/dashboard" className="brand brand-underline">
-            <span className="text-brand-recruit">Recrute</span><span className="text-brand-ai" style={{ color: "#F59E0B" }}>AI</span>
+            <span className="text-brand-recruit">Recrute</span><span className="text-brand-ai" style={{ color: "var(--status-warning)" }}>AI</span>
           </Link>
         </div>
 
@@ -152,9 +152,9 @@ export default function DashboardLayout({ children }) {
         }
 
         .sidebar {
-          width: 280px;
-          background: #0F172A;
-          border-right: 1px solid #1E293B;
+          width: 240px;
+          background: var(--purple-900);
+          border-right: 1px solid var(--purple-800);
           display: flex;
           flex-direction: column;
           position: fixed;
@@ -163,50 +163,48 @@ export default function DashboardLayout({ children }) {
         }
 
         .sidebar-header {
-          padding: 28px 24px 20px;
-          border-bottom: 1px solid #1E293B;
+          padding: 24px 20px 20px;
+          border-bottom: 1px solid var(--purple-800);
         }
 
         .brand {
           font-size: 1.5rem;
           font-weight: 800;
           text-decoration: none;
-          color: #F8FAFC;
+          color: var(--ink-900);
           letter-spacing: -0.02em;
-        }
-
-        .accent {
-          color: #3B82F6;
+          display: block;
+          text-align: center;
         }
 
         .company-badge {
-          margin: 20px 20px 0;
-          padding: 16px 18px;
-          background: rgba(59, 130, 246, 0.08);
-          border: 1px solid rgba(59, 130, 246, 0.2);
-          border-radius: 10px;
+          margin: 20px 16px 0;
+          padding: 16px;
+          background: var(--purple-100);
+          border: 1px solid var(--line);
+          border-radius: 8px;
         }
 
         .company-label {
           display: block;
           font-size: 0.7rem;
           font-weight: 700;
-          color: #60A5FA;
+          color: var(--purple-100);
           text-transform: uppercase;
-          letter-spacing: 1.5px;
-          margin-bottom: 6px;
+          letter-spacing: 1px;
+          margin-bottom: 4px;
         }
 
         .company-name {
           display: block;
-          font-size: 1rem;
+          font-size: 0.95rem;
           font-weight: 600;
-          color: #F8FAFC;
+          color: var(--ink-900);
         }
 
         .sidebar-nav {
           flex: 1;
-          padding: 24px 16px;
+          padding: 24px 12px;
           display: flex;
           flex-direction: column;
           gap: 24px;
@@ -221,113 +219,105 @@ export default function DashboardLayout({ children }) {
         .nav-section-title {
           font-size: 0.7rem;
           font-weight: 700;
-          color: #94A3B8;
+          color: var(--ink-500);
           text-transform: uppercase;
-          letter-spacing: 1.5px;
+          letter-spacing: 1px;
           padding: 0 12px;
           margin-bottom: 8px;
-          opacity: 0.8;
         }
 
         .nav-item {
-          padding: 12px 18px;
+          padding: 10px 16px;
           border-radius: 8px;
-          color: #94A3B8;
+          color: var(--ink-700);
           text-decoration: none !important;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           transition: all 0.2s ease;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
           display: flex;
           align-items: center;
           gap: 10px;
         }
 
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.05);
-          color: #FFFFFF !important;
-          transform: translateX(4px);
+          background: var(--purple-100);
+          color: var(--ink-900) !important;
         }
 
         .nav-item.active {
-          background: #3B82F6 !important;
-          border-color: #3B82F6 !important;
-          box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
-          color: #FFFFFF !important;
+          background: var(--purple-600) !important;
+          border-color: var(--purple-600) !important;
+          box-shadow: none;
+          color: var(--ink-900) !important;
         }
 
         .sidebar-footer {
-          padding: 20px;
-          border-top: 1px solid #1E293B;
+          padding: 16px;
+          border-top: 1px solid var(--purple-800);
           margin-top: auto;
         }
 
         .user-info {
-          margin-bottom: 16px;
+          margin-bottom: 12px;
         }
 
         .user-label {
           display: block;
           font-size: 0.7rem;
           font-weight: 600;
-          color: var(--text-muted);
+          color: var(--ink-500);
           text-transform: uppercase;
           letter-spacing: 1px;
-          margin-bottom: 4px;
-          opacity: 0.6;
+          margin-bottom: 2px;
         }
 
         .user-email {
-          font-size: 0.85rem;
-          color: var(--text-muted);
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.8);
           word-break: break-all;
         }
 
         .logout-btn {
           width: 100%;
-          background: rgba(251, 247, 240, 0.03);
-          border: 1px solid var(--border-glass);
-          color: var(--text-muted);
-          padding: 12px;
+          background: var(--purple-100);
+          border: 1px solid var(--line);
+          color: rgba(255, 255, 255, 0.8);
+          padding: 10px;
           border-radius: 8px;
           font-weight: 600;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           cursor: pointer;
           transition: all 0.15s;
         }
 
         .logout-btn:hover {
-          background: rgba(196, 92, 75, 0.1);
-          border-color: rgba(196, 92, 75, 0.3);
+          background: rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.3);
           color: var(--status-danger);
         }
 
         .main-content {
           flex: 1;
-          margin-left: 280px;
-          padding: 48px;
+          margin-left: 240px;
+          padding: 32px 48px;
           min-height: 100vh;
         }
 
         @media (max-width: 1024px) {
-          .sidebar {
-            width: 240px;
-          }
-
           .main-content {
-            margin-left: 240px;
-            padding: 32px;
+            padding: 24px;
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .sidebar {
             display: none;
           }
 
           .main-content {
             margin-left: 0;
-            padding: 24px;
+            padding: 20px;
           }
         }
       `}</style>

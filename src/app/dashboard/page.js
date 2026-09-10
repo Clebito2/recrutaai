@@ -51,7 +51,7 @@ export default function DashboardHome() {
       {/* Guia de Fluxo da Plataforma */}
       <div className="platform-workflow-banner">
         <div className="workflow-title-row">
-          <Info size={20} color="#3B82F6" />
+          <Info size={20} color="var(--purple-600)" />
           <h3>Como Funciona o Fluxo Live de R&S</h3>
         </div>
         <div className="workflow-steps-grid">
@@ -179,13 +179,13 @@ export default function DashboardHome() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border: 1px solid #1E293B;
+          border: 1px solid var(--line);
         }
 
         /* Platform Workflow Banner */
         .platform-workflow-banner {
-          background: #131B2A;
-          border: 1px solid #1E293B;
+          background: var(--ink-900);
+          border: 1px solid var(--line);
           border-radius: 16px;
           padding: 24px 28px;
           margin-bottom: 32px;
@@ -201,7 +201,7 @@ export default function DashboardHome() {
         .workflow-title-row h3 {
           font-size: 1.05rem;
           font-weight: 700;
-          color: #F8FAFC;
+          color: var(--ink-900);
           margin: 0;
         }
 
@@ -212,7 +212,7 @@ export default function DashboardHome() {
         }
 
         .workflow-step-card {
-          background: rgba(255, 255, 255, 0.02);
+          background: var(--purple-100);
           border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 12px;
           padding: 16px;
@@ -226,8 +226,8 @@ export default function DashboardHome() {
           width: 26px;
           height: 26px;
           border-radius: 50%;
-          background: #3B82F6;
-          color: #FFFFFF;
+          background: var(--purple-600);
+          color: var(--ink-900);
           font-weight: 800;
           font-size: 0.8rem;
           margin-bottom: 10px;
@@ -236,13 +236,13 @@ export default function DashboardHome() {
         .workflow-step-card h4 {
           font-size: 0.95rem;
           font-weight: 700;
-          color: #FFFFFF;
+          color: var(--ink-900);
           margin-bottom: 6px;
         }
 
         .workflow-step-card p {
           font-size: 0.82rem;
-          color: #94A3B8;
+          color: var(--ink-500);
           line-height: 1.5;
           margin: 0;
         }
@@ -251,7 +251,7 @@ export default function DashboardHome() {
           font-size: 2.5rem;
           font-weight: 800;
           margin-bottom: 8px;
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
 
         .hero-content .highlight {
@@ -261,7 +261,7 @@ export default function DashboardHome() {
         .hero-content p {
           font-size: 1.1rem;
           opacity: 0.7;
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
 
         .quick-actions {
@@ -284,8 +284,8 @@ export default function DashboardHome() {
         }
 
         .action-btn.primary {
-          background: #3B82F6;
-          color: #FFFFFF;
+          background: var(--purple-600);
+          color: var(--ink-900);
           box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
         }
 
@@ -297,7 +297,7 @@ export default function DashboardHome() {
 
         .action-btn.secondary {
           background: rgba(255, 255, 255, 0.08);
-          color: #FFFFFF;
+          color: var(--ink-900);
           border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
@@ -350,7 +350,7 @@ export default function DashboardHome() {
           align-items: center;
           justify-content: center;
           background: rgba(59, 130, 246, 0.12);
-          color: #3B82F6;
+          color: var(--purple-600);
         }
 
         .status-badge {
@@ -366,14 +366,14 @@ export default function DashboardHome() {
 
         .status-badge.active {
           background: rgba(16, 185, 129, 0.15);
-          color: #10B981;
+          color: var(--status-success);
         }
 
         .pulse-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #10B981;
+          background: var(--status-success);
           animation: pulse 2s infinite;
         }
 
@@ -381,13 +381,13 @@ export default function DashboardHome() {
           font-size: 1.5rem;
           font-weight: 700;
           margin-bottom: 12px;
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
 
         .feature-card p {
           font-size: 0.95rem;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--ink-700);
           margin-bottom: 24px;
           flex: 1;
         }
@@ -405,7 +405,7 @@ export default function DashboardHome() {
 
         .card-action:hover {
           gap: 12px;
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
 
         @keyframes pulse {

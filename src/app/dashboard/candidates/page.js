@@ -402,7 +402,7 @@ export default function CandidatesPage() {
         {/* Guia de Instruções da Ferramenta */}
         <div className="tool-guide-card animate-fade">
           <div className="guide-icon">
-            <Info size={22} color="#3B82F6" />
+            <Info size={22} color="var(--purple-600)" />
           </div>
           <div className="guide-text">
             <strong>Instruções do Analista de Perfil & Ranqueamento:</strong>
@@ -586,7 +586,7 @@ export default function CandidatesPage() {
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <CheckCircle size={16} color="#3B82F6" />
+                    <CheckCircle size={16} color="var(--purple-600)" />
                     PDF pronto para análise com OCR inteligente (lê texto nativo e documentos escaneados).
                   </p>
                 )}
@@ -973,7 +973,7 @@ export default function CandidatesPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Brain size={20} color="#3B82F6" /> Roteiro Socrático & Role Play Personalizado
+                    <Brain size={20} color="var(--purple-600)" /> Roteiro Socrático & Role Play Personalizado
                   </h3>
                   <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
                     Perguntas investigativas e simulação prática calibradas cirurgicamente para as lacunas e riscos de <strong>{analysisResult.nome || 'Candidato'}</strong>.
@@ -1084,9 +1084,9 @@ export default function CandidatesPage() {
 
           .tool-guide-card {
             display: flex;
-            background: #131B2A;
-            border: 1px solid #1E293B;
-            border-left: 4px solid #3B82F6;
+            background: var(--ink-900);
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--purple-600);
             padding: 16px 20px;
             border-radius: 10px;
             gap: 14px;
@@ -1097,8 +1097,8 @@ export default function CandidatesPage() {
           .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
 
           .btn-socratic {
-            background: #3B82F6;
-            color: #FFFFFF;
+            background: var(--purple-600);
+            color: var(--ink-900);
             border: none;
             padding: 10px 18px;
             border-radius: 8px;
@@ -1122,16 +1122,16 @@ export default function CandidatesPage() {
           }
 
           .socratic-instructions-box {
-            background: #131B2A;
-            border: 1px solid #1E293B;
+            background: var(--ink-900);
+            border: 1px solid var(--line);
             border-radius: 8px;
             padding: 14px 18px;
             margin-bottom: 8px;
           }
 
           .clean-guide-wrapper {
-            background: #131B2A;
-            border: 1px solid #1E293B;
+            background: var(--ink-900);
+            border: 1px solid var(--line);
             border-radius: 10px;
             padding: 22px;
             overflow-x: auto;
@@ -1141,7 +1141,7 @@ export default function CandidatesPage() {
             font-family: inherit;
             font-size: 0.9rem;
             line-height: 1.8;
-            color: #F8FAFC;
+            color: var(--ink-900);
             margin: 0;
           }
 
@@ -1163,7 +1163,7 @@ export default function CandidatesPage() {
             padding: 14px;
             border: none;
             background: transparent;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--ink-500);
             cursor: pointer;
             border-radius: 8px;
             font-weight: 600;
@@ -1191,7 +1191,7 @@ export default function CandidatesPage() {
           .selector-label {
             font-size: 0.82rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--ink-500);
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
@@ -1369,7 +1369,7 @@ export default function CandidatesPage() {
           }
 
           .history-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--purple-100);
             border-color: var(--action-primary);
             transform: translateX(3px);
           }
@@ -1378,7 +1378,7 @@ export default function CandidatesPage() {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--line);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1550,7 +1550,7 @@ export default function CandidatesPage() {
 
           .btn-secondary {
             background: transparent;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--ink-700);
             border: 1px solid var(--border-glass);
             padding: 14px 24px;
             border-radius: 10px;
@@ -1564,7 +1564,7 @@ export default function CandidatesPage() {
 
           .btn-secondary:hover {
             color: white;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--purple-100);
           }
 
           /* Animações (Antigravity: mínimo 0.3s ease-out) */

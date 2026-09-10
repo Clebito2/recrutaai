@@ -87,7 +87,7 @@ export default function StatCard({ icon, value, label, trend, variant = "briefca
         .stat-value {
           font-size: 2rem;
           font-weight: 800;
-          color: #FFFFFF;
+          color: var(--ink-900);
           line-height: 1;
           margin-bottom: 4px;
         }

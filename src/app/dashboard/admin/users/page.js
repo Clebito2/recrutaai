@@ -132,12 +132,12 @@ export default function AdminUsersPage() {
       <header className="page-header">
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
-            <ShieldCheck size={28} color="#3B82F6" />
-            <h1 style={{ fontSize: "1.8rem", fontWeight: "800", color: "#F8FAFC", margin: 0 }}>
+            <ShieldCheck size={28} color="var(--purple-600)" />
+            <h1 style={{ fontSize: "1.8rem", fontWeight: "800", color: "var(--ink-900)", margin: 0 }}>
               Central de Aprovações & Usuários
             </h1>
           </div>
-          <p style={{ color: "#94A3B8", fontSize: "0.9rem", margin: 0 }}>
+          <p style={{ color: "var(--ink-500)", fontSize: "0.9rem", margin: 0 }}>
             Gerencie e aprove imediatamente cadastros e liberações de pagamento PIX.
           </p>
         </div>
@@ -170,17 +170,17 @@ export default function AdminUsersPage() {
         </GlassCard>
         <GlassCard className="stat-box pending">
           <div className="stat-label">Aguardando Aprovação (PIX)</div>
-          <div className="stat-val" style={{ color: "#F59E0B" }}>{pendingCount}</div>
+          <div className="stat-val" style={{ color: "var(--status-warning)" }}>{pendingCount}</div>
         </GlassCard>
         <GlassCard className="stat-box active">
           <div className="stat-label">Acessos Ativos</div>
-          <div className="stat-val" style={{ color: "#10B981" }}>{activeCount}</div>
+          <div className="stat-val" style={{ color: "var(--status-success)" }}>{activeCount}</div>
         </GlassCard>
       </div>
 
       <div className="controls-row">
         <div className="search-bar">
-          <Search size={16} color="#94A3B8" />
+          <Search size={16} color="var(--ink-500)" />
           <input 
             type="text" 
             placeholder="Buscar por e-mail, nome ou empresa..." 
@@ -214,7 +214,7 @@ export default function AdminUsersPage() {
       <GlassCard className="table-card">
         {loading ? (
           <div className="loading-state">
-            <Loader2 size={32} className="spin" color="#3B82F6" />
+            <Loader2 size={32} className="spin" color="var(--purple-600)" />
             <p>Carregando usuários cadastrados...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
@@ -328,9 +328,9 @@ export default function AdminUsersPage() {
         }
 
         .btn-refresh {
-          background: #131B2A;
-          color: #94A3B8;
-          border: 1px solid #1E293B;
+          background: var(--ink-900);
+          color: var(--ink-500);
+          border: 1px solid var(--line);
           padding: 8px 16px;
           border-radius: 8px;
           font-size: 0.85rem;
@@ -342,8 +342,8 @@ export default function AdminUsersPage() {
           transition: all 0.2s;
         }
         .btn-refresh:hover {
-          color: #FFFFFF;
-          border-color: #3B82F6;
+          color: var(--ink-900);
+          border-color: var(--purple-600);
         }
 
         .alert-box {
@@ -357,14 +357,14 @@ export default function AdminUsersPage() {
           font-weight: 600;
         }
         .alert-box.success {
-          background: rgba(16, 185, 129, 0.15);
-          color: #10B981;
-          border: 1px solid #10B981;
+          background: rgba(16, 185, 129, 0.1);
+          color: var(--status-success);
+          border: 1px solid var(--status-success);
         }
         .alert-box.error {
           background: rgba(239, 68, 68, 0.15);
-          color: #EF4444;
-          border: 1px solid #EF4444;
+          color: var(--status-danger);
+          border: 1px solid var(--status-danger);
         }
 
         .stats-row {
@@ -379,7 +379,7 @@ export default function AdminUsersPage() {
         }
         .stat-label {
           font-size: 0.82rem;
-          color: #94A3B8;
+          color: var(--ink-500);
           font-weight: 600;
           text-transform: uppercase;
           margin-bottom: 6px;
@@ -387,7 +387,7 @@ export default function AdminUsersPage() {
         .stat-val {
           font-size: 2rem;
           font-weight: 800;
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
 
         .controls-row {
@@ -403,8 +403,8 @@ export default function AdminUsersPage() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: #131B2A;
-          border: 1px solid #1E293B;
+          background: var(--ink-900);
+          border: 1px solid var(--line);
           border-radius: 8px;
           padding: 10px 14px;
           flex: 1;
@@ -414,7 +414,7 @@ export default function AdminUsersPage() {
           background: transparent;
           border: none;
           outline: none;
-          color: #FFFFFF;
+          color: var(--ink-900);
           width: 100%;
           font-size: 0.9rem;
         }
@@ -424,9 +424,9 @@ export default function AdminUsersPage() {
           gap: 8px;
         }
         .pill {
-          background: #131B2A;
-          border: 1px solid #1E293B;
-          color: #94A3B8;
+          background: var(--ink-900);
+          border: 1px solid var(--line);
+          color: var(--ink-500);
           padding: 8px 14px;
           border-radius: 20px;
           font-size: 0.82rem;
@@ -435,23 +435,23 @@ export default function AdminUsersPage() {
           transition: all 0.2s;
         }
         .pill:hover {
-          color: #FFFFFF;
+          color: var(--ink-900);
         }
         .pill.active {
-          background: #3B82F6;
-          border-color: #3B82F6;
-          color: #FFFFFF;
+          background: var(--purple-600);
+          border-color: var(--purple-600);
+          color: var(--ink-900);
         }
         .pill.warning.active {
-          background: #F59E0B;
-          border-color: #F59E0B;
-          color: #0B0F17;
+          background: var(--status-warning);
+          border-color: var(--status-warning);
+          color: var(--ink-900);
           font-weight: 700;
         }
         .pill.success.active {
-          background: #10B981;
-          border-color: #10B981;
-          color: #FFFFFF;
+          background: var(--status-success);
+          border-color: var(--status-success);
+          color: var(--ink-900);
         }
 
         .table-card {
@@ -467,28 +467,28 @@ export default function AdminUsersPage() {
           font-size: 0.88rem;
         }
         .users-table th {
-          background: rgba(255, 255, 255, 0.02);
-          border-bottom: 1px solid #1E293B;
+          background: var(--purple-100);
+          border-bottom: 1px solid var(--line);
           padding: 14px 18px;
           text-align: left;
-          color: #94A3B8;
+          color: var(--ink-500);
           font-weight: 700;
           font-size: 0.8rem;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
         .users-table td {
-          padding: 16px 18px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          padding: 0 16px; height: 52px;
+          border-bottom: 1px solid var(--line);
           vertical-align: middle;
         }
         .users-table tr.pending-row {
-          background: rgba(245, 158, 11, 0.03);
+          background: #FFF9ED;
         }
 
         .user-identity strong {
           display: block;
-          color: #FFFFFF;
+          color: var(--ink-900);
           font-size: 0.92rem;
           margin-bottom: 3px;
         }
@@ -496,7 +496,7 @@ export default function AdminUsersPage() {
           display: flex;
           align-items: center;
           gap: 5px;
-          color: #94A3B8;
+          color: var(--ink-500);
           font-size: 0.8rem;
         }
 
@@ -504,7 +504,7 @@ export default function AdminUsersPage() {
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #CBD5E1;
+          color: var(--ink-700);
           font-size: 0.82rem;
         }
 
@@ -518,20 +518,20 @@ export default function AdminUsersPage() {
           font-weight: 700;
         }
         .badge-status.active {
-          background: rgba(16, 185, 129, 0.15);
-          color: #10B981;
+          background: rgba(16, 185, 129, 0.1);
+          color: var(--status-success);
           border: 1px solid rgba(16, 185, 129, 0.3);
         }
         .badge-status.pending {
-          background: rgba(245, 158, 11, 0.15);
-          color: #F59E0B;
+          background: rgba(245, 158, 11, 0.1);
+          color: var(--status-warning);
           border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .plan-badge {
-          background: rgba(59, 130, 246, 0.12);
-          color: #60A5FA;
-          border: 1px solid rgba(59, 130, 246, 0.25);
+          background: rgba(91, 42, 134, 0.1);
+          color: var(--purple-600);
+          border: 1px solid var(--purple-100);
           padding: 3px 8px;
           border-radius: 6px;
           font-size: 0.75rem;
@@ -541,14 +541,14 @@ export default function AdminUsersPage() {
 
         .self-badge {
           font-size: 0.78rem;
-          color: #60A5FA;
+          color: var(--purple-600);
           font-weight: 600;
           opacity: 0.7;
         }
 
         .btn-approve {
-          background: #10B981;
-          color: #FFFFFF;
+          background: var(--status-success);
+          color: var(--ink-900);
           border: none;
           padding: 8px 14px;
           border-radius: 6px;
@@ -572,9 +572,9 @@ export default function AdminUsersPage() {
         }
 
         .btn-revoke {
-          background: rgba(239, 68, 68, 0.1);
-          color: #EF4444;
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.05);
+          color: var(--status-danger);
+          border: 1px solid rgba(239, 68, 68, 0.15);
           padding: 6px 12px;
           border-radius: 6px;
           font-weight: 600;
@@ -586,7 +586,7 @@ export default function AdminUsersPage() {
           transition: all 0.2s;
         }
         .btn-revoke:hover {
-          background: rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.15);
         }
 
         .loading-state, .empty-state {
@@ -596,7 +596,7 @@ export default function AdminUsersPage() {
           justify-content: center;
           gap: 12px;
           padding: 60px 20px;
-          color: #94A3B8;
+          color: var(--ink-500);
         }
 
         .spin {

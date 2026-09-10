@@ -46,7 +46,7 @@ export default function PageHeader({
           display: flex;
           align-items: center;
           gap: 8px;
-          color: rgba(255, 255, 255, 0.5);
+          color: var(--ink-500);
           text-decoration: none;
           font-size: 0.9rem;
           margin-bottom: 20px;
