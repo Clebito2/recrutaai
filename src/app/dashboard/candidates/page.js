@@ -445,7 +445,7 @@ export default function CandidatesPage() {
             {activeTab !== 'history' && (
               <div className="job-family-selectors" style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div className="selector-group">
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#e2e8f0' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: 'var(--ink-700)' }}>
                     Vaga de Referência (Aplica Gate Check Eliminatório):
                   </label>
                   <select
@@ -463,9 +463,9 @@ export default function CandidatesPage() {
                       width: '100%',
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      background: '#131B2A',
-                      border: '1px solid #1E293B',
-                      color: '#F8FAFC'
+                      background: '#FFFFFF',
+                      border: '1px solid var(--line)',
+                      color: 'var(--ink-900)'
                     }}
                   >
                     <option value="">-- Sem vaga vinculada (Triagem Avulsa por Família) --</option>
@@ -478,7 +478,7 @@ export default function CandidatesPage() {
                 </div>
 
                 <div className="selector-group">
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: '#F8FAFC' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: 'var(--ink-700)' }}>
                     Família da Vaga (Determina pesos e critérios do arquétipo):
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
@@ -500,9 +500,9 @@ export default function CandidatesPage() {
                         style={{
                           padding: '8px 12px',
                           borderRadius: '8px',
-                          border: selectedFamily === f.id ? '1px solid #3B82F6' : '1px solid #1E293B',
-                          background: selectedFamily === f.id ? '#3B82F6' : '#131B2A',
-                          color: selectedFamily === f.id ? '#FFFFFF' : '#94A3B8',
+                          border: selectedFamily === f.id ? '1px solid var(--purple-600)' : '1px solid var(--line)',
+                          background: selectedFamily === f.id ? 'var(--purple-600)' : '#FFFFFF',
+                          color: selectedFamily === f.id ? '#FFFFFF' : 'var(--ink-700)',
                           fontWeight: '600',
                           fontSize: '0.82rem',
                           cursor: 'pointer',
@@ -580,7 +580,7 @@ export default function CandidatesPage() {
                     borderRadius: '8px',
                     background: 'rgba(59, 130, 246, 0.1)',
                     border: '1px solid rgba(59, 130, 246, 0.25)',
-                    color: '#60A5FA',
+                    color: '#1D4ED8',
                     fontSize: '0.85rem',
                     display: 'flex',
                     alignItems: 'center',
@@ -686,14 +686,14 @@ export default function CandidatesPage() {
                   <div className="history-container">
                     {/* Tabela Comparativa Multi-Candidatos */}
                     {history.length > 1 && (
-                      <div className="comparison-box" style={{ marginBottom: '32px', background: '#131B2A', padding: '20px', borderRadius: '12px', border: '1px solid #1E293B' }}>
-                        <h3 style={{ fontSize: '1.05rem', color: '#60A5FA', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div className="comparison-box" style={{ marginBottom: '32px', background: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid var(--line)' }}>
+                        <h3 style={{ fontSize: '1.05rem', color: 'var(--purple-600)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Users size={18} /> Comparador de Candidatos (Matriz de Decisão)
                         </h3>
                         <div style={{ overflowX: 'auto' }}>
                           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                             <thead>
-                              <tr style={{ borderBottom: '1px solid #1E293B', textAlign: 'left', color: '#94A3B8' }}>
+                              <tr style={{ borderBottom: '2px solid var(--line)', textAlign: 'left', color: 'var(--ink-700)' }}>
                                 <th style={{ padding: '8px' }}>Candidato</th>
                                 <th style={{ padding: '8px' }}>Vaga / Perfil</th>
                                 <th style={{ padding: '8px' }}>Gate Check</th>
@@ -714,11 +714,11 @@ export default function CandidatesPage() {
                                       setAnalysisResult({ ...ana, docId: item.id, jobId: item.jobId });
                                       setCandidateGuide(item.candidateGuide || "");
                                     }}
-                                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer', transition: 'background 0.2s' }}
+                                    style={{ borderBottom: '1px solid var(--line)', cursor: 'pointer', transition: 'background 0.2s' }}
                                     className="comparison-row"
                                   >
-                                    <td style={{ padding: '10px 8px', fontWeight: '700', color: '#ffffff' }}>{item.name}</td>
-                                    <td style={{ padding: '10px 8px', color: '#94a3b8' }}>{item.role}</td>
+                                    <td style={{ padding: '10px 8px', fontWeight: '700', color: 'var(--ink-900)' }}>{item.name}</td>
+                                    <td style={{ padding: '10px 8px', color: 'var(--ink-500)' }}>{item.role}</td>
                                     <td style={{ padding: '10px 8px' }}>
                                       <span style={{ 
                                         padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700',
@@ -728,13 +728,13 @@ export default function CandidatesPage() {
                                         {ana.gate_check?.status || "OK"}
                                       </span>
                                     </td>
-                                    <td style={{ padding: '10px 8px', fontWeight: '800', color: '#10B981' }}>
+                                    <td style={{ padding: '10px 8px', fontWeight: '800', color: '#059669' }}>
                                       {ana.scorecard?.score_final_100 ? `${ana.scorecard.score_final_100}/100` : (ana.nota_geral ? `${ana.nota_geral}/5` : '—')}
                                     </td>
-                                    <td style={{ padding: '10px 8px', color: '#cbd5e1' }}>
+                                    <td style={{ padding: '10px 8px', color: 'var(--ink-700)' }}>
                                       {ana.swot?.forcas?.[0] || '—'}
                                     </td>
-                                    <td style={{ padding: '10px 8px', color: '#fca5a5' }}>
+                                    <td style={{ padding: '10px 8px', color: '#B91C1C' }}>
                                       {ana.swot?.ameacas?.[0] || ana.swot?.fraquezas?.[0] || '—'}
                                     </td>
                                     <td style={{ padding: '10px 8px' }}>
@@ -782,11 +782,11 @@ export default function CandidatesPage() {
             
             {/* Alerta de Gate Reprovado */}
             {analysisResult.gate_check?.status === "REPROVADO" && (
-              <div style={{ background: 'rgba(255, 59, 59, 0.15)', border: '1px solid #ff3b3b', padding: '16px 20px', borderRadius: '12px', color: '#ff6b6b' }}>
+              <div style={{ background: 'rgba(255, 59, 59, 0.12)', border: '1px solid #ef4444', padding: '16px 20px', borderRadius: '12px', color: '#B91C1C' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '1rem', marginBottom: '4px' }}>
                   <ShieldAlert size={20} /> REPROVADO NO GATE CHECK ELIMINATÓRIO
                 </div>
-                <div style={{ fontSize: '0.9rem', color: '#fecaca' }}>
+                <div style={{ fontSize: '0.9rem', color: '#991B1B' }}>
                   {analysisResult.gate_check.motivo}
                 </div>
               </div>
@@ -799,10 +799,10 @@ export default function CandidatesPage() {
                   <User size={32} />
                 </div>
                 <div>
-                  <h2 className="narrative-text" style={{ fontSize: '1.6rem', fontWeight: '800', color: '#ffffff' }}>
+                  <h2 className="narrative-text" style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--ink-900)' }}>
                     {analysisResult.nome || 'Candidato'}
                   </h2>
-                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '2px' }}>
+                  <p style={{ color: 'var(--ink-500)', fontSize: '0.9rem', marginTop: '2px' }}>
                     Vaga: {analysisResult.vaga_titulo || 'Avaliação Direta'} • Família: {analysisResult.familia_vaga || selectedFamily}
                   </p>
                 </div>
@@ -824,11 +824,11 @@ export default function CandidatesPage() {
             </GlassCard>
 
             {/* TL;DR Resumo Executivo */}
-            <GlassCard style={{ borderLeft: '4px solid #3B82F6', padding: '18px 22px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: '#60A5FA', letterSpacing: '0.5px' }}>
+            <GlassCard style={{ borderLeft: '4px solid var(--purple-600)', padding: '18px 22px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--purple-600)', letterSpacing: '0.5px' }}>
                 Resumo Executivo (Leitura de 30 Segundos)
               </span>
-              <p style={{ marginTop: '6px', fontSize: '0.95rem', lineHeight: '1.6', color: '#f1f5f9' }}>
+              <p style={{ marginTop: '6px', fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--ink-800)' }}>
                 {analysisResult.resumo}
               </p>
             </GlassCard>
@@ -868,11 +868,11 @@ export default function CandidatesPage() {
                 </div>
 
                 {/* Banner de Auditoria Matemática */}
-                <div style={{ background: '#131B2A', border: '1px dashed #3B82F6', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontFamily: 'monospace' }}>
-                  <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                <div style={{ background: '#F8FAFC', border: '1px dashed var(--purple-600)', borderRadius: '10px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--ink-700)' }}>
                     {analysisResult.scorecard.formula_calculo || 'Conta de score auditável calculada.'}
                   </span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#10B981' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#059669' }}>
                     Score Final: {analysisResult.scorecard.score_final_100 || Math.round((analysisResult.nota_geral || 3.5) * 20)}/100
                   </span>
                 </div>
@@ -882,18 +882,18 @@ export default function CandidatesPage() {
             {/* Análise STAR com Evidências Concretas */}
             {analysisResult.star_analysis && analysisResult.star_analysis.length > 0 && (
               <GlassCard>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: 'var(--ink-900)' }}>
                   Evidências STAR (Situação, Tarefa, Ação Individual, Resultado)
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {analysisResult.star_analysis.map((star, idx) => (
-                    <div key={idx} style={{ background: 'rgba(0,0,0,0.25)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', fontSize: '0.88rem', lineHeight: '1.6' }}>
+                    <div key={idx} style={{ background: 'var(--surface, #F8FAFC)', padding: '14px', borderRadius: '8px', border: '1px solid var(--line, #E2E8F0)', color: 'var(--ink-800)', fontSize: '0.88rem', lineHeight: '1.6' }}>
                       <p><strong>[S] Situação:</strong> {star.situacao}</p>
                       <p><strong>[T] Tarefa:</strong> {star.tarefa}</p>
                       <p><strong>[A] Ação Individual:</strong> {star.acao}</p>
-                      <p><strong>[R] Resultado:</strong> <span style={{ color: '#10B981' }}>{star.resultado}</span></p>
+                      <p><strong>[R] Resultado:</strong> <span style={{ color: '#059669', fontWeight: '600' }}>{star.resultado}</span></p>
                       {star.ponto_atencao && (
-                        <p style={{ color: '#f59e0b', fontSize: '0.8rem', marginTop: '4px' }}>⚠️ Ponto de Atenção: {star.ponto_atencao}</p>
+                        <p style={{ color: '#D97706', fontSize: '0.8rem', marginTop: '4px', fontWeight: '600' }}>⚠️ Ponto de Atenção: {star.ponto_atencao}</p>
                       )}
                     </div>
                   ))}
@@ -904,31 +904,31 @@ export default function CandidatesPage() {
             {/* Matriz SWOT */}
             {analysisResult.swot && (
               <GlassCard>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '14px', color: 'var(--ink-900)' }}>
                   Matriz SWOT do Candidato
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                   <div style={{ borderLeft: '3px solid #10B981', padding: '10px', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '4px' }}>
-                    <h5 style={{ color: '#10B981', fontSize: '0.85rem', fontWeight: '700' }}>FORÇAS</h5>
-                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                    <h5 style={{ color: '#059669', fontSize: '0.85rem', fontWeight: '700' }}>FORÇAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px', color: 'var(--ink-800)' }}>
                       {(analysisResult.swot.forcas || []).map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
-                  <div style={{ borderLeft: '3px solid #ff3b3b', padding: '10px', background: 'rgba(255, 59, 59, 0.05)', borderRadius: '4px' }}>
-                    <h5 style={{ color: '#ff3b3b', fontSize: '0.85rem', fontWeight: '700' }}>FRAQUEZAS</h5>
-                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                  <div style={{ borderLeft: '3px solid #ef4444', padding: '10px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#DC2626', fontSize: '0.85rem', fontWeight: '700' }}>FRAQUEZAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px', color: 'var(--ink-800)' }}>
                       {(analysisResult.swot.fraquezas || []).map((f, i) => <li key={i}>{f}</li>)}
                     </ul>
                   </div>
-                  <div style={{ borderLeft: '3px solid #38bdf8', padding: '10px', background: 'rgba(56, 189, 248, 0.05)', borderRadius: '4px' }}>
-                    <h5 style={{ color: '#38bdf8', fontSize: '0.85rem', fontWeight: '700' }}>OPORTUNIDADES</h5>
-                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                  <div style={{ borderLeft: '3px solid #38bdf8', padding: '10px', background: 'rgba(56, 189, 248, 0.08)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#0284C7', fontSize: '0.85rem', fontWeight: '700' }}>OPORTUNIDADES</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px', color: 'var(--ink-800)' }}>
                       {(analysisResult.swot.oportunidades || []).map((o, i) => <li key={i}>{o}</li>)}
                     </ul>
                   </div>
-                  <div style={{ borderLeft: '3px solid #f59e0b', padding: '10px', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '4px' }}>
-                    <h5 style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: '700' }}>AMEAÇAS</h5>
-                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px' }}>
+                  <div style={{ borderLeft: '3px solid #f59e0b', padding: '10px', background: 'rgba(245, 158, 11, 0.08)', borderRadius: '4px' }}>
+                    <h5 style={{ color: '#D97706', fontSize: '0.85rem', fontWeight: '700' }}>AMEAÇAS</h5>
+                    <ul style={{ fontSize: '0.8rem', paddingLeft: '14px', marginTop: '6px', color: 'var(--ink-800)' }}>
                       {(analysisResult.swot.ameacas || []).map((a, i) => <li key={i}>{a}</li>)}
                     </ul>
                   </div>
@@ -939,8 +939,8 @@ export default function CandidatesPage() {
             {/* Temperamento */}
             {analysisResult.temperamento && (
               <GlassCard className="temperament-card">
-                <h3 style={{ fontSize: '0.95rem', color: '#94a3b8' }}>Temperamento Operacional</h3>
-                <p className="temperament-value" style={{ color: '#3B82F6', fontWeight: '700' }}>
+                <h3 style={{ fontSize: '0.95rem', color: 'var(--ink-700)' }}>Temperamento Operacional</h3>
+                <p className="temperament-value" style={{ color: 'var(--purple-600)', fontWeight: '700' }}>
                   {typeof analysisResult.temperamento === 'string' 
                     ? analysisResult.temperamento 
                     : `${analysisResult.temperamento.perfil_estimado || ''} — ${analysisResult.temperamento.leitura_fit || ''}`}
@@ -951,10 +951,10 @@ export default function CandidatesPage() {
             {/* Informações Faltantes */}
             {analysisResult.informacoes_faltantes && analysisResult.informacoes_faltantes.length > 0 && (
               <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '14px', borderRadius: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#f59e0b', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#B45309', textTransform: 'uppercase' }}>
                   Honestidade Epistêmica — Critérios sem Dado Suficiente no Material:
                 </span>
-                <ul style={{ paddingLeft: '20px', marginTop: '6px', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                <ul style={{ paddingLeft: '20px', marginTop: '6px', fontSize: '0.82rem', color: 'var(--ink-800)' }}>
                   {analysisResult.informacoes_faltantes.map((inf, i) => <li key={i}>{inf}</li>)}
                 </ul>
               </div>
@@ -963,19 +963,19 @@ export default function CandidatesPage() {
             {/* Justificativa */}
             {analysisResult.justificativa && (
               <GlassCard className="justification-card">
-                <h3 style={{ fontSize: '0.95rem', color: '#94a3b8', marginBottom: '8px' }}>Parecer Técnico Conclusivo</h3>
-                <p style={{ lineHeight: '1.7', color: '#e2e8f0' }}>{analysisResult.justificativa}</p>
+                <h3 style={{ fontSize: '0.95rem', color: 'var(--ink-700)', marginBottom: '8px' }}>Parecer Técnico Conclusivo</h3>
+                <p style={{ lineHeight: '1.7', color: 'var(--ink-800)' }}>{analysisResult.justificativa}</p>
               </GlassCard>
             )}
 
             {/* Roteiro Socrático de Entrevista & Role Play Personalizado */}
-            <GlassCard className="socratic-guide-card" style={{ borderLeft: '4px solid #3B82F6' }}>
+            <GlassCard className="socratic-guide-card" style={{ borderLeft: '4px solid var(--purple-600)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--ink-900)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Brain size={20} color="var(--purple-600)" /> Roteiro Socrático & Role Play Personalizado
                   </h3>
-                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '4px' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--ink-500)', marginTop: '4px' }}>
                     Perguntas investigativas e simulação prática calibradas cirurgicamente para as lacunas e riscos de <strong>{analysisResult.nome || 'Candidato'}</strong>.
                   </p>
                 </div>
@@ -994,10 +994,10 @@ export default function CandidatesPage() {
 
               {/* Dicas Metodológicas de Entrevista */}
               <div className="socratic-instructions-box">
-                <strong style={{ color: '#60A5FA', display: 'block', marginBottom: '4px' }}>
+                <strong style={{ color: 'var(--purple-600)', display: 'block', marginBottom: '4px' }}>
                   Metodologia Live de Entrevista Investigativa:
                 </strong>
-                <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '0.82rem', color: 'var(--ink-700)', lineHeight: '1.5' }}>
                   <li><strong>Investigação Socrática:</strong> Não faça perguntas genéricas; confronte o candidato sobre as lacunas e pontos fracos apontados no diagnóstico.</li>
                   <li><strong>Simulação de Role Play:</strong> Conduza a dinâmica situacional prática para avaliar a execução sob pressão.</li>
                   <li><strong>Teste de Coachability:</strong> Forneça um feedback corretivo e observe se ele reage defensivamente ou assimila com maturidade.</li>
@@ -1007,7 +1007,7 @@ export default function CandidatesPage() {
               {candidateGuide && (
                 <div className="candidate-guide-display" style={{ marginTop: '18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: '#60A5FA' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--purple-600)' }}>
                       Roteiro Oficial do Candidato (Formatado e Sem Asteriscos)
                     </span>
                     <button
@@ -1094,11 +1094,11 @@ export default function CandidatesPage() {
             align-items: flex-start;
           }
           .guide-icon { flex-shrink: 0; margin-top: 2px; }
-          .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
+          .guide-text { font-size: 0.88rem; line-height: 1.6; color: var(--ink-700); }
 
           .btn-socratic {
             background: var(--purple-600);
-            color: var(--ink-900);
+            color: #FFFFFF;
             border: none;
             padding: 10px 18px;
             border-radius: 8px;
@@ -1111,9 +1111,9 @@ export default function CandidatesPage() {
             transition: all 0.2s ease;
           }
           .btn-socratic:hover {
-            background: var(--purple-600);
+            background: var(--purple-700, #4C1D95);
             transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 14px rgba(91, 42, 134, 0.25);
           }
           .btn-socratic:disabled {
             opacity: 0.6;
@@ -1152,7 +1152,8 @@ export default function CandidatesPage() {
           .tabs {
             display: flex;
             gap: 8px;
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--surface, #F1F5F9);
+            border: 1px solid var(--line);
             padding: 4px;
             border-radius: 10px;
             margin-bottom: 24px;
@@ -1203,9 +1204,9 @@ export default function CandidatesPage() {
 
           .selector-btn {
             padding: 9px 18px;
-            border: 1px solid var(--border-glass);
-            background: transparent;
-            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--line);
+            background: #FFFFFF;
+            color: var(--ink-700);
             border-radius: 8px;
             font-weight: 600;
             font-size: 0.85rem;
@@ -1214,15 +1215,15 @@ export default function CandidatesPage() {
           }
 
           .selector-btn:hover {
-            border-color: rgba(79, 70, 229, 0.5);
-            color: white;
+            border-color: var(--purple-600);
+            color: var(--purple-600);
           }
 
           .selector-btn.active {
-            background: var(--action-primary);
-            border-color: var(--action-primary);
-            color: white;
-            box-shadow: 0 0 16px rgba(79, 70, 229, 0.3);
+            background: var(--purple-600);
+            border-color: var(--purple-600);
+            color: #FFFFFF;
+            box-shadow: 0 0 16px rgba(91, 42, 134, 0.2);
           }
 
           /* Sugestão automática de nível */
@@ -1231,9 +1232,9 @@ export default function CandidatesPage() {
             align-items: center;
             gap: 6px;
             font-size: 0.78rem;
-            color: rgba(0, 212, 255, 0.85);
-            background: rgba(0, 212, 255, 0.06);
-            border: 1px solid rgba(0, 212, 255, 0.15);
+            color: #0369A1;
+            background: #F0F9FF;
+            border: 1px solid #BAE6FD;
             border-radius: 6px;
             padding: 6px 12px;
             animation: fadeIn 0.35s ease-out forwards;
@@ -1241,9 +1242,9 @@ export default function CandidatesPage() {
 
           .suggestion-apply {
             margin-left: 6px;
-            background: rgba(0, 212, 255, 0.15);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            color: #00d4ff;
+            background: #0284C7;
+            border: none;
+            color: #FFFFFF;
             border-radius: 4px;
             padding: 2px 8px;
             font-size: 0.75rem;
@@ -1253,14 +1254,14 @@ export default function CandidatesPage() {
           }
 
           .suggestion-apply:hover {
-            background: rgba(0, 212, 255, 0.25);
+            background: #0369A1;
           }
 
           /* Banner de erro */
           .error-banner {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #FCA5A5;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #B91C1C;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 24px;
@@ -1273,9 +1274,9 @@ export default function CandidatesPage() {
           /* Aviso PDF escaneado */
           .pdf-warning {
             font-size: 0.78rem;
-            color: rgba(255, 149, 0, 0.85);
-            background: rgba(255, 149, 0, 0.06);
-            border: 1px solid rgba(255, 149, 0, 0.15);
+            color: #9A3412;
+            background: #FFF7ED;
+            border: 1px solid #FFEDD5;
             border-radius: 6px;
             padding: 8px 12px;
             margin-top: -20px;
@@ -1284,7 +1285,7 @@ export default function CandidatesPage() {
 
           /* Drop zone */
           .drop-zone {
-            border: 2px dashed var(--border-glass);
+            border: 2px dashed var(--line);
             border-radius: 12px;
             padding: 60px 40px;
             text-align: center;
@@ -1310,27 +1311,29 @@ export default function CandidatesPage() {
           }
 
           .drop-zone small {
-            opacity: 0.5;
+            opacity: 0.7;
+            color: var(--ink-500);
             font-size: 0.82rem;
           }
 
           .file-name {
             font-weight: 600;
-            color: var(--action-secondary);
+            color: var(--purple-600);
           }
 
           .file-size {
-            opacity: 0.5;
+            opacity: 0.7;
+            color: var(--ink-500);
             font-size: 0.85rem;
           }
 
           .transcript-section textarea {
             width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-glass);
+            background: #FFFFFF;
+            border: 1px solid var(--line);
             padding: 20px;
             border-radius: 12px;
-            color: white;
+            color: var(--ink-900);
             font-size: 1rem;
             font-family: var(--font-ui);
             resize: vertical;
@@ -1361,8 +1364,8 @@ export default function CandidatesPage() {
             align-items: center;
             gap: 16px;
             padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-glass);
+            background: #FFFFFF;
+            border: 1px solid var(--line);
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s ease-out;
@@ -1370,7 +1373,7 @@ export default function CandidatesPage() {
 
           .history-item:hover {
             background: var(--purple-100);
-            border-color: var(--action-primary);
+            border-color: var(--purple-600);
             transform: translateX(3px);
           }
 
@@ -1382,7 +1385,7 @@ export default function CandidatesPage() {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--ink-700);
             flex-shrink: 0;
           }
 
@@ -1394,7 +1397,7 @@ export default function CandidatesPage() {
 
           .history-info strong {
             font-size: 1rem;
-            color: white;
+            color: var(--ink-900);
           }
 
           .history-info span {
@@ -1549,9 +1552,9 @@ export default function CandidatesPage() {
           }
 
           .btn-secondary {
-            background: transparent;
+            background: #FFFFFF;
             color: var(--ink-700);
-            border: 1px solid var(--border-glass);
+            border: 1px solid var(--line);
             padding: 14px 24px;
             border-radius: 10px;
             cursor: pointer;
@@ -1563,8 +1566,9 @@ export default function CandidatesPage() {
           }
 
           .btn-secondary:hover {
-            color: white;
+            color: var(--purple-700);
             background: var(--purple-100);
+            border-color: var(--purple-600);
           }
 
           /* Animações (Antigravity: mínimo 0.3s ease-out) */

@@ -399,14 +399,14 @@ export function generateReport(analysis, options = {}) {
 
     .skill-bar-track {
       height: 8px;
-      background: #FFFFFF;
+      background: #1E293B;
       border-radius: 4px;
       overflow: hidden;
     }
 
     .skill-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--purple-600), #3B82F6);
+      background: linear-gradient(90deg, #3B82F6, #10B981);
       border-radius: 4px;
     }
 

@@ -342,7 +342,7 @@ export default function InterviewsPage() {
           display: flex;
           justify-content: flex-end;
           padding-top: 12px;
-          border-top: 1px solid var(--border-glass);
+          border-top: 1px solid var(--line);
         }
 
         .empty-state {
@@ -370,7 +370,7 @@ export default function InterviewsPage() {
           align-items: flex-start;
         }
         .guide-icon { flex-shrink: 0; margin-top: 2px; }
-        .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
+        .guide-text { font-size: 0.88rem; line-height: 1.6; color: var(--ink-700); }
 
         @media (max-width: 768px) {
           .page-header {

@@ -94,8 +94,8 @@ export default function StatCard({ icon, value, label, trend, variant = "briefca
 
         .stat-label {
           font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.6);
-          font-weight: 500;
+          color: var(--ink-500);
+          font-weight: 600;
         }
 
         .stat-trend {

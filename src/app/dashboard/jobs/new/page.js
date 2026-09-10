@@ -482,7 +482,7 @@ export default function NewJobPage() {
           .preview-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px; }
           .preview-tabs { display: flex; gap: 10px; }
           .tab-btn { background: #FFFFFF; border: 1px solid var(--line); color: var(--ink-500); padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
-          .tab-btn.active { background: var(--purple-600); border-color: var(--purple-600); color: var(--ink-900); }
+          .tab-btn.active { background: var(--purple-600); border-color: var(--purple-600); color: #FFFFFF; }
           .preview-actions { display: flex; gap: 12px; }
           .preview-content { background: #FFFFFF; padding: 28px; border-radius: 12px; border: 1px solid var(--line); line-height: 1.8; color: var(--ink-900); }
           .loading-box { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; color: var(--purple-600); }
@@ -499,7 +499,7 @@ export default function NewJobPage() {
             align-items: flex-start;
           }
           .guide-icon { flex-shrink: 0; margin-top: 2px; }
-          .guide-text { font-size: 0.88rem; line-height: 1.6; color: #E2E8F0; }
+          .guide-text { font-size: 0.88rem; line-height: 1.6; color: var(--ink-700); }
           .step-pill {
             display: inline-block;
             background: rgba(59, 130, 246, 0.15);

@@ -102,7 +102,7 @@ export default function JobsPage() {
                       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                         <div className="job-status-badge">Ativa</div>
                         {job.family && (
-                          <span style={{ fontSize: "0.75rem", background: "rgba(255,255,255,0.08)", padding: "2px 8px", borderRadius: "12px", textTransform: "capitalize", color: "#94a3b8" }}>
+                          <span style={{ fontSize: "0.75rem", background: "var(--purple-100, #F3E8FF)", padding: "2px 8px", borderRadius: "12px", textTransform: "capitalize", color: "var(--purple-700, #7E22CE)", fontWeight: "600" }}>
                             {job.family}
                           </span>
                         )}

@@ -22,21 +22,20 @@ export default function UploadProgress({ step }) {
     return (
         <div style={{
             marginTop: '20px',
-            background: 'rgba(255, 255, 255, 0.04)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid #FFFFFF',
+            background: '#FFFFFF',
+            border: '1px solid var(--line)',
             borderRadius: '14px',
             padding: '20px 24px',
+            boxShadow: '0 4px 16px rgba(26, 16, 48, 0.06)',
             animation: 'fadeIn 0.3s ease-out forwards',
         }}>
             <p style={{
-                fontSize: '0.7rem',
+                fontSize: '0.72rem',
                 textTransform: 'uppercase',
-                letterSpacing: '1.5px',
-                color: 'rgba(255,255,255,0.35)',
+                letterSpacing: '1.2px',
+                color: 'var(--ink-500)',
                 marginBottom: '14px',
-                fontWeight: 600,
+                fontWeight: 700,
             }}>
                 Processamento em Andamento
             </p>
@@ -53,7 +52,7 @@ export default function UploadProgress({ step }) {
                             alignItems: 'center',
                             gap: '14px',
                             padding: '9px 0',
-                            opacity: isCompleted || isActive ? 1 : 0.25,
+                            opacity: isCompleted || isActive ? 1 : 0.4,
                             transition: 'opacity 0.35s ease-out',
                         }}
                     >
@@ -70,35 +69,35 @@ export default function UploadProgress({ step }) {
                             fontWeight: 700,
                             transition: 'all 0.35s ease-out',
                             background: isCompleted
-                                ? 'rgba(0, 200, 150, 0.2)'
+                                ? 'rgba(0, 184, 124, 0.12)'
                                 : isActive
-                                    ? 'rgba(108, 99, 255, 0.25)'
-                                    : 'rgba(255,255,255,0.05)',
-                            border: `2px solid ${isCompleted ? '#00C896' : isActive ? '#6C63FF' : 'rgba(255,255,255,0.1)'}`,
+                                    ? 'var(--purple-100)'
+                                    : 'var(--canvas)',
+                            border: `2px solid ${isCompleted ? 'var(--green-500, #00B87C)' : isActive ? 'var(--purple-600)' : 'var(--line)'}`,
                             boxShadow: isCompleted
-                                ? '0 0 12px rgba(0,200,150,0.3)'
+                                ? '0 0 10px rgba(0, 184, 124, 0.2)'
                                 : isActive
-                                    ? '0 0 12px rgba(108,99,255,0.4)'
+                                    ? '0 0 10px rgba(91, 42, 134, 0.2)'
                                     : 'none',
                         }}>
                             {isCompleted ? (
-                                <span style={{ color: '#00C896' }}>✓</span>
+                                <span style={{ color: 'var(--green-500, #00B87C)' }}>✓</span>
                             ) : isActive ? (
-                                <span style={{ color: '#6C63FF', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>
+                                <span style={{ color: 'var(--purple-600)', animation: 'spin 1s linear infinite', display: 'inline-block' }}>◌</span>
                             ) : (
-                                <span style={{ opacity: 0.4 }}>{i + 1}</span>
+                                <span style={{ color: 'var(--ink-500)' }}>{i + 1}</span>
                             )}
                         </div>
 
                         {/* Label da etapa */}
                         <span style={{
-                            fontSize: '0.9rem',
-                            fontWeight: isActive ? 700 : isCompleted ? 500 : 400,
+                            fontSize: '0.92rem',
+                            fontWeight: isActive ? 700 : isCompleted ? 600 : 500,
                             color: isCompleted
-                                ? '#00C896'
+                                ? 'var(--green-500, #00B87C)'
                                 : isActive
-                                    ? '#ffffff'
-                                    : 'rgba(255,255,255,0.4)',
+                                    ? 'var(--purple-600)'
+                                    : 'var(--ink-500)',
                             transition: 'color 0.35s ease-out',
                             letterSpacing: isActive ? '0.2px' : '0',
                         }}>
@@ -111,7 +110,7 @@ export default function UploadProgress({ step }) {
                                 width: '6px',
                                 height: '6px',
                                 borderRadius: '50%',
-                                background: '#6C63FF',
+                                background: 'var(--purple-600)',
                                 animation: 'pulse 1.2s ease-in-out infinite',
                                 marginLeft: 'auto',
                             }} />

@@ -183,14 +183,14 @@ export default function JobDetails() {
                 </MetaItem>
                 {job.companyDescription && (
                   <MetaItem icon={<Building2 size={16} />} label="Sobre a Empresa">
-                    <span style={{ fontSize: "0.82rem", color: "#CBD5E1", lineHeight: "1.5" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--ink-700)", lineHeight: "1.5" }}>
                       {job.companyDescription}
                     </span>
                   </MetaItem>
                 )}
                 {job.responsibilities && (
                   <MetaItem icon={<ListChecks size={16} />} label="Atribuições / Rotina">
-                    <span style={{ fontSize: "0.82rem", color: "#CBD5E1", lineHeight: "1.5" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--ink-700)", lineHeight: "1.5" }}>
                       {job.responsibilities}
                     </span>
                   </MetaItem>
@@ -373,13 +373,15 @@ export default function JobDetails() {
             display: flex;
             justify-content: space-between;
             font-size: 0.85rem;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--surface, #F8FAFC);
+            border: 1px solid var(--line, #E2E8F0);
             padding: 6px 10px;
             border-radius: 6px;
+            color: var(--ink-700);
           }
 
           .weight-item strong {
-            color: #fff;
+            color: var(--ink-900);
           }
 
           .repo-section {
