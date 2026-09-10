@@ -5,17 +5,20 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-flash-latest";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent`;
 
 /**
  * Default generation configuration
  */
 const DEFAULT_CONFIG = {
-    temperature: 0.5,
+    temperature: 0.2,
     topK: 30,
     topP: 0.9,
-    maxOutputTokens: 4096
+    maxOutputTokens: 4096,
+    thinkingConfig: {
+        thinkingBudget: 0
+    }
 };
 
 /**
@@ -55,7 +58,7 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
         ...config
     };
 
-    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash"];
+    const modelsToTry = [DEFAULT_MODEL, "gemini-2.5-flash", "gemini-3.5-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {
@@ -170,10 +173,13 @@ export async function callGeminiStructured({ systemPrompt, userContent, schema, 
         ...DEFAULT_CONFIG,
         ...config,
         responseMimeType: "application/json",
-        responseSchema: schema
+        responseSchema: schema,
+        thinkingConfig: {
+            thinkingBudget: 0
+        }
     };
 
-    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash"];
+    const modelsToTry = [DEFAULT_MODEL, "gemini-2.5-flash", "gemini-3.5-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {

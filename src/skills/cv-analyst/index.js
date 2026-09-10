@@ -62,7 +62,10 @@ export async function analyzeCandidate(companyName, cvContent, ...args) {
         schema: SCHEMA_LIVE_RS,
         config: {
             temperature: 0.1, // Temperatura baixa para análise científica e auditável
-            maxOutputTokens: 8192
+            maxOutputTokens: 4096,
+            thinkingConfig: {
+                thinkingBudget: 0
+            }
         }
     });
 
