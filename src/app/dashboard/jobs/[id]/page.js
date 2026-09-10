@@ -6,22 +6,25 @@ import SubscriptionGuard from "../../../../components/common/SubscriptionGuard";
 import PageHeader from "../../../../components/common/PageHeader";
 import MetaList from "../../../../components/common/MetaList";
 import MetaItem from "../../../../components/common/MetaItem";
-import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText } from "lucide-react";
+import { Copy, Check, MapPin, Calendar, Briefcase, Award, Sliders, ExternalLink, MessageSquareQuote, FileText, Building2, Edit3, Save, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../../context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
 import { JOB_FAMILIES, FAMILY_DEFAULT_WEIGHTS } from "../../../../lib/validation";
 
 export default function JobDetails() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const router = useRouter();
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("ad"); // "ad" | "guide"
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -48,11 +51,40 @@ export default function JobDetails() {
   }, [user, id, router]);
 
   const handleCopy = async () => {
-    const textToCopy = activeTab === "guide" ? (job?.interviewGuide || "") : (job?.jobDescription || "");
+    const textToCopy = activeTab === "guide" 
+      ? (job?.interviewGuide || "") 
+      : (job?.jobDescription || job?.description || "");
     if (!textToCopy) return;
     await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleStartEdit = () => {
+    const currentText = activeTab === "guide"
+      ? (job?.interviewGuide || "")
+      : (job?.jobDescription || job?.description || "");
+    setEditedText(currentText);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      const docRef = doc(db, "jobs", id);
+      const updateData = activeTab === "guide"
+        ? { interviewGuide: editedText }
+        : { jobDescription: editedText, description: editedText };
+
+      await updateDoc(docRef, updateData);
+      setJob(prev => ({ ...prev, ...updateData }));
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error updating job:", err);
+      alert("Erro ao salvar alterações no texto");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="loading">Carregando inteligência da vaga...</div>;
@@ -60,19 +92,36 @@ export default function JobDetails() {
 
   const familyLabel = JOB_FAMILIES.find(f => f.id === job.family)?.label || job.family || "Padrão Live";
   const weights = job.customWeights || FAMILY_DEFAULT_WEIGHTS[job.family] || FAMILY_DEFAULT_WEIGHTS.comercial;
+  const companyName = job.companyName || userProfile?.companyName || "Empresa";
 
   const actions = (
-    <div style={{ display: "flex", gap: "10px" }}>
-      <button onClick={handleCopy} className="btn-secondary">
-        {copied ? <Check size={18} /> : <Copy size={18} />}
-        {copied ? "Copiado" : activeTab === "guide" ? "Copiar Roteiro" : "Copiar Anúncio"}
-      </button>
-      <button 
-        onClick={() => router.push(`/dashboard/candidates?jobId=${job.id}`)}
-        className="btn-indigo"
-      >
-        Analisar Candidatos
-      </button>
+    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+      {!isEditing ? (
+        <>
+          <button onClick={handleStartEdit} className="btn-secondary">
+            <Edit3 size={16} /> Editar Texto
+          </button>
+          <button onClick={handleCopy} className="btn-secondary">
+            {copied ? <Check size={18} /> : <Copy size={18} />}
+            {copied ? "Copiado" : activeTab === "guide" ? "Copiar Roteiro" : "Copiar Anúncio"}
+          </button>
+          <button 
+            onClick={() => router.push(`/dashboard/candidates?jobId=${job.id}`)}
+            className="btn-indigo"
+          >
+            Analisar Candidatos
+          </button>
+        </>
+      ) : (
+        <>
+          <button onClick={() => setIsEditing(false)} className="btn-secondary" disabled={saving}>
+            <X size={16} /> Cancelar
+          </button>
+          <button onClick={handleSaveEdit} className="btn-indigo" disabled={saving}>
+            <Save size={16} /> {saving ? "Salvando..." : "Salvar Alterações"}
+          </button>
+        </>
+      )}
     </div>
   );
 
@@ -90,13 +139,13 @@ export default function JobDetails() {
         <div className="tab-container">
           <button 
             className={`tab-btn ${activeTab === 'ad' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ad')}
+            onClick={() => { setActiveTab('ad'); setIsEditing(false); }}
           >
             <FileText size={16} /> Anúncio Oficial
           </button>
           <button 
             className={`tab-btn ${activeTab === 'guide' ? 'active' : ''}`}
-            onClick={() => setActiveTab('guide')}
+            onClick={() => { setActiveTab('guide'); setIsEditing(false); }}
           >
             <MessageSquareQuote size={16} /> Roteiro Socrático de Entrevista
           </button>
@@ -105,8 +154,21 @@ export default function JobDetails() {
         <div className="job-grid">
           <div className="main-content">
             <GlassCard className="content-card">
-              {activeTab === "ad" ? (
-                <pre className="job-text">{job.jobDescription || "Nenhuma descrição de anúncio salva para esta vaga."}</pre>
+              {isEditing ? (
+                <div className="editor-wrapper">
+                  <div className="editor-info">
+                    <span>Editando: {activeTab === "ad" ? "Anúncio Oficial" : "Roteiro Socrático de Entrevista"}</span>
+                  </div>
+                  <textarea
+                    className="job-textarea"
+                    value={editedText}
+                    onChange={(e) => setEditedText(e.target.value)}
+                    rows={22}
+                    placeholder="Edite o conteúdo..."
+                  />
+                </div>
+              ) : activeTab === "ad" ? (
+                <pre className="job-text">{job.jobDescription || job.description || "Nenhuma descrição de anúncio salva para esta vaga."}</pre>
               ) : (
                 <pre className="job-text guide-text">{job.interviewGuide || "Nenhum roteiro de entrevista estruturado foi gerado para esta vaga. Você pode gerar através do Arquiteto de Vagas."}</pre>
               )}
@@ -116,6 +178,9 @@ export default function JobDetails() {
           <div className="sidebar">
             <GlassCard className="meta-card">
               <MetaList title="Arquitetura de Vaga (Live)">
+                <MetaItem icon={<Building2 size={16} />} label="Empresa Contratante">
+                  {companyName}
+                </MetaItem>
                 <MetaItem icon={<Briefcase size={16} />} label="Família Funcional">
                   {familyLabel}
                 </MetaItem>
@@ -233,6 +298,41 @@ export default function JobDetails() {
 
           .meta-card {
             padding: 24px;
+          }
+
+          .editor-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          }
+
+          .editor-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #60A5FA;
+            font-weight: 600;
+          }
+
+          .job-textarea {
+            width: 100%;
+            min-height: 480px;
+            background: #0B0F17;
+            border: 1px solid #1E293B;
+            border-radius: 8px;
+            padding: 18px;
+            color: #F8FAFC;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            resize: vertical;
+          }
+
+          .job-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
           }
 
           .weights-section {

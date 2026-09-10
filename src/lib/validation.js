@@ -62,6 +62,7 @@ export const analysisRequestSchema = z.object({
 });
 
 export const jobDiagnosticSchema = z.object({
+    companyName: z.string().optional(),
     title: z.string().min(2),
     family: z.enum([
         "comercial",

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GlassCard from "@/components/common/GlassCard";
 import SubscriptionGuard from "@/components/common/SubscriptionGuard";
 import { 
   Briefcase, Target, Brain, ListChecks, DollarSign, MapPin, Zap, 
   Loader2, Sparkles, AlertCircle, FileText, CheckCircle2, ShieldAlert,
-  FolderGit2, Users, HelpCircle
+  FolderGit2, Users, HelpCircle, Building2
 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -35,6 +35,7 @@ export default function NewJobPage() {
   const { user, userProfile } = useAuth();
 
   const [formData, setFormData] = useState({
+    companyName: userProfile?.companyName || "",
     title: "",
     family: "comercial",
     archetype: "hunter",
@@ -46,6 +47,12 @@ export default function NewJobPage() {
     benefits: "",
     repositoryUrl: ""
   });
+
+  useEffect(() => {
+    if (userProfile?.companyName && !formData.companyName) {
+      setFormData(prev => ({ ...prev, companyName: userProfile.companyName }));
+    }
+  }, [userProfile, formData.companyName]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -64,7 +71,7 @@ export default function NewJobPage() {
     setGeneratedDesc("");
     setError("");
 
-    const companyName = userProfile?.companyName || "Live Consultoria";
+    const targetCompany = formData.companyName?.trim() || userProfile?.companyName || "Empresa Contratante";
 
     try {
       // 1. Gerar Anúncio de Vaga
@@ -72,9 +79,10 @@ export default function NewJobPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          companyName,
+          companyName: targetCompany,
           diagnosticData: {
             ...formData,
+            companyName: targetCompany,
             profileType: formData.family === "lideranca" ? "lideranca" : "tecnico"
           }
         })
@@ -109,15 +117,18 @@ export default function NewJobPage() {
   const handleGenerateInterviewGuide = async () => {
     if (generatedGuide) return; // Já gerado
     setIsGeneratingGuide(true);
-    const companyName = userProfile?.companyName || "Live Consultoria";
+    const targetCompany = formData.companyName?.trim() || userProfile?.companyName || "Empresa Contratante";
 
     try {
       const response = await fetch("/api/generate-interview-guide", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          companyName,
-          diagnosticData: formData
+          companyName: targetCompany,
+          diagnosticData: {
+            ...formData,
+            companyName: targetCompany
+          }
         })
       });
 
@@ -145,9 +156,12 @@ export default function NewJobPage() {
 
   const handleSave = async () => {
     try {
+      const targetCompany = formData.companyName?.trim() || userProfile?.companyName || "Empresa Contratante";
       await addDoc(collection(db, "jobs"), {
         ...formData,
+        companyName: targetCompany,
         description: generatedDesc,
+        jobDescription: generatedDesc, // salvar ambos para compatibilidade
         interviewGuide: generatedGuide || null,
         customWeights: FAMILY_DEFAULT_WEIGHTS[formData.family] || FAMILY_DEFAULT_WEIGHTS.tecnico,
         userId: user.uid,
@@ -173,6 +187,21 @@ export default function NewJobPage() {
         {step === 1 ? (
           <GlassCard className="form-card">
             <div className="form-grid">
+              {/* Empresa Contratante / Cliente */}
+              <div className="form-group full-width">
+                <label><Building2 size={16} /> Empresa Contratante / Cliente</label>
+                <input
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Visual work, TechCorp, Padaria Central..."
+                  required
+                />
+                <span className="helper-text">
+                  Nome da empresa onde a vaga será aberta (constará no anúncio oficial e no roteiro de entrevista).
+                </span>
+              </div>
+
               {/* Título da Vaga */}
               <div className="form-group full-width">
                 <label><Briefcase size={16} /> Título da Vaga</label>
@@ -180,7 +209,7 @@ export default function NewJobPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="Ex: Executivo de Vendas B2B, Tech Lead, Especialista Financeiro..."
+                  placeholder="Ex: Executivo de Vendas B2B, Tech Lead, Mecânico, Especialista Financeiro..."
                 />
               </div>
 

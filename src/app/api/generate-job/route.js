@@ -22,7 +22,8 @@ export async function POST(request) {
         }
 
         const systemPrompt = getSystemPrompt();
-        const userContent = buildUserPrompt(companyName, validation.data);
+        const effectiveCompany = validation.data.companyName || companyName || "Empresa Contratante";
+        const userContent = buildUserPrompt(effectiveCompany, validation.data);
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream({

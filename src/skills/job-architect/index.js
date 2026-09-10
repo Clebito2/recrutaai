@@ -6,18 +6,21 @@
 import { callGemini, removeEmojis } from '../gemini-client/index.js';
 
 export const SYSTEM_PROMPT_JOB = `Você é o Consultor Sênior de R&S da Live Consultoria.
-Sua missão é elaborar descritivos de vaga de alto calibre seguindo a metodologia de funil da Live, adaptada à família de vaga do cliente.
+Sua missão é elaborar descritivos de vaga de alto calibre seguindo a metodologia de funil da Live, adaptada à família de vaga e à empresa cliente indicada.
 
-DIRETRIZ DE SOBRIEDADE E PROFISSIONALISMO:
-- Proibido qualquer emoji no corpo do anúncio.
-- Proibidos títulos como 'Ninja', 'Jedi', 'Rockstar' ou clichês vazios ('vestir a camisa', 'empresa líder').
-- Bullet points objetivos e formatação limpa.
+DIRETRIZES MANDATÓRIAS DE SOBRIEDADE INSTITUCIONAL:
+- NUNCA invente nomes como "Empresa Teste" ou similares. Use RIGOROSAMENTE o nome exato da EMPRESA CLIENTE fornecido nos dados.
+- PROIBIDO iniciar com saudações informais ou perguntas apelativas/motivacionais (Ex: "Olá, Conectado(a)!", "Cansado de apenas executar?", "Sonha em liderar...", "Temos a vaga dos seus sonhos").
+- PROIBIDO qualquer emoji no corpo do anúncio.
+- PROIBIDOS títulos como 'Ninja', 'Jedi', 'Rockstar' ou clichês vazios ('vestir a camisa', 'empresa líder', 'somos movidos pela inovação').
+- Inicie DIRETAMENTE pelo Título da Posição e pela descrição institucional da EMPRESA CLIENTE.
+- Bullet points objetivos e formatação limpa em Markdown.
 - Chamada para diversidade com linguagem neutra e inclusiva.
 
 ESTRUTURA FIXA DA REDAÇÃO (NÃO DESVIAR):
 1. **Título da Vaga** — Claro, direto e sem jargões inflados.
-2. **Sobre [Cliente]** — Descrição institucional sóbria focada em autoridade e mercado.
-3. **Responsabilidades e Atribuições** — Verbos de ação específicos da família de vaga (não assuma 'prospectar' fora da área comercial).
+2. **Sobre [Nome Exato da Empresa Cliente]** — Descrição institucional sóbria focada em autoridade e mercado.
+3. **Responsabilidades e Atribuições** — Verbos de ação específicos da família de vaga.
 4. **Requisitos Comportamentais (Obrigatório)** — Soft skills extraídas das competências-chave da família, ajustadas ao arquétipo.
 5. **Requisitos Técnicos** — Divididos com clareza entre:
    - *Obrigatórios (Critérios Eliminatórios do Gate Check)*
@@ -106,6 +109,7 @@ export function validateInput(data) {
  * Monta o prompt do usuário para geração do anúncio
  */
 export function buildJobPrompt(companyName, data) {
+    const targetCompany = data.companyName || companyName || "Empresa Contratante";
     const family = (data.family === "outro" && data.customFamilyDetail)
         ? `OUTRO (${data.customFamilyDetail})`
         : (data.family || data.profileType || "tecnico").toUpperCase();
@@ -119,7 +123,8 @@ export function buildJobPrompt(companyName, data) {
         ? `Outro Motivador: ${data.customMotivatorDetail}`
         : (MOTIVATOR_MAP[data.motivator] || data.motivator || "Crescimento profissional e impacto");
 
-    return `EMPRESA CLIENTE: ${companyName}
+    return `EMPRESA CLIENTE (CONTRATANTE): ${targetCompany}
+(ATENÇÃO: Utilize impreterivelmente o nome "${targetCompany}" como a empresa contratante na seção "Sobre a Empresa" e ao longo de todo o texto. Não utilize "Empresa Teste" nem qualquer outro nome fictício).
 FAMÍLIA DA VAGA: ${family}
 ARQUÉTIPO DE ATUAÇÃO: ${archetypeDesc}
 MOTIVADOR PRINCIPAL: ${motivatorDesc}
@@ -141,6 +146,7 @@ Redija o anúncio oficial da vaga seguindo estritamente a estrutura de 7 tópico
  * Monta o prompt para o Roteiro Estruturado de Entrevista
  */
 export function buildInterviewGuidePrompt(companyName, data) {
+    const targetCompany = data.companyName || companyName || "Empresa Contratante";
     const family = (data.family === "outro" && data.customFamilyDetail)
         ? `OUTRO (${data.customFamilyDetail})`
         : (data.family || data.profileType || "tecnico").toUpperCase();
@@ -150,7 +156,7 @@ export function buildInterviewGuidePrompt(companyName, data) {
         ? `${rawArchetype} — Detalhe: ${data.customArchetypeDetail}`
         : rawArchetype;
 
-    return `EMPRESA CLIENTE: ${companyName}
+    return `EMPRESA CLIENTE (CONTRATANTE): ${targetCompany}
 VAGA: ${data.title} (${family})
 ARQUÉTIPO: ${archetypeDesc}
 REQUISITOS OBRIGATÓRIOS: ${data.mustHaves || "Não especificados"}

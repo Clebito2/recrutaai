@@ -22,7 +22,8 @@ export async function POST(request) {
         }
 
         const systemPrompt = SYSTEM_PROMPT_INTERVIEW;
-        const userContent = buildInterviewGuidePrompt(companyName, validation.data);
+        const effectiveCompany = validation.data.companyName || companyName || "Empresa Contratante";
+        const userContent = buildInterviewGuidePrompt(effectiveCompany, validation.data);
 
         const encoder = new TextEncoder();
         const stream = new ReadableStream({

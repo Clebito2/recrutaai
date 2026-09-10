@@ -228,7 +228,8 @@ export default function CandidatesPage() {
       // ── ETAPA 2: Análise com IA ────────────────────────────
       setUploadStep('analyzing');
 
-      const companyName = userProfile?.companyName || 'Empresa';
+      const currentJob = jobs.find(j => j.id === selectedJobId);
+      const companyName = currentJob?.companyName || userProfile?.companyName || 'Empresa';
 
       const response = await fetch('/api/analyze-candidate', {
         method: 'POST',
@@ -270,7 +271,8 @@ export default function CandidatesPage() {
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true);
     try {
-      const companyName = userProfile?.companyName || 'Recruit-AI';
+      const currentJob = jobs.find(j => j.id === (analysisResult?.jobId || selectedJobId));
+      const companyName = currentJob?.companyName || userProfile?.companyName || 'Recruit-AI';
 
       const response = await fetch('/api/generate-report', {
         method: 'POST',
