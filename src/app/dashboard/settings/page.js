@@ -2,18 +2,32 @@
 
 import { useState } from "react";
 import GlassCard from "../../../components/common/GlassCard";
-import { User, Building2, CreditCard, Bell, Shield, Save, Loader2, CheckCircle } from "lucide-react";
+import { User, Building2, CreditCard, Bell, Shield, Save, Loader2, CheckCircle, Lock, Eye, EyeOff, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import { useSubscription } from "../../../hooks/useSubscription";
 
 export default function SettingsPage() {
-    const { userProfile, updateCompanyName } = useAuth();
+    const { user, userProfile, updateCompanyName, changePassword, sendResetPasswordEmail } = useAuth();
     const { subscription } = useSubscription();
+    
+    // Empresa states
     const [companyName, setCompanyName] = useState(userProfile?.companyName || "");
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
 
-    const handleSave = async () => {
+    // Password change states
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [changingPassword, setChangingPassword] = useState(false);
+    const [passwordSuccess, setPasswordSuccess] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [resetEmailSending, setResetEmailSending] = useState(false);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
+
+    const handleSaveCompany = async () => {
         setSaving(true);
         try {
             await updateCompanyName(companyName);
@@ -26,10 +40,65 @@ export default function SettingsPage() {
         }
     };
 
+    const handleChangePassword = async (e) => {
+        if (e) e.preventDefault();
+        setPasswordError("");
+        setPasswordSuccess("");
+
+        if (!newPassword || newPassword.length < 6) {
+            setPasswordError("A nova senha deve possuir no mínimo 6 caracteres.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError("A confirmação não confere com a nova senha digitada.");
+            return;
+        }
+
+        setChangingPassword(true);
+        try {
+            await changePassword(currentPassword, newPassword);
+            setPasswordSuccess("Sua senha foi alterada com sucesso!");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setTimeout(() => setPasswordSuccess(""), 4000);
+        } catch (err) {
+            console.error("[Settings] Erro ao alterar senha:", err);
+            let msg = err.message || "Erro ao alterar a senha. Verifique seus dados.";
+            if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+                msg = "A senha atual informada está incorreta.";
+            } else if (err.code === "auth/weak-password") {
+                msg = "A nova senha informada é fraca. Utilize letras, números e caracteres especiais.";
+            } else if (err.code === "auth/requires-recent-login") {
+                msg = "Por segurança, informe sua senha atual para autorizar a modificação.";
+            }
+            setPasswordError(msg);
+        } finally {
+            setChangingPassword(false);
+        }
+    };
+
+    const handleSendResetEmail = async () => {
+        setPasswordError("");
+        setResetEmailSending(true);
+        try {
+            const email = user?.email || userProfile?.email;
+            await sendResetPasswordEmail(email);
+            setResetEmailSent(true);
+            setTimeout(() => setResetEmailSent(false), 5000);
+        } catch (err) {
+            console.error("[Settings] Erro ao enviar link de redefinição:", err);
+            setPasswordError("Falha ao enviar e-mail de redefinição: " + (err.message || "Tente novamente mais tarde."));
+        } finally {
+            setResetEmailSending(false);
+        }
+    };
+
     const planDetails = {
-        trial: { name: "Trial", price: "Grátis", color: "var(--action-secondary)" },
-        tier1: { name: "Essencial", price: "R$ 99/mês", color: "var(--action-primary)" },
-        tier2: { name: "Elite", price: "R$ 249/mês", color: "var(--action-accent)" }
+        trial: { name: "Trial", price: "Grátis", color: "var(--action-secondary, #10B981)" },
+        tier1: { name: "Essencial", price: "R$ 99/mês", color: "var(--action-primary, #7C3AED)" },
+        tier2: { name: "Elite", price: "R$ 249/mês", color: "var(--action-accent, #3B82F6)" }
     };
 
     const currentPlan = planDetails[subscription?.plan] || planDetails.trial;
@@ -38,14 +107,137 @@ export default function SettingsPage() {
         <div className="settings-page animate-fade">
             <header className="page-header">
                 <h1>Configurações</h1>
-                <p>Gerencie seu perfil, assinatura e preferências.</p>
+                <p>Gerencie seu perfil, assinatura, preferências e credenciais de acesso.</p>
             </header>
 
             <div className="settings-grid">
+                {/* Security Section (Alterar Senha) */}
+                <GlassCard className="settings-card security-card" style={{ gridColumn: "1 / -1" }}>
+                    <div className="card-header">
+                        <Shield size={24} color="var(--action-primary, #7C3AED)" />
+                        <h3>Segurança da Conta & Alteração de Senha</h3>
+                    </div>
+                    <div className="card-content">
+                        <p className="card-description">
+                            Atualize sua senha de acesso ao sistema com segurança. Caso tenha esquecido a senha atual, utilize o envio do link seguro por e-mail.
+                        </p>
+
+                        {passwordSuccess && (
+                            <div className="alert-banner alert-success">
+                                <CheckCircle size={18} />
+                                <span>{passwordSuccess}</span>
+                            </div>
+                        )}
+
+                        {passwordError && (
+                            <div className="alert-banner alert-error">
+                                <AlertCircle size={18} />
+                                <span>{passwordError}</span>
+                            </div>
+                        )}
+
+                        {resetEmailSent && (
+                            <div className="alert-banner alert-success">
+                                <Mail size={18} />
+                                <span>Link de redefinição enviado com sucesso para <strong>{user?.email || userProfile?.email}</strong>! Verifique sua caixa de entrada.</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleChangePassword} className="password-grid-form">
+                            <div className="input-group">
+                                <label>Senha Atual</label>
+                                <div className="input-password-wrapper">
+                                    <input
+                                        type={showCurrentPassword ? "text" : "password"}
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        placeholder="Sua senha atual"
+                                        autoComplete="current-password"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="eye-toggle-btn"
+                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                        tabIndex="-1"
+                                        aria-label={showCurrentPassword ? "Ocultar senha" : "Ver senha"}
+                                    >
+                                        {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="input-group">
+                                <label>Nova Senha</label>
+                                <div className="input-password-wrapper">
+                                    <input
+                                        type={showNewPassword ? "text" : "password"}
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        placeholder="Mínimo 6 caracteres"
+                                        autoComplete="new-password"
+                                        minLength={6}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="eye-toggle-btn"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        tabIndex="-1"
+                                        aria-label={showNewPassword ? "Ocultar senha" : "Ver senha"}
+                                    >
+                                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="input-group">
+                                <label>Confirmar Nova Senha</label>
+                                <div className="input-password-wrapper">
+                                    <input
+                                        type={showNewPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="Confirme a nova senha"
+                                        autoComplete="new-password"
+                                        minLength={6}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="security-actions">
+                                <button
+                                    type="submit"
+                                    className="btn-indigo"
+                                    disabled={changingPassword || !newPassword || !confirmPassword}
+                                >
+                                    {changingPassword ? (
+                                        <><Loader2 className="spin" size={18} /> Salvando Nova Senha...</>
+                                    ) : (
+                                        <><Lock size={18} /> Salvar Nova Senha</>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="btn-text-action"
+                                    onClick={handleSendResetEmail}
+                                    disabled={resetEmailSending}
+                                    title="Receber link oficial do Firebase para redefinição no seu e-mail cadastrado"
+                                >
+                                    {resetEmailSending ? (
+                                        <><Loader2 className="spin" size={16} /> Enviando e-mail...</>
+                                    ) : (
+                                        <><Mail size={16} /> Esqueci a senha / Enviar link por e-mail</>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </GlassCard>
+
                 {/* Profile Section */}
                 <GlassCard className="settings-card">
                     <div className="card-header">
-                        <Building2 size={24} color="var(--action-primary)" />
+                        <Building2 size={24} color="var(--action-primary, #7C3AED)" />
                         <h3>Empresa</h3>
                     </div>
                     <div className="card-content">
@@ -60,7 +252,7 @@ export default function SettingsPage() {
                         </div>
                         <button
                             className="btn-indigo"
-                            onClick={handleSave}
+                            onClick={handleSaveCompany}
                             disabled={saving || !companyName.trim()}
                         >
                             {saving ? (
@@ -118,18 +310,24 @@ export default function SettingsPage() {
                 {/* Account Section */}
                 <GlassCard className="settings-card">
                     <div className="card-header">
-                        <User size={24} color="var(--action-accent)" />
+                        <User size={24} color="var(--action-accent, #3B82F6)" />
                         <h3>Conta</h3>
                     </div>
                     <div className="card-content">
                         <div className="info-row">
                             <span className="info-label">Email</span>
-                            <span className="info-value">{userProfile?.email}</span>
+                            <span className="info-value">{userProfile?.email || user?.email}</span>
                         </div>
                         <div className="info-row">
                             <span className="info-label">Membro desde</span>
                             <span className="info-value">
                                 {userProfile?.createdAt?.toDate?.()?.toLocaleDateString("pt-BR") || "—"}
+                            </span>
+                        </div>
+                        <div className="info-row">
+                            <span className="info-label">Status da Conta</span>
+                            <span className="info-value" style={{ color: "var(--green-600, #16A34A)", fontWeight: 700 }}>
+                                {userProfile?.status === "active" ? "Ativa" : "Regular"}
                             </span>
                         </div>
                     </div>
@@ -138,7 +336,7 @@ export default function SettingsPage() {
                 {/* Notifications Section */}
                 <GlassCard className="settings-card">
                     <div className="card-header">
-                        <Bell size={24} color="var(--action-secondary)" />
+                        <Bell size={24} color="var(--action-secondary, #10B981)" />
                         <h3>Notificações</h3>
                     </div>
                     <div className="card-content">
@@ -156,21 +354,24 @@ export default function SettingsPage() {
 
             <style jsx>{`
         .settings-page {
-          max-width: 1000px;
+          max-width: 1040px;
+          margin: 0 auto;
         }
 
         .page-header {
-          margin-bottom: 40px;
+          margin-bottom: 32px;
         }
 
         .page-header h1 {
           font-size: 2rem;
           font-weight: 800;
+          color: var(--ink-900, #0F172A);
           margin-bottom: 8px;
         }
 
         .page-header p {
-          opacity: 0.6;
+          color: var(--ink-700, #475569);
+          font-size: 1rem;
         }
 
         .settings-grid {
@@ -187,20 +388,29 @@ export default function SettingsPage() {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
           padding-bottom: 16px;
-          border-bottom: 1px solid var(--border-glass);
+          border-bottom: 1px solid var(--line, #E2E8F0);
         }
 
         .card-header h3 {
-          font-size: 1.1rem;
+          font-size: 1.15rem;
           font-weight: 700;
+          color: var(--ink-900, #0F172A);
+          margin: 0;
+        }
+
+        .card-description {
+          font-size: 0.9rem;
+          color: var(--ink-700, #475569);
+          line-height: 1.5;
+          margin-bottom: 18px;
         }
 
         .card-content {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 18px;
         }
 
         .input-group {
@@ -210,24 +420,115 @@ export default function SettingsPage() {
         }
 
         .input-group label {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
+          font-weight: 700;
           text-transform: uppercase;
-          opacity: 0.6;
+          color: var(--ink-700, #334155);
           letter-spacing: 0.5px;
         }
 
-        input[type="text"] {
-          background: rgba(0, 0, 0, 0.2);
-          border: 1px solid var(--border-glass);
-          padding: 14px;
+        input[type="text"],
+        input[type="password"] {
+          width: 100%;
+          background: #F8FAFC;
+          border: 1.5px solid var(--line, #CBD5E1);
+          padding: 12px 14px;
           border-radius: 8px;
-          color: white;
-          font-size: 1rem;
+          color: var(--ink-900, #0F172A);
+          font-size: 0.95rem;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        input[type="password"]:focus {
           outline: none;
-          border-color: var(--action-primary);
+          border-color: var(--action-primary, #7C3AED);
+          background: #FFFFFF;
+          box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+
+        .input-password-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .input-password-wrapper input {
+          padding-right: 42px;
+        }
+
+        .eye-toggle-btn {
+          position: absolute;
+          right: 12px;
+          background: none;
+          border: none;
+          color: var(--ink-500, #64748B);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+        }
+
+        .eye-toggle-btn:hover {
+          color: var(--ink-900, #0F172A);
+        }
+
+        .password-grid-form {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .security-actions {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+          margin-top: 8px;
+        }
+
+        .btn-text-action {
+          background: none;
+          border: none;
+          color: var(--purple-700, #6D28D9);
+          font-size: 0.9rem;
+          font-weight: 700;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          transition: background 0.2s;
+        }
+
+        .btn-text-action:hover {
+          background: rgba(124, 58, 237, 0.08);
+        }
+
+        .alert-banner {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 16px;
+          border-radius: 8px;
+          font-size: 0.92rem;
+          font-weight: 600;
+          line-height: 1.4;
+        }
+
+        .alert-success {
+          background: #ECFDF5;
+          border: 1px solid #10B981;
+          color: #065F46;
+        }
+
+        .alert-error {
+          background: #FEF2F2;
+          border: 1px solid #EF4444;
+          color: #991B1B;
         }
 
         .plan-display {
@@ -246,6 +547,7 @@ export default function SettingsPage() {
         .plan-price {
           font-size: 1.25rem;
           font-weight: 700;
+          color: var(--ink-900, #0F172A);
         }
 
         .usage-section {
@@ -257,23 +559,25 @@ export default function SettingsPage() {
         .usage-item {
           display: flex;
           justify-content: space-between;
-          font-size: 0.9rem;
+          font-size: 0.92rem;
         }
 
         .usage-label {
-          opacity: 0.6;
+          color: var(--ink-700, #475569);
+          font-weight: 500;
         }
 
         .usage-value {
-          font-weight: 600;
+          font-weight: 700;
+          color: var(--ink-900, #0F172A);
         }
 
         .btn-upgrade {
-          background: linear-gradient(135deg, var(--action-primary) 0%, var(--action-accent) 100%);
+          background: linear-gradient(135deg, var(--action-primary, #7C3AED) 0%, var(--action-accent, #3B82F6) 100%);
           color: white;
           border: none;
           padding: 14px;
-          border-radius: 10px;
+          border-radius: 9999px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.2s;
@@ -281,21 +585,28 @@ export default function SettingsPage() {
 
         .btn-upgrade:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+          box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
         }
 
         .info-row {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
+          padding: 10px 0;
+          border-bottom: 1px solid var(--line, #F1F5F9);
+        }
+
+        .info-row:last-child {
+          border-bottom: none;
         }
 
         .info-label {
-          opacity: 0.6;
+          color: var(--ink-700, #475569);
+          font-weight: 600;
         }
 
         .info-value {
-          font-weight: 500;
+          font-weight: 700;
+          color: var(--ink-900, #0F172A);
         }
 
         .toggle-row {
@@ -303,13 +614,15 @@ export default function SettingsPage() {
           justify-content: space-between;
           align-items: center;
           cursor: pointer;
+          font-weight: 600;
+          color: var(--ink-800, #1E293B);
         }
 
         .toggle-row input[type="checkbox"] {
           width: 44px;
           height: 24px;
           appearance: none;
-          background: var(--line);
+          background: var(--line, #CBD5E1);
           border-radius: 12px;
           position: relative;
           cursor: pointer;
@@ -329,7 +642,7 @@ export default function SettingsPage() {
         }
 
         .toggle-row input[type="checkbox"]:checked {
-          background: var(--action-primary);
+          background: var(--action-primary, #7C3AED);
         }
 
         .toggle-row input[type="checkbox"]:checked::before {
@@ -357,6 +670,10 @@ export default function SettingsPage() {
         @media (max-width: 768px) {
           .settings-grid {
             grid-template-columns: 1fr;
+          }
+          .security-actions {
+            flex-direction: column;
+            align-items: stretch;
           }
         }
       `}</style>

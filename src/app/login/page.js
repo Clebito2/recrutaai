@@ -13,9 +13,10 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const { signIn, signUp, user, userProfile, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, userProfile, loading: authLoading, sendResetPasswordEmail } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -62,6 +63,24 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Por favor, digite seu e-mail no campo acima para receber o link de alteração/redefinição de senha.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      await sendResetPasswordEmail(email);
+      setResetSent(true);
+      setTimeout(() => setResetSent(false), 6000);
+    } catch (err) {
+      setError("Erro ao enviar e-mail: " + (err.message || "Verifique o endereço digitado."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!mounted || authLoading) {
     return (
       <div className="login-container">
@@ -98,6 +117,21 @@ export default function Login() {
             <div className="error-message">{error}</div>
           )}
 
+          {resetSent && (
+            <div style={{
+              background: "#ECFDF5",
+              border: "1px solid #10B981",
+              color: "#065F46",
+              padding: "12px 14px",
+              borderRadius: "8px",
+              fontSize: "0.88rem",
+              fontWeight: "600",
+              marginBottom: "16px"
+            }}>
+              📧 Link de redefinição de senha enviado para <strong>{email}</strong>! Verifique sua caixa de entrada e spam.
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="login-form">
             <div className="input-group">
               <label htmlFor="email">E-mail</label>
@@ -112,7 +146,26 @@ export default function Login() {
             </div>
 
             <div className="input-group">
-              <label htmlFor="password">Senha</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <label htmlFor="password">Senha</label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--purple-700, #6D28D9)",
+                      fontSize: "0.8rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      padding: "0"
+                    }}
+                  >
+                    Esqueci minha senha
+                  </button>
+                )}
+              </div>
               <input
                 id="password"
                 type="password"

@@ -5,7 +5,11 @@ import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    signOut
+    signOut,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider,
+    sendPasswordResetEmail
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -200,6 +204,45 @@ export function AuthProvider({ children }) {
     // Retrocompatibilidade
     const updateCompanyName = addCompany;
 
+    // Alterar senha do usuário logado
+    const changePassword = async (currentPassword, newPassword) => {
+        if (!auth.currentUser) throw new Error("Usuário não autenticado.");
+        if (!newPassword || newPassword.length < 6) {
+            throw new Error("A nova senha deve ter no mínimo 6 caracteres.");
+        }
+
+        const currentUser = auth.currentUser;
+
+        // Se a senha atual foi informada, reautentica para garantir sessão fresca
+        if (currentPassword) {
+            try {
+                const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+                await reauthenticateWithCredential(currentUser, credential);
+            } catch (authErr) {
+                if (authErr.code === "auth/wrong-password" || authErr.code === "auth/invalid-credential") {
+                    throw new Error("A senha atual informada está incorreta.");
+                }
+                throw authErr;
+            }
+        }
+
+        try {
+            await updatePassword(currentUser, newPassword);
+        } catch (err) {
+            if (err.code === "auth/requires-recent-login") {
+                throw new Error("Por segurança, informe sua senha atual para confirmar a alteração.");
+            }
+            throw err;
+        }
+    };
+
+    // Enviar link de redefinição de senha por e-mail
+    const sendResetPasswordEmail = async (email) => {
+        const targetEmail = email || auth.currentUser?.email;
+        if (!targetEmail) throw new Error("E-mail não informado para redefinição.");
+        await sendPasswordResetEmail(auth, targetEmail);
+    };
+
     const value = {
         user,
         userProfile,
@@ -210,7 +253,9 @@ export function AuthProvider({ children }) {
         addCompany,
         switchCompany,
         updateCompanyName,
-        refreshUserProfile
+        refreshUserProfile,
+        changePassword,
+        sendResetPasswordEmail
     };
 
     return (

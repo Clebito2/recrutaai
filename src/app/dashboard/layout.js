@@ -161,6 +161,22 @@ export default function DashboardLayout({ children }) {
           <div className="user-info">
             <span className="user-label">Logado como</span>
             <span className="user-email">{userProfile.email}</span>
+            <Link 
+              href="/dashboard/settings" 
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                color: "#D8B4FE",
+                fontSize: "0.75rem",
+                fontWeight: "700",
+                textDecoration: "none",
+                marginTop: "4px"
+              }}
+              title="Alterar sua senha de acesso"
+            >
+              🔒 Alterar Senha
+            </Link>
           </div>
           <button onClick={handleLogout} className="logout-btn">
             Sair da Conta
