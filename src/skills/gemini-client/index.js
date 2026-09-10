@@ -55,7 +55,7 @@ export async function callGemini({ systemPrompt, userContent, config = {} }) {
         ...config
     };
 
-    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.5-flash", "gemini-3-flash-preview"];
+    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {
@@ -173,7 +173,7 @@ export async function callGeminiStructured({ systemPrompt, userContent, schema, 
         responseSchema: schema
     };
 
-    const modelsToTry = [DEFAULT_MODEL, "gemini-1.5-flash"];
+    const modelsToTry = [DEFAULT_MODEL, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {

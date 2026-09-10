@@ -21,6 +21,11 @@
     --status-warning: #F59E0B;
     --status-danger: #EF4444;
 
+    /* Action Tokens Compatibility */
+    --action-primary: var(--purple-600);
+    --action-secondary: var(--green-500);
+    --action-accent: #3B82F6;
+
     /* Focus Ring */
     --slds-focus-ring: var(--purple-600);
 

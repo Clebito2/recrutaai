@@ -5,6 +5,9 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { analysisRequestSchema } from "@/lib/validation";
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
     try {
         const rateLimitResponse = checkRateLimit(request, RATE_LIMITS.analyzeCandidate);

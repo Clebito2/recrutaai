@@ -6,6 +6,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 // Limite de caracteres enviados à IA (custo + segurança)
 const MAX_TEXT_CHARS = 15000;
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(req) {
     try {
         const formData = await req.formData();

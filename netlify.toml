@@ -9,6 +9,9 @@
   NODE_VERSION = "20.12.0"
   NPM_FLAGS = "--legacy-peer-deps"
 
+[functions]
+  timeout = 26
+
 [[headers]]
   for = "/*"
   [headers.values]

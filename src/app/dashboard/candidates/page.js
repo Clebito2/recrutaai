@@ -251,10 +251,18 @@ export default function CandidatesPage() {
         })
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = {};
+      if (contentType?.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const rawText = await response.text();
+        console.error('[candidates] analyze-candidate não retornou JSON:', response.status, rawText);
+        throw new Error(response.status === 504 ? 'A análise demorou mais que o esperado (Timeout de rede). Tente novamente.' : `Erro no servidor (Status ${response.status}). Tente novamente.`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro na análise de perfil.');
+        throw new Error(data.error || data.message || `Erro na análise de perfil (Status ${response.status}).`);
       }
 
       setAnalysisResult(data.analysis);
@@ -1161,10 +1169,10 @@ export default function CandidatesPage() {
 
           .tab {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             border: none;
             background: transparent;
-            color: var(--ink-500);
+            color: var(--ink-700);
             cursor: pointer;
             border-radius: 8px;
             font-weight: 600;
@@ -1175,9 +1183,15 @@ export default function CandidatesPage() {
             transition: all 0.2s;
           }
 
+          .tab:hover {
+            color: var(--purple-600);
+            background: rgba(91, 42, 134, 0.06);
+          }
+
           .tab.active {
-            background: var(--action-primary);
-            color: white;
+            background: var(--purple-600);
+            color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(91, 42, 134, 0.25);
           }
 
           /* Seletor de perfil */

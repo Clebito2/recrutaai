@@ -2,6 +2,9 @@ import { generateEliteReport } from "@/services/reportGenerator";
 import { NextResponse } from "next/server";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
     try {
         const rateLimitResponse = checkRateLimit(request, RATE_LIMITS.generateReport);
