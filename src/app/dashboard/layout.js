@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 
 export default function DashboardLayout({ children }) {
-  const { user, userProfile, loading, logout } = useAuth();
+  const { user, userProfile, loading, logout, switchCompany } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -20,24 +20,26 @@ export default function DashboardLayout({ children }) {
     user?.email === "cleberdonato@ecossistemalive.com.br";
   const isPendingApproval = !isMasterAdmin && (userProfile?.status === "pending_payment" || userProfile?.paymentApproved === false);
 
+  const hasCompany = !!(userProfile?.companyName || (Array.isArray(userProfile?.companies) && userProfile.companies.length > 0));
+
   useEffect(() => {
     if (mounted && !loading) {
       if (!user) {
         router.push("/login");
       } else if (isPendingApproval) {
         router.push("/pending-approval");
-      } else if (!userProfile?.companyName) {
+      } else if (!hasCompany && !isMasterAdmin) {
         router.push("/onboarding");
       }
     }
-  }, [mounted, loading, user, userProfile, isPendingApproval, router]);
+  }, [mounted, loading, user, userProfile, isPendingApproval, hasCompany, isMasterAdmin, router]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
 
-  if (!mounted || loading || !user || isPendingApproval || !userProfile?.companyName) {
+  if (!mounted || loading || !user || isPendingApproval || (!hasCompany && !isMasterAdmin)) {
     return (
       <div className="loading-screen">
         <span>Carregando...</span>
@@ -76,8 +78,32 @@ export default function DashboardLayout({ children }) {
         </div>
 
         <div className="company-badge">
-          <span className="company-label">Empresa</span>
-          <span className="company-name">{userProfile.companyName}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span className="company-label">Empresa</span>
+            <Link href="/onboarding" style={{ color: "#D8B4FE", fontSize: "0.7rem", fontWeight: "700", textDecoration: "none" }} title="Cadastrar nova empresa">
+              + Nova
+            </Link>
+          </div>
+          {Array.isArray(userProfile?.companies) && userProfile.companies.length > 1 ? (
+            <select
+              value={userProfile.companyName || ""}
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  router.push("/onboarding");
+                } else {
+                  switchCompany(e.target.value);
+                }
+              }}
+              className="company-select"
+            >
+              {userProfile.companies.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+              <option value="__new__">+ Nova Empresa...</option>
+            </select>
+          ) : (
+            <span className="company-name">{userProfile?.companyName || "Minha Empresa"}</span>
+          )}
         </div>
 
         <nav className="sidebar-nav">
@@ -201,6 +227,32 @@ export default function DashboardLayout({ children }) {
           font-size: 0.95rem;
           font-weight: 700;
           color: #FFFFFF;
+        }
+
+        .company-select {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #FFFFFF;
+          font-weight: 700;
+          font-size: 0.88rem;
+          padding: 6px 8px;
+          border-radius: 6px;
+          outline: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .company-select:hover {
+          background: rgba(255, 255, 255, 0.18);
+          border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .company-select option {
+          background: #241038;
+          color: #FFFFFF;
+          font-weight: 600;
+          padding: 8px;
         }
 
         .sidebar-nav {

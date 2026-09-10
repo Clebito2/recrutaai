@@ -11,7 +11,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const { user, userProfile, loading: authLoading, updateCompanyName } = useAuth();
+  const { user, userProfile, loading: authLoading, addCompany, switchCompany } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
-      await updateCompanyName(companyName);
+      await addCompany(companyName);
       router.push("/dashboard");
     } catch (error) {
       console.error("Error saving company:", error);
@@ -73,19 +73,60 @@ export default function Onboarding() {
     return null;
   }
 
+  const existingCompanies = Array.isArray(userProfile?.companies) 
+    ? userProfile.companies 
+    : (userProfile?.companyName ? [userProfile.companyName] : []);
+
   return (
     <div className="onboarding-container">
       <main className="onboarding-main">
         <GlassCard className="onboarding-card">
           <div className="card-header">
-            <span className="step-badge">Passo 1 de 1</span>
-            <h1>Identificação Corporativa</h1>
-            <p>Para configurar sua conta, precisamos identificar sua empresa.</p>
+            <span className="step-badge">Empresas & Clientes</span>
+            <h1>Gestão de Empresas</h1>
+            <p>Selecione uma empresa já cadastrada ou adicione uma nova para gerenciar seus processos seletivos.</p>
           </div>
+
+          {existingCompanies.length > 0 && (
+            <div style={{ marginBottom: "24px", paddingBottom: "20px", borderBottom: "1px solid var(--line)" }}>
+              <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "700", color: "var(--ink-700)", marginBottom: "10px" }}>
+                Acessar empresa já cadastrada:
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {existingCompanies.map((comp) => (
+                  <button
+                    key={comp}
+                    type="button"
+                    onClick={async () => {
+                      await switchCompany(comp);
+                      router.push("/dashboard");
+                    }}
+                    style={{
+                      background: userProfile?.companyName === comp ? "var(--purple-600)" : "#FFFFFF",
+                      color: userProfile?.companyName === comp ? "#FFFFFF" : "var(--purple-600)",
+                      border: "1px solid var(--purple-600)",
+                      padding: "8px 16px",
+                      borderRadius: "20px",
+                      fontWeight: "700",
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px"
+                    }}
+                  >
+                    🏢 {comp}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleStart} className="onboarding-form">
             <div className="input-group">
-              <label htmlFor="company">Nome da Empresa</label>
+              <label htmlFor="company">
+                {existingCompanies.length > 0 ? "Ou Cadastrar Nova Empresa" : "Nome da Empresa"}
+              </label>
               <input
                 id="company"
                 type="text"
@@ -93,18 +134,18 @@ export default function Onboarding() {
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="Ex: TechFlow Systems"
                 required
-                autoFocus
+                autoFocus={existingCompanies.length === 0}
               />
             </div>
 
             <button type="submit" className="btn-indigo full-width" disabled={loading || !companyName.trim()}>
               {loading ? (
                 <>
-                  <Loader2 className="spin" size={18} /> Configurando...
+                  <Loader2 className="spin" size={18} /> Salvando...
                 </>
               ) : (
                 <>
-                  Acessar Dashboard <ArrowRight size={18} />
+                  Cadastrar e Acessar <ArrowRight size={18} />
                 </>
               )}
             </button>

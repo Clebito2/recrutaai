@@ -34,9 +34,11 @@ export default function Login() {
         return;
       }
 
-      if (userProfile?.companyName) {
+      const hasCompany = !!(userProfile?.companyName || (Array.isArray(userProfile?.companies) && userProfile.companies.length > 0));
+
+      if (hasCompany || isMasterAdmin) {
         router.push("/dashboard");
-      } else {
+      } else if (userProfile !== null) {
         router.push("/onboarding");
       }
     }

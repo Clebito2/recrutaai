@@ -7,7 +7,7 @@ import {
     createUserWithEmailAndPassword,
     signOut
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
 const AuthContext = createContext({});
@@ -21,7 +21,6 @@ export function AuthProvider({ children }) {
 
     // Listen for auth state changes
     useEffect(() => {
-
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
 
@@ -31,6 +30,22 @@ export function AuthProvider({ children }) {
                     const profileRef = doc(db, "users", firebaseUser.uid);
                     const profileSnap = await getDoc(profileRef);
 
+                    // Recuperar empresas cadastradas pelo usuário (inclusive de vagas anteriores)
+                    let userCompanies = [];
+
+                    try {
+                        const jobsQ = query(collection(db, "jobs"), where("userId", "==", firebaseUser.uid));
+                        const jobsSnap = await getDocs(jobsQ);
+                        jobsSnap.forEach(jDoc => {
+                            const cName = jDoc.data()?.companyName;
+                            if (cName && typeof cName === 'string' && !userCompanies.includes(cName)) {
+                                userCompanies.push(cName);
+                            }
+                        });
+                    } catch (e) {
+                        console.warn("[Auth] Aviso ao buscar vagas do usuario:", e);
+                    }
+
                     if (profileSnap.exists()) {
                         const existingData = profileSnap.data();
                         const isMasterAdmin = [
@@ -38,19 +53,41 @@ export function AuthProvider({ children }) {
                             "cleberdonato@ecossistemalive.com.br"
                         ].includes(firebaseUser.email?.toLowerCase());
 
-                        if (isMasterAdmin && (!existingData.paymentApproved || existingData.status !== "active")) {
-                            const adminOverride = { status: "active", paymentApproved: true, plan: "elite" };
-                            await setDoc(profileRef, adminOverride, { merge: true });
-                            setUserProfile({ ...existingData, ...adminOverride });
-                        } else {
-                            setUserProfile(existingData);
+                        // Combinar empresas salvas no perfil com as encontradas nas vagas
+                        const savedCompanies = Array.isArray(existingData.companies) ? existingData.companies : [];
+                        savedCompanies.forEach(c => {
+                            if (c && !userCompanies.includes(c)) userCompanies.push(c);
+                        });
+                        if (existingData.companyName && !userCompanies.includes(existingData.companyName)) {
+                            userCompanies.unshift(existingData.companyName);
                         }
+
+                        const activeCompany = existingData.companyName || userCompanies[0] || (isMasterAdmin ? "Live Consultoria" : null);
+
+                        const profileUpdates = {
+                            companies: userCompanies,
+                            companyName: activeCompany
+                        };
+
+                        if (isMasterAdmin && (!existingData.paymentApproved || existingData.status !== "active")) {
+                            profileUpdates.status = "active";
+                            profileUpdates.paymentApproved = true;
+                            profileUpdates.plan = "elite";
+                        }
+
+                        await setDoc(profileRef, profileUpdates, { merge: true });
+                        setUserProfile({ ...existingData, ...profileUpdates });
                     } else {
                         // Novo usuário — criação condicionada à aprovação de pagamento
                         const isMasterAdmin = [
                             "cleber.ihs@gmail.com",
                             "cleberdonato@ecossistemalive.com.br"
                         ].includes(firebaseUser.email?.toLowerCase());
+
+                        const defaultCompany = isMasterAdmin ? "Live Consultoria" : (userCompanies[0] || null);
+                        if (defaultCompany && !userCompanies.includes(defaultCompany)) {
+                            userCompanies.push(defaultCompany);
+                        }
 
                         const newProfile = {
                             email: firebaseUser.email,
@@ -59,7 +96,8 @@ export function AuthProvider({ children }) {
                             status: isMasterAdmin ? "active" : "pending_payment",
                             paymentApproved: isMasterAdmin ? true : false,
                             plan: isMasterAdmin ? "elite" : "pending",
-                            companyName: isMasterAdmin ? "Live Consultoria" : null,
+                            companyName: defaultCompany,
+                            companies: userCompanies,
                             jobsCount: 0,
                             cvCount: 0
                         };
@@ -79,7 +117,8 @@ export function AuthProvider({ children }) {
                         status: isMasterAdmin ? "active" : "pending_payment",
                         paymentApproved: isMasterAdmin ? true : false,
                         plan: isMasterAdmin ? "elite" : "pending",
-                        companyName: isMasterAdmin ? "Live Consultoria" : null
+                        companyName: isMasterAdmin ? "Live Consultoria" : null,
+                        companies: isMasterAdmin ? ["Live Consultoria"] : []
                     });
                 }
             } else {
@@ -127,14 +166,39 @@ export function AuthProvider({ children }) {
         setUserProfile(null);
     };
 
-    // Update company name after onboarding
-    const updateCompanyName = async (companyName) => {
-        if (!user) return;
+    // Adicionar nova empresa à conta mantendo o histórico de todas
+    const addCompany = async (companyName) => {
+        if (!user || !companyName?.trim()) return;
+        const trimmed = companyName.trim();
+        const profileRef = doc(db, "users", user.uid);
+        
+        const currentCompanies = Array.isArray(userProfile?.companies) ? userProfile.companies : [];
+        const updatedCompanies = currentCompanies.includes(trimmed) 
+            ? currentCompanies 
+            : [...currentCompanies, trimmed];
 
+        await setDoc(profileRef, { 
+            companyName: trimmed,
+            companies: updatedCompanies 
+        }, { merge: true });
+
+        setUserProfile(prev => ({ 
+            ...prev, 
+            companyName: trimmed,
+            companies: updatedCompanies 
+        }));
+    };
+
+    // Alternar entre empresas já cadastradas
+    const switchCompany = async (companyName) => {
+        if (!user || !companyName) return;
         const profileRef = doc(db, "users", user.uid);
         await setDoc(profileRef, { companyName }, { merge: true });
         setUserProfile(prev => ({ ...prev, companyName }));
     };
+
+    // Retrocompatibilidade
+    const updateCompanyName = addCompany;
 
     const value = {
         user,
@@ -143,6 +207,8 @@ export function AuthProvider({ children }) {
         signUp,
         signIn,
         logout,
+        addCompany,
+        switchCompany,
         updateCompanyName,
         refreshUserProfile
     };
