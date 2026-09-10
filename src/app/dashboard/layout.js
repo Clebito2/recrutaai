@@ -15,22 +15,29 @@ export default function DashboardLayout({ children }) {
     setMounted(true);
   }, []);
 
+  const isMasterAdmin = 
+    user?.email === "cleber.ihs@gmail.com" || 
+    user?.email === "cleberdonato@ecossistemalive.com.br";
+  const isPendingApproval = !isMasterAdmin && (userProfile?.status === "pending_payment" || userProfile?.paymentApproved === false);
+
   useEffect(() => {
     if (mounted && !loading) {
       if (!user) {
         router.push("/login");
+      } else if (isPendingApproval) {
+        router.push("/pending-approval");
       } else if (!userProfile?.companyName) {
         router.push("/onboarding");
       }
     }
-  }, [mounted, loading, user, userProfile, router]);
+  }, [mounted, loading, user, userProfile, isPendingApproval, router]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
 
-  if (!mounted || loading || !user || !userProfile?.companyName) {
+  if (!mounted || loading || !user || isPendingApproval || !userProfile?.companyName) {
     return (
       <div className="loading-screen">
         <span>Carregando...</span>

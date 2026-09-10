@@ -15,16 +15,25 @@ export default function Login() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle, user, userProfile, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, userProfile, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Redirect if already logged in
+  // Redirect based on auth & payment status
   useEffect(() => {
     if (mounted && !authLoading && user) {
+      const isMasterAdmin = 
+        user.email === "cleber.ihs@gmail.com" || 
+        user.email === "cleberdonato@ecossistemalive.com.br";
+
+      if (!isMasterAdmin && (userProfile?.status === "pending_payment" || userProfile?.paymentApproved === false)) {
+        router.push("/pending-approval");
+        return;
+      }
+
       if (userProfile?.companyName) {
         router.push("/dashboard");
       } else {
@@ -46,34 +55,6 @@ export default function Login() {
       }
     } catch (err) {
       setError(err.message || "Ocorreu um erro. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const user = await signInWithGoogle();
-      if (!user) {
-        // Redirect disparado
-        return;
-      }
-    } catch (err) {
-      console.error("[Login] Erro ao entrar com Google:", err);
-      let userMsg = "Erro ao entrar com o Google.";
-      if (err.code === "auth/internal-error") {
-        userMsg = "Erro de conexão/permissão no Google Auth. Se o popup falhou, tente recarregar a página ou utilize login por E-mail e Senha.";
-      } else if (err.code === "auth/popup-blocked") {
-        userMsg = "A janela pop-up do Google foi bloqueada pelo navegador. Redirecionando automaticamente...";
-      } else if (err.code === "auth/unauthorized-domain") {
-        userMsg = "Domínio não autorizado no Firebase Auth. Acesse o Console e adicione este domínio aos Domínios Autorizados.";
-      } else if (err.message) {
-        userMsg = err.message;
-      }
-      setError(userMsg);
     } finally {
       setLoading(false);
     }
@@ -108,7 +89,7 @@ export default function Login() {
         <GlassCard className="login-card">
           <div className="card-header">
             <h1>{isLogin ? "Bem-vindo de volta" : "Criar conta"}</h1>
-            <p>{isLogin ? "Entre para acessar seu painel" : "Comece seu trial gratuito de 7 dias"}</p>
+            <p>{isLogin ? "Entre com seu e-mail e senha para acessar" : "Preencha seus dados para solicitar liberação de acesso"}</p>
           </div>
 
           {error && (
@@ -145,18 +126,10 @@ export default function Login() {
               {loading ? (
                 <><Loader2 className="spin" size={18} /> Processando...</>
               ) : (
-                <>{isLogin ? "Entrar" : "Criar Conta"} <ArrowRight size={18} /></>
+                <>{isLogin ? "Entrar" : "Criar Conta e Solicitar Acesso"} <ArrowRight size={18} /></>
               )}
             </button>
           </form>
-
-          <div className="divider">
-            <span>ou</span>
-          </div>
-
-          <button type="button" onClick={handleGoogleSignIn} className="btn-google" disabled={loading}>
-            Continuar com Google
-          </button>
 
           <p className="toggle-mode">
             {isLogin ? "Não tem uma conta?" : "Já tem uma conta?"}{" "}
@@ -243,51 +216,7 @@ export default function Login() {
           margin-top: 8px;
         }
 
-        .divider {
-          display: flex;
-          align-items: center;
-          margin: 28px 0;
-          gap: 16px;
-        }
 
-        .divider::before,
-        .divider::after {
-          content: "";
-          flex: 1;
-          height: 1px;
-          background: var(--border-glass);
-        }
-
-        .divider span {
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .btn-google {
-          width: 100%;
-          background: transparent;
-          border: 1px solid var(--border-glass);
-          color: var(--text-muted);
-          padding: 14px;
-          border-radius: 8px;
-          font-size: 0.95rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .btn-google:hover {
-          background: rgba(251, 247, 240, 0.05);
-          border-color: rgba(251, 247, 240, 0.15);
-          color: var(--text-primary);
-        }
-
-        .btn-google:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
 
         .toggle-mode {
           margin-top: 28px;

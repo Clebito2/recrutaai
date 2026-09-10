@@ -11,7 +11,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const { user, loading: authLoading, updateCompanyName } = useAuth();
+  const { user, userProfile, loading: authLoading, updateCompanyName } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,10 +19,20 @@ export default function Onboarding() {
   }, []);
 
   useEffect(() => {
-    if (mounted && !authLoading && !user) {
-      router.push("/login");
+    if (mounted && !authLoading) {
+      if (!user) {
+        router.push("/login");
+      } else {
+        const isMasterAdmin = 
+          user.email === "cleber.ihs@gmail.com" || 
+          user.email === "cleberdonato@ecossistemalive.com.br";
+
+        if (!isMasterAdmin && (userProfile?.status === "pending_payment" || userProfile?.paymentApproved === false)) {
+          router.push("/pending-approval");
+        }
+      }
     }
-  }, [mounted, authLoading, user, router]);
+  }, [mounted, authLoading, user, userProfile, router]);
 
   const handleStart = async (e) => {
     e.preventDefault();

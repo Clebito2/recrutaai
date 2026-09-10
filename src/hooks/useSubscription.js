@@ -25,11 +25,15 @@ export function useSubscription() {
                 const expiresAt = new Date(createdAt);
                 expiresAt.setDate(expiresAt.getDate() + trialDays);
 
-                // GOD MODE for specific user
-                const isGodUser = user.email === "cleber.ihs@gmail.com";
+                // GOD MODE for master admins
+                const isGodUser = 
+                    user.email === "cleber.ihs@gmail.com" || 
+                    user.email === "cleberdonato@ecossistemalive.com.br";
 
-                let isExpired = new Date() > expiresAt;
-                let daysRemaining = Math.max(0, Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24)));
+                const isPendingPayment = !isGodUser && (userProfile.status === "pending_payment" || userProfile.paymentApproved === false);
+
+                let isExpired = isPendingPayment || (new Date() > expiresAt);
+                let daysRemaining = isPendingPayment ? 0 : Math.max(0, Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24)));
 
                 if (isGodUser) {
                     isExpired = false;
@@ -62,13 +66,14 @@ export function useSubscription() {
                     id: user.uid,
                     name: userProfile.companyName || userProfile.displayName,
                     isExpired,
+                    isPendingPayment,
                     daysRemaining,
                     currentLimits,
                     hasReachedJobLimit,
                     hasReachedCVLimit,
                     isNearLimit,
-                    canCreateJob: !isExpired && !hasReachedJobLimit,
-                    canAnalyzeCV: !isExpired && !hasReachedCVLimit
+                    canCreateJob: !isPendingPayment && !isExpired && !hasReachedJobLimit,
+                    canAnalyzeCV: !isPendingPayment && !isExpired && !hasReachedCVLimit
                 });
             } catch (err) {
                 console.error("Error fetching subscription:", err);
